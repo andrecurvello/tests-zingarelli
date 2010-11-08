@@ -1,0 +1,82 @@
+Para organizar uma festa é necessário:
+
+- Pensar em como vai ser feito
+	- Contratar uma empresa especializada em fazer festas
+	- ou fazer tudo você mesmo
+
+- Pensar no tipo de festa
+
+- Pensar em que tipos de convidados você quer
+
+- Fazer uma lista de convidados
+
+- Pensar na data e horário
+
+- Pensar no local
+	- ver salões de festas
+	- ver chácaras
+		- pesquisar na internet
+		- pedir indicações de amigos
+		- usar cartões que você já possui
+		- contactar a pessoa que você já conhece
+
+- Pensar na decoração
+- Pensar na alimentação
+	- comprar salgados
+	- fazer salgados
+	- contratar buffet
+	- comprar bolo
+	- comprar itens para churrasco
+- Pensar em bebidas
+	- comprar no mercado
+	- comprar em atacado
+- Pensar na segurança
+	- contratar segurança
+- Pensar na animação
+	- contratar banda
+	- contratar palhaço
+	- contratar DJ
+	- contratar Barman
+- Pensar na limpeza
+	- Limpar você mesmo
+	- Contratar serviço de limpeza
+- Fazer orçamento
+	- listar os gastos
+	- verificar se vai cobrar para entrada na festa
+		- pensar no preço do convite
+- Fazer divulgação
+	- enviar convites
+	- ligar para amigos
+	- fazer panfletos
+	- divulgar em TV, rádio, Internet
+- confirmar convidados
+
+++++++++++++++++++++++++++++++++++++++++++++++
+Para organizar uma festa usando o sistema
+- Clicar em "Fazer uma festa"
+- Usuário escolhe o tipo de festa (churrasco, aniversário, balada, etc)
+- Usuário descreve brevemente a festa (o quê)
+- Usuário escolhe a data e horário da festa (quando)
+	- pop up de um calendário para o usuário procurar a data
+- Usuário escolhe o local (onde)
+	- dropdown listando tipos de locais disponíveis
+	- uma lista de locais aparece abaixo do dropdown e o usuário clica em algum para ver mais informações
+	- usuário pode favoritar os locais de interesse para uma possível nova consulta
+	- usuário pode ver comentários feitos por outros usuários sobre o local
+	- usuário pode avaliar e comentar sobre o local
+- Usuário escolhe serviços oferecidos
+	- usuário escolhe no menu que tipo de serviço quer consultar (alimentação, decoração, bebidas)
+	- ocorrem as mesmas atividades listadas para local
+- Usuário faz a lista de convidados
+	- opção de importar amigos de outro serviço web (e-mail, Orkut, Facebook)
+	- incluir manualmente nome e email de convidado
+- Usuário divulga a festa
+	- opções de divulgação
+		- geração de convite
+		- divulgar em serviços sociais (twitter, orkut, etc)
+- Usuário monitora lista de convidados
+	- usuário vê na tela que convidados confirmaram presença ou não ou estão em dúvida
+- usuário salva a festa
+	- opção de salvar a festa para uma possível alteração posterior
+
+
