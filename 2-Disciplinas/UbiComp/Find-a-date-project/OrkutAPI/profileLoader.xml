@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="Profile Loader" 
+    description="This is an app for testing which fields are available for a profile" 
+    author="Matheus Ricardo Uihara Zingarelli">
+  <Require feature="opensocial-0.8"/>
+</ModulePrefs>
+
+<Content type="html">
+  <![CDATA[
+  <script type="text/javascript">
+    function loadProfile() {
+       var req = opensocial.newDataRequest();
+    
+      //fields to fetch data from
+      var params = {};
+      params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = 
+        [opensocial.Person.Field.GENDER,
+         opensocial.Person.Field.RELATIONSHIP_STATUS,
+         opensocial.Person.Field.CURRENT_LOCATION,
+         opensocial.Person.Field.ABOUT_ME,
+         opensocial.Person.Field.INTERESTS,
+         opensocial.Person.Field.MUSIC,
+         opensocial.Person.Field.TV_SHOWS,
+         opensocial.Person.Field.MOVIES,
+         opensocial.Person.Field.FOOD,
+         opensocial.Person.Field.STATUS,
+         opensocial.Person.Field.TURN_ONS,
+         opensocial.Person.Field.TURN_OFFS,
+         opensocial.Person.Field.ROMANCE];
+    
+      req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER, params), 'viewer');   
+
+      req.send(onLoadProfile);
+    }
+
+    function onLoadProfile(data) {
+    
+      var viewer = data.get('viewer');
+    
+      if(!viewer.hadError()){
+        var viewerData = viewer.getData();
+        var address = viewerData.getField(opensocial.Person.Field.CURRENT_LOCATION);
+            
+        html = new Array();
+        html.push('<ul>');
+        html.push('<li>Nome: ', viewerData.getDisplayName(), '</li>');
+        html.push('<li>Sexo: ', viewerData.getField(opensocial.Person.Field.GENDER).getDisplayValue(), '</li>');
+        html.push('<li>Estado Civil: ', viewerData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS), '</li>');
+        html.push('<li>Cidade: ', address.getField(opensocial.Address.Field.LOCALITY), '</li>');
+        html.push('<li>Sobre mim: ', viewerData.getField(opensocial.Person.Field.ABOUT_ME), '</li>');
+        html.push('<li>Musicas: ', viewerData.getField(opensocial.Person.Field.MUSIC), '</li>');
+        html.push('<li>TV: ', viewerData.getField(opensocial.Person.Field.TV_SHOWS), '</li>');
+        html.push('<li>Filmes: ', viewerData.getField(opensocial.Person.Field.MOVIES), '</li>');
+        html.push('<li>Comida: ', viewerData.getField(opensocial.Person.Field.FOOD), '</li>');
+        html.push('<li>Status: ', viewerData.getField(opensocial.Person.Field.STATUS), '</li>');       
+        html.push('<li>Gosto de: ', viewerData.getField(opensocial.Person.Field.TURN_ONS), '</li>');
+        html.push('<li>Nao gosto de: ', viewerData.getField(opensocial.Person.Field.TURN_OFFS), '</li>');
+        html.push('<li>Par ideal: ', viewerData.getField(opensocial.Person.Field.ROMANCE), '</li>');       
+        html.push('</ul>');
+        document.getElementById('perfil').innerHTML = html.join('');
+      }
+      else{
+        document.getElementById('perfil').innerHTML = 'Erro no recebimento de dados do perfil';
+      }
+    }
+
+    function init() {
+      loadProfile();
+    }
+
+    gadgets.util.registerOnLoadHandler(init);
+  </script>
+  <div id='main'>
+    Este eh seu perfil:
+    <div id='perfil'></div>
+  </div>
+  ]]>
+</Content>
+</Module>
