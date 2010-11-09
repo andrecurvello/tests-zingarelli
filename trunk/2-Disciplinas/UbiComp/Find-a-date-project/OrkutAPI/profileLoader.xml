@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
   <ModulePrefs title="Profile Loader" 
-    description="This is an app for testing which fields are available for a profile" 
+    description="This app loads fields that are available for a profile" 
     author="Matheus Ricardo Uihara Zingarelli">
   <Require feature="opensocial-0.8"/>
 </ModulePrefs>
@@ -9,17 +9,24 @@
 <Content type="html">
   <![CDATA[
   <script type="text/javascript">
+    //fetch data from user's profile	
     function loadProfile() {
        var req = opensocial.newDataRequest();
-    
-      //fields to fetch data from
+   
+      //fields we are interested to get data from
       var params = {};
       params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = 
-        [opensocial.Person.Field.GENDER,
+        [opensocial.Person.Field.THUMBNAIL_URL,
+	 opensocial.Person.Field.GENDER,
          opensocial.Person.Field.RELATIONSHIP_STATUS,
          opensocial.Person.Field.CURRENT_LOCATION,
-         opensocial.Person.Field.ABOUT_ME,
+	 opensocial.Person.Field.LANGUAGES_SPOKEN,
+	 opensocial.Person.Field.HUMOR,
+	 opensocial.Person.Field.FASHION,
          opensocial.Person.Field.INTERESTS,
+	 opensocial.Person.Field.SPORTS,
+	 opensocial.Person.Field.ACTIVITIES,
+	 opensocial.Person.Field.BOOKS,
          opensocial.Person.Field.MUSIC,
          opensocial.Person.Field.TV_SHOWS,
          opensocial.Person.Field.MOVIES,
@@ -34,30 +41,45 @@
       req.send(onLoadProfile);
     }
 
-    function onLoadProfile(data) {
-    
+    //display data from user's profile
+    function onLoadProfile(data) {    
       var viewer = data.get('viewer');
     
       if(!viewer.hadError()){
         var viewerData = viewer.getData();
+	
+        //CURRENT_LOCATION is an opensocial.Address object
         var address = viewerData.getField(opensocial.Person.Field.CURRENT_LOCATION);
             
         html = new Array();
+        html.push('Dados do perfil a serem usados no matching');
         html.push('<ul>');
-        html.push('<li>Nome: ', viewerData.getDisplayName(), '</li>');
-        html.push('<li>Sexo: ', viewerData.getField(opensocial.Person.Field.GENDER).getDisplayValue(), '</li>');
-        html.push('<li>Estado Civil: ', viewerData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS), '</li>');
-        html.push('<li>Cidade: ', address.getField(opensocial.Address.Field.LOCALITY), '</li>');
-        html.push('<li>Sobre mim: ', viewerData.getField(opensocial.Person.Field.ABOUT_ME), '</li>');
-        html.push('<li>Musicas: ', viewerData.getField(opensocial.Person.Field.MUSIC), '</li>');
-        html.push('<li>TV: ', viewerData.getField(opensocial.Person.Field.TV_SHOWS), '</li>');
-        html.push('<li>Filmes: ', viewerData.getField(opensocial.Person.Field.MOVIES), '</li>');
-        html.push('<li>Comida: ', viewerData.getField(opensocial.Person.Field.FOOD), '</li>');
-        html.push('<li>Status: ', viewerData.getField(opensocial.Person.Field.STATUS), '</li>');       
-        html.push('<li>Gosto de: ', viewerData.getField(opensocial.Person.Field.TURN_ONS), '</li>');
-        html.push('<li>Nao gosto de: ', viewerData.getField(opensocial.Person.Field.TURN_OFFS), '</li>');
-        html.push('<li>Par ideal: ', viewerData.getField(opensocial.Person.Field.ROMANCE), '</li>');       
+        html.push('<li><strong>Sexo: </strong>', viewerData.getField(opensocial.Person.Field.GENDER).getDisplayValue(), '</li>');
+        html.push('<li><strong>Estado Civil: </strong>', viewerData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS), '</li>');
+        html.push('<li><strong>Endereço: </strong>', address.getField(opensocial.Address.Field.LOCALITY), ', ', address.getField(opensocial.Address.Field.REGION), ', ', address.getField(opensocial.Address.Field.COUNTRY), '</li>');
+        html.push('<li><strong>Línguas que eu falo: </strong>', viewerData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN), '</li>');
+        html.push('<li><strong>Humor: </strong>', viewerData.getField(opensocial.Person.Field.HUMOR), '</li>');
+        html.push('<li><strong>Estilo de vestir: </strong>', viewerData.getField(opensocial.Person.Field.FASHION), '</li>');
+        html.push('<li><strong>Paixões: </strong>', viewerData.getField(opensocial.Person.Field.INTERESTS), '</li>');
+        html.push('<li><strong>Esportes: </strong>', viewerData.getField(opensocial.Person.Field.SPORTS), '</li>');
+        html.push('<li><strong>Atividades: </strong>', viewerData.getField(opensocial.Person.Field.ACTIVITIES), '</li>');
+        html.push('<li><strong>Livros: </strong>', viewerData.getField(opensocial.Person.Field.BOOKS), '</li>');
+        html.push('<li><strong>Músicas: </strong>', viewerData.getField(opensocial.Person.Field.MUSIC), '</li>');
+        html.push('<li><strong>TV: </strong>', viewerData.getField(opensocial.Person.Field.TV_SHOWS), '</li>');
+        html.push('<li><strong>Filmes: </strong>', viewerData.getField(opensocial.Person.Field.MOVIES), '</li>');
+        html.push('<li><strong>Comida: </strong>', viewerData.getField(opensocial.Person.Field.FOOD), '</li>');
+        html.push('<li><strong>Gosto de: </strong>', viewerData.getField(opensocial.Person.Field.TURN_ONS), '</li>');
+        html.push('<li><strong>Nao gosto de: </strong>', viewerData.getField(opensocial.Person.Field.TURN_OFFS), '</li>');
+        html.push('<li><strong>Par ideal: </strong>', viewerData.getField(opensocial.Person.Field.ROMANCE), '</li>');       
         html.push('</ul>');
+        html.push('Dados do perfil para exibição:');   
+        html.push('<p><img src="', viewerData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;<strong>', viewerData.getDisplayName(), '</strong></p>');
+        html.push('<p><strong><em>', viewerData.getField(opensocial.Person.Field.STATUS), '</em></strong></p>');       
+        html.push('<ul>');
+        html.push('<li><strong>Gosto de: </strong>', viewerData.getField(opensocial.Person.Field.TURN_ONS), '</li>');
+        html.push('<li><strong>Nao gosto de: </strong>', viewerData.getField(opensocial.Person.Field.TURN_OFFS), '</li>');
+        html.push('<li><strong>Par ideal: </strong>', viewerData.getField(opensocial.Person.Field.ROMANCE), '</li>');       
+        html.push('</ul>');        
         document.getElementById('perfil').innerHTML = html.join('');
       }
       else{
@@ -72,9 +94,9 @@
     gadgets.util.registerOnLoadHandler(init);
   </script>
   <div id='main'>
-    Este eh seu perfil:
     <div id='perfil'></div>
   </div>
   ]]>
 </Content>
 </Module>
+
