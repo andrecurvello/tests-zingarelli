@@ -1,0 +1,41 @@
+@charset "utf-8";
+/* CSS Document */
+
+/* Geral */
+body{
+	width:1024px;
+}
+
+*.left{float:left;}
+*.right{float:right;}
+
+/* Header */
+div#header{
+	border:thin solid black;
+	height:160px;
+}
+
+div#logo{
+	float:left;
+}
+
+div#login{
+	float:right;
+}
+
+/* Container */
+div#container{}
+
+/* Área de Busca */
+div#left-bar{
+	float:left;
+	width:320px;
+	border:thin solid black;
+}
+
+/* Área de conteúdo */
+div#content{
+	float:right;
+	width:700px;
+	border:thin solid black;
+}
