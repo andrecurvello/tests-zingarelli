@@ -3,4 +3,10 @@ Horas:
 index.php
 main.css
 
-15:00 - 
+15:00 - 17:00
+criacao arquivos de include
+criaçao da área de resultados da busca
+
+19:00 - 20:00
+criação da área de detalhes
+Edição gráfica do logo
