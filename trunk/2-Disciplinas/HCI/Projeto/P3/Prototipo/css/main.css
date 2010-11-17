@@ -2,9 +2,21 @@
 /* CSS Document */
 
 /* Geral */
+html{background-color:#DFFDFF;}
+
 body{
 	min-width:1024px;
 	margin:20px;
+}
+
+p{margin:5px 5px 0 0;}
+
+h1{
+	font-family:verdana;
+	font-size:22px;
+	font-weight:bold;
+	margin:20px 5px 10px;
+	text-align:center;
 }
 
 a{
@@ -13,8 +25,12 @@ a{
 }
 a:LINK{color:blue;}
 a:HOVER{text-decoration:underline;}
+a:VISITED{color:blue;}
 
 strong{font-weight:bold;}
+em{font-style:italic;}
+
+hr{width:70%;}
 
 *.left{float:left;}
 *.right{float:right;}
@@ -35,50 +51,105 @@ div#login{
 	float:right;
 	margin:10px 20px;
 	text-align:right;
+	width:220px;
 }
 
-div#login-main{text-align:right;}
+div#login-main{
+	text-align:right;
+	margin-right:20px;
+}
+
+div#login-main img{cursor:pointer; margin-right:3px;}
 
 div#login-sub{text-align:left;}
 
 /* Container */
-div#container{}
+div#container{
+	height:500px;
+	border:thin solid black;
+}
 
 /* Área de Busca */
 div#left-bar{
 	float:left;
 	width: 25%;
-	border:thin solid black;
-	height:500px;
+	border-right:thin solid black;
+	height:inherit;
 }
 
+div.search{margin: 30px 5px;}
+
+input#keysearch{width:65%;}
 
 /* Área de conteúdo */
 div#content{
 	float:right;
 	width:74%;
-	min-height:500px;
-	border:thin solid black;
+	height:inherit;
 }
 
+div#empty-search{margin:75px;}
+
+/* Resultados da busca */
 div#content-list{
 	width:45%;
 	overflow:auto;
-	border:thin solid black;	
-	height:500px;
+	height:inherit;
+	border-right:thin solid black;
 }
 
+div#content-list li{
+	padding:10px 0;
+	border-top:thin dotted black;
+	min-height:70px;
+	margin:auto 5px;
+}
+
+*.photo{margin:0 8px 5px 0;}
+
+img.arrow-details{cursor:pointer;}
+
+
+/* Detalhes do fornecedor */
 div#content-details{
 	width:54%;
 	overflow:auto;
-	border:thin solid black;
-	height:500px;
+	height:inherit;
 }
 
-div.error-message{border:medium dashed red;}
+div#content-details hr{margin:20px auto;}
+
+div#content-details h1{text-align:left;}
+
+div.inner-content{margin:0 10px;}
+
+div#details-empty{margin:50px 20px 0;}
+
+div.error-message{
+	border:medium solid red;
+	margin:10px 0;
+	padding:5px 5px;
+}
+
+img.avaliar{cursor:pointer;}
 
 div#photo-gallery{
 	border:thin dotted black;
-	width:90%;
-	height:50px;
+	height:60px;
+	text-align:center;
 }
+
+div#photo-gallery img{
+	border: thin solid black;
+	margin:5px;
+}
+
+div#comments{
+	border:thin solid black;
+	padding:10px;
+	margin-bottom:10px;
+}
+
+div#comments div{padding:10px 0;}
+
+div.inner-comment{border-bottom:thin solid black;}

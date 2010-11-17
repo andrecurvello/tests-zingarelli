@@ -5,6 +5,8 @@
 <title>Projeto Faça a Festa - Página Inicial</title>
 <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.2.0/build/cssreset/reset-min.css" />
 <link rel="stylesheet" type="text/css" href="css/main.css"/>
+<script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+<script type="text/javascript" src="js/utils.js"></script>
 </head>
 
 <body>
