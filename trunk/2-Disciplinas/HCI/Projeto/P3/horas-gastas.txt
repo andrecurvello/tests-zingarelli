@@ -27,3 +27,11 @@ Aplicação de javascript
 19:00 - 21
 Tratamento de interação com a ferramenta de pesquisa
 Preenchimento de dados fake
+
+13:00-14:00
+Preenchimento de dados fake
+criação da lógica de login
+
+16:00-19:00
+lógica de login
+lógica de mensagem de erro qdo adiciona a favoritos/avalia/comenta/spam
