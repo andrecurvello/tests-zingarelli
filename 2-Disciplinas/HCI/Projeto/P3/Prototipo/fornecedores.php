@@ -51,20 +51,25 @@
 		<div id="details-empty"><em>Clique em um dos fornecedores ao lado e veja aqui mais detalhes sobre ele.</em></div>
         <div class="inner-content-1">
             <h1>Suzanna Enfeites e Decorações</h1>
-            <img class="avaliar" id="star-1" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 1 estrela" />
-            <img class="avaliar" id="star-2" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 2 estrelas" title="Avalie o fornecedor - 2 estrelas" />
-            <img class="avaliar" id="star-3" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 3 estrelas" title="Avalie o fornecedor - 3 estrelas" />
-            <img class="avaliar" id="star-4" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 4 estrelas" title="Avalie o fornecedor - 4 estrelas" />
-            <img class="avaliar" id="star-5" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 5 estrelas" title="Avalie o fornecedor - 5 estrelas" />
+			<span class="avaliacao-1 small"><em>Fornecedor avaliado!</em></span>
+			<span class="stars-1">
+            <a href="#" onclick="checkLogged('avaliar', 1);"><img class="star-1" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 1 estrela" /></a>
+            <a href="#" onclick="checkLogged('avaliar', 1);"><img class="star-2" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 2 estrelas" /></a>
+			<a href="#" onclick="checkLogged('avaliar', 1);"><img class="star-3" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 3 estrelas" /></a>
+			<a href="#" onclick="checkLogged('avaliar', 1);"><img class="star-4" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 4 estrelas" /></a>
+			<a href="#" onclick="checkLogged('avaliar', 1);"><img class="star-5" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 5 estrelas" /></a>
+			</span>
             &nbsp;&nbsp;&nbsp;
-            <a class="small" href="#" title="Adicionar a favoritos">Adicionar a favoritos</a>
+            <a class="small fav-1" onclick="checkLogged('favoritos', 1);" href="#" title="Adicionar a favoritos" nowrap>Adicionar a favoritos</a>
+			<span class="small fav-1-1"><em>Salvo aos favoritos!</em></span>
             &nbsp;&nbsp;&nbsp;
-            <a class="small" href="#" title="Sinalizar como spam">Sinalizar como spam</a>
-            
-            <div class="error-message" id="em-1"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
+            <a class="small spam-1"onclick="checkLogged('spam', 1);" href="#" title="Sinalizar como spam">Sinalizar como spam</a>
+            <span class="small spam-1-1"><em>Obrigado, iremos verificar.</em></span>
+			
+            <div class="error-message em-1-1"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
             
             <p class="small">Deixamos sua festa linda com nossas decorações personalizadas! Trabalhamos também com presentinhos de lembrança de batizados, festas, casamentos em geral. Venha nos visitar!</p>
-            <p>Rua Centenário, 1278 - Sinibaldi - S.J.Rio Preto/SP</p>
+            <p>Rua Centenário, 1278 - Sinibaldi - São Carlos/SP</p>
             <p>(17) 3011 2624</p>
             
             <hr />
@@ -81,54 +86,54 @@
             <hr />
             
             <p>Comentários <span class="small">(<a href="#" title="Deixe seu comentário">comente</a>)</span></p>
-            <div class="error-message" id="em-2"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
+            <div class="error-message em-2-1"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
             <div id="comments">
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Marcia</a><span class="small"> (1 dia atrás): </span> Fiz a festa do meu filho com eles com a decoração do Ben 10, ficou divino!! Fora que eles cuidam de tudo, na hora de arrumar e de retirar a decoração. Nota 1000!!!</div>
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Ana Cláudia</a><span class="small"> (2 dias atrás): </span>Olá amiga vocês trabalham com decoração para outras cidades? Moro em Mirassol. Obrigada Ana.</div>
-            <div class="bottom-comment"><a href="#" title="Veja o perfil do usuário">Carlos Eustáquio</a><span class="small"> (3 semanas atrás): </span>O atendimento é ótimo, mas o preço... podia melhorar né? Paguei 2 reais por cada lembrancinha de batizado.</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Marcia</a><span class="small"> (1 dia atrás): </span> Fiz a festa do meu filho com eles com a decoração do Ben 10, ficou divino!! Fora que eles cuidam de tudo, na hora de arrumar e de retirar a decoração. Nota 1000!!!</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Ana Cláudia</a><span class="small"> (2 dias atrás): </span>Olá amiga vocês trabalham com decoração para outras cidades? Moro em Ibaté. Obrigada Ana.</div>
+            <div class="bottom-comment"><a href="usuario.php" title="Veja o perfil do usuário">Carlos</a><span class="small"> (3 semanas atrás): </span>O atendimento é ótimo, mas o preço... podia melhorar né? Paguei 2 reais por cada lembrancinha de batizado.</div>
             </div><!--#comments-->
         </div><!--.inner-content-->
         <div class="inner-content-2">
             <h1>Kids Festas Infantis</h1>            
-            <img class="avaliar" id="star-1" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 1 estrela" />
-            <img class="avaliar" id="star-2" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 2 estrelas" title="Avalie o fornecedor - 2 estrelas" />
-            <img class="avaliar" id="star-3" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 3 estrelas" title="Avalie o fornecedor - 3 estrelas" />
-            <img class="avaliar" id="star-4" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 4 estrelas" title="Avalie o fornecedor - 4 estrelas" />
-            <img class="avaliar" id="star-5" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 5 estrelas" title="Avalie o fornecedor - 5 estrelas" />
+            <img class="star-1" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 1 estrela" title="Avalie o fornecedor - 1 estrela" />
+            <img class="star-2" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 2 estrelas" title="Avalie o fornecedor - 2 estrelas" />
+            <img class="star-3" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 3 estrelas" title="Avalie o fornecedor - 3 estrelas" />
+            <img class="star-4" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 4 estrelas" title="Avalie o fornecedor - 4 estrelas" />
+            <img class="star-5" width="15" height="15" src="img/star-empty.png" alt="Avalie o fornecedor - 5 estrelas" title="Avalie o fornecedor - 5 estrelas" />
             &nbsp;&nbsp;&nbsp;
             <a class="small" href="#" title="Adicionar a favoritos">Adicionar a favoritos</a>
             &nbsp;&nbsp;&nbsp;
             <a class="small" href="#" title="Sinalizar como spam">Sinalizar como spam</a>
             
-            <div class="error-message" id="em-1"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
+            <div class="error-message em-1"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
             
-            <p>Lorem ipsum dolor sit amet</p>
-            <p>Lorem ipsum, 235 - Lorem Ipsum/SP</p>
-            <p>(xx) xxxx - xxxx</p>
-            <p><a href="mailto:lorem@ipsum.com.br" title="Email: lorem@ipsum.com.br">lorem@ipsum.com.br</a></p>
-            <p><a href="#" title="Acessar o site do fornecedor">http://www.lipsum.com.br</a></p>
+            <p>Portal com todo tipo de informação para a organizações de festas infantis. Kides Festas Infantis é o melhor lugar para você organizar a festa infantil. Trabalhamos também com decorações atuais como Backyardigans, Pinky Dinky Do e Hi-5</p>
+            <p>Avenida Santos Dumont, 1915 - Jd. Boa Esperança - São Carlos/SP</p>
+            <p>(13) 3342-3232</p>
+            <p><a href="mailto:contato@kidsfestas.com.br" title="Email: contato@kidsfestas.com.br">contato@kidsfestas.com.br</a></p>
+            <p><a href="#" title="http://www.kidsfestas.com">http://www.kidsfestas.com</a></p>
             
             <hr />
             
             <p>Fotos <span class="small">(clique na foto para vê-la em um tamanho maior)</span></p>
             <div id=photo-gallery>
-            	<a href="#" title="Ver foto em tamanho maior" onclick="popup('img/bob-esponja.jpg');"><img src="img/bob-esponja.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
-                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/bob-esponja.jpg');"><img src="img/bob-esponja.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
-                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/bob-esponja.jpg');"><img src="img/bob-esponja.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
-                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/bob-esponja.jpg');"><img src="img/bob-esponja.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
-                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/bob-esponja.jpg');"><img src="img/bob-esponja.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
+            	<a href="#" title="Ver foto em tamanho maior" onclick="popup('img/backyardigans-1.jpg');"><img src="img/backyardigans-1-thumb.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
+                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/backyardigans-2.jpg');"><img src="img/backyardigans-2-thumb.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
+                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/pooh-1.jpg');"><img src="img/pooh-1-thumbs.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
+                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/pooh-2.jpg');"><img src="img/pooh-2-thumbs.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
+                <a href="#" title="Ver foto em tamanho maior" onclick="popup('img/pooh-3.jpg');"><img src="img/pooh-3-thumbs.jpg" width="50" alt="Foto fornecedor" title="Foto fornecedor"/></a>
             </div>
             
             <hr />
             
             <p>Comentários <span class="small">(<a href="#" title="Deixe seu comentário">comente</a>)</span></p>
-            <div class="error-message" id="em-2"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
+            <div class="error-message em-2"><a href="#" title="Cadastrar">Cadastre-se</a> ou <a href="#" title="Fazer Login">faça login</a> para realizar esta ação!</div>
             <div id="comments">
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Usuário A</a><span class="small"> (1 dia atrás): </span> Consectetur adipiscing elit. Nulla id neque ipsum, eu porta purus. Vivamus id tellus ac ipsum elementum consectetur. Sed viverra mi enim, vitae vestibulum libero.</div>
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Usuário A</a><span class="small"> (1 dia atrás): </span> Curabitur vel orci nunc. Praesent eget massa purus, sed tempor nulla. Integer at sapien non metus lacinia dapibus nec non eros.</div>
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Usuário A</a><span class="small"> (1 dia atrás): </span> uis pharetra enim a magna gravida sollicitudin. Phasellus semper eros in augue tincidunt luctus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Duis ut diam ac metus varius scelerisque a in dui.</div>
-            <div class="inner-comment"><a href="#" title="Veja o perfil do usuário">Usuário A</a><span class="small"> (1 dia atrás): </span> Vestibulum eget urna vitae felis sodales congue a ut metus. Nulla interdum commodo metus quis interdum. Maecenas porttitor consectetur arcu, eu mollis nulla tincidunt at. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</div>
-            <div class="bottom-comment"><a href="#" title="Veja o perfil do usuário">Usuário A</a><span class="small"> (1 dia atrás): </span> Sed sit amet velit eget eros lobortis sagittis vitae sed metus. Quisque vitae nunc nibh. Mauris vitae mauris arcu, non porttitor velit. Aliquam dictum justo ut enim volutpat eget dictum diam consectetur. Fusce lorem odio, accumsan ut lobortis ac, vulputate ac lectus.</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Maria Teodora</a><span class="small"> (2 dia atrás): </span> Os enfeites e a decoração é muito bonita, porém cuidado, quebram fácil e tive que pagar multa.</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Jacqueline</a><span class="small"> (1 mês atrás): </span>Não gostei do serviço, a decoração veio em uma caixa de papelão com alguns bonecos de isopor quebrados. Quando liguei para eles reporem os bonecos quebrados eles falaram que viriam trocar na festa e nem apareceram. Já na hora de pagar a história foi outra...</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Jéssica</a><span class="small"> (1 mês atrás): </span>Eles trabalham muito bem com tudo detalhado no contrato minha festa ficou maravilhosa!!</div>
+            <div class="inner-comment"><a href="usuario.php" title="Veja o perfil do usuário">Thamires Cristina</a><span class="small"> (3 meses atrás): </span>Conheço o trabalho deles e recomendo!</div>
+            <div class="bottom-comment"><a href="usuario.php" title="Veja o perfil do usuário">Andréia</a><span class="small"> (1 ano atrás): </span>Eles podiam melhorar e começar a fazer decorações mais atuais o que acham????</div>
             </div><!--#comments-->
         </div><!--.inner-content-->        
     </div><!--#content-details-->
@@ -214,11 +219,11 @@
 		<div id="details-empty"><em>Clique em um dos fornecedores ao lado e veja aqui mais detalhes sobre ele.</em></div>
         <div class="inner-content">
             <h1>Fornecedor 1</h1>
-            <img class="avaliar" id="star-1" width="15" height="15" src="img/star-empty.png" />
-            <img class="avaliar" id="star-2" width="15" height="15" src="img/star-empty.png" />
-            <img class="avaliar" id="star-3" width="15" height="15" src="img/star-empty.png" />
-            <img class="avaliar" id="star-4" width="15" height="15" src="img/star-empty.png" />
-            <img class="avaliar" id="star-5" width="15" height="15" src="img/star-empty.png" />
+            <img class="avaliar" class="star-1" width="15" height="15" src="img/star-empty.png" />
+            <img class="avaliar" class="star-2" width="15" height="15" src="img/star-empty.png" />
+            <img class="avaliar" class="star-3" width="15" height="15" src="img/star-empty.png" />
+            <img class="avaliar" class="star-4" width="15" height="15" src="img/star-empty.png" />
+            <img class="avaliar" class="star-5" width="15" height="15" src="img/star-empty.png" />
             &nbsp;&nbsp;&nbsp;
             <a class="small" href="#" title="Adicionar a favoritos">Adicionar a favoritos</a>
             &nbsp;&nbsp;&nbsp;
