@@ -35,3 +35,12 @@ criação da lógica de login
 16:00-19:00
 lógica de login
 lógica de mensagem de erro qdo adiciona a favoritos/avalia/comenta/spam
+
+12:00-13:00
+lógica de mensagem de erro qdo adiciona a favoritos/avalia/comenta/spam
+
+13:00-15:00
+Preenchimento de dados fake
+
+15:00 - 18:00
+Criação da página de favoritos e de detalhes
