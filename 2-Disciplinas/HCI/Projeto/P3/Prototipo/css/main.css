@@ -19,6 +19,12 @@ h1{
 	text-align:center;
 }
 
+h2{
+	font-family:verdana;
+	margin:20px 100px 10px;
+	text-align:center;
+}
+
 a{
 	outline:none;
 	text-decoration:none;
@@ -152,3 +158,28 @@ div#comments{
 div#comments div{padding:10px 0;}
 
 div.inner-comment{border-bottom:thin solid black;}
+
+div#fornecedor-detalhes{
+	height:465px;
+	margin:10px 20px;
+	overflow:auto;
+}
+
+/* Favoritos */
+div#favs{
+	border:thin solid black;
+	height:370px;
+	margin:10px 50px;
+	overflow:auto;
+}
+
+div#favs li{
+	margin:15px;
+}
+
+div.fav-header{}
+
+div.fav-contact{
+	width:87%;
+	margin-bottom:15px;
+}

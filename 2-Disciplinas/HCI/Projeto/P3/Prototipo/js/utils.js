@@ -5,7 +5,7 @@ $(document).ready(function(){
 	$("#login-sub").hide();
 	$("#login-erro").hide();
 	
-	//lógica para tratamento de usuario logado
+	//logica para tratamento de usuario logado
 	//pega o cookie e valida
 	var c_name = "usuario=";
 	var login_cookie = "";
@@ -26,14 +26,38 @@ $(document).ready(function(){
 	
 	//esconde a imagem de flecha para voltar no menu de opcoes de usuario logado
 	$(".arrow-left").hide();
-	//esconde a mensagem de sucesso de avaliação
+	//esconde secoess de interacao com detalhes do fornecedor
 	$(".avaliacao-1").hide();
-	$(".avaliacao-2").hide();	
 	$(".fav-1-1").hide();
 	$(".spam-1-1").hide();
+	$(".new-comment-1").hide();
+	$(".avaliacao-2").hide();
+	$(".fav-1-2").hide();
+	$(".spam-1-2").hide();
+	$(".new-comment-2").hide();
+	$(".avaliacao-3").hide();
+	$(".fav-1-3").hide();
+	$(".spam-1-3").hide();
+	$(".new-comment-3").hide();
+	$(".avaliacao-4").hide();
+	$(".fav-1-4").hide();
+	$(".spam-1-4").hide();
+	$(".new-comment-4").hide();
+	$(".avaliacao-5").hide();
+	$(".fav-1-5").hide();
+	$(".spam-1-5").hide();
+	$(".new-comment-5").hide();
+	$(".avaliacao-6").hide();
+	$(".fav-1-6").hide();
+	$(".spam-1-6").hide();
+	$(".new-comment-6").hide();
 	//esconde o conteudo de detalhes de um fornecedor
 	$(".inner-content-1").hide();
 	$(".inner-content-2").hide();
+	$(".inner-content-3").hide();
+	$(".inner-content-4").hide();
+	$(".inner-content-5").hide();
+	$(".inner-content-6").hide();	
 	//esconde as mensagens de erro de usuario nao logado
 	$(".error-message").hide();
 	//faz animacao das flechas em login e lista de resultados
@@ -106,7 +130,7 @@ function toggleMenu(){
 	changeArrow();
 }
 
-//troca a flecha da área de login (quando clica em gerenciar)
+//troca a flecha da area de login (quando clica em gerenciar)
 function changeArrow(){
 	$(".arrow-right").toggle();
 	$(".arrow-left").toggle()
@@ -123,6 +147,30 @@ function showDetails(number){
 		$(".inner-content-1").hide();
 		$(".inner-content-2").show('fast');
 	}
+	if(number==3){
+		$(".inner-content-6").hide();
+		$(".inner-content-5").hide();
+		$(".inner-content-4").hide();
+		$(".inner-content-3").show('fast');
+	}
+	if(number==4){
+		$(".inner-content-6").hide();
+		$(".inner-content-5").hide();
+		$(".inner-content-3").hide();
+		$(".inner-content-4").show('fast');
+	}
+	if(number==5){
+		$(".inner-content-6").hide();
+		$(".inner-content-3").hide();
+		$(".inner-content-4").hide();
+		$(".inner-content-5").show('fast');
+	}
+	if(number==6){
+		$(".inner-content-3").hide();
+		$(".inner-content-4").hide();
+		$(".inner-content-5").hide();
+		$(".inner-content-6").show('fast');
+	}
 }
 
 //cria uma janela popup para mostrar as fotos
@@ -131,16 +179,27 @@ function popup(url){
 		url,'popUpWindow','height=600,width=800,left=10,top=10,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no,status=yes')
 }
 
-//mostra os input para usuário logar
+//mostra os input para usuario logar
 function showLogin(){
 	$("#not-logged").hide();
 	$("#login-section").show();
+	$("#login-id").val("");
 	//esconde as mensagens de erro caso o usuario tenha visto uma
-	$(".em-1").hide("slow");
-	$(".em-2").hide("slow");
+	$(".em-1-1").hide("slow");
+	$(".em-2-1").hide("slow");
+	$(".em-1-2").hide("slow");
+	$(".em-2-2").hide("slow");	
+	$(".em-1-3").hide("slow");
+	$(".em-2-3").hide("slow");
+	$(".em-1-4").hide("slow");
+	$(".em-2-4").hide("slow");	
+	$(".em-1-5").hide("slow");
+	$(".em-2-5").hide("slow");
+	$(".em-1-6").hide("slow");
+	$(".em-2-6").hide("slow");
 }
 
-//mostra links de cadastro ou login se usuario cancela a ação de logar
+//mostra links de cadastro ou login se usuario cancela a acao de logar
 function showMenu(){
 	$("#not-logged").show();
 	$("#login-section").hide();
@@ -163,9 +222,9 @@ function checkLogin(){
 	}
 }
 
-//destrói cookie de login
+//destroi cookie de login
 function logout(){
-	//destrói cookie
+	//destroi cookie
 	var d = new Date();
 	document.cookie = "usuario=Usuario;expires=" + d.toGMTString();
 	//mostra o menu de login/cadastro
@@ -174,7 +233,7 @@ function logout(){
 	$("#logged").hide();
 }
 
-//verifica se usuario está logado. type é qual mensagem de erro ou sucesso mostrar. Number qual dos detalhes deve ser mostrado 
+//verifica se usuario esta logado. type qual mensagem de erro ou sucesso mostrar. Number qual dos detalhes deve ser mostrado 
 function checkLogged(type, number){
 	//pega o cookie e valida
 	var c_name = "usuario=";
@@ -189,26 +248,58 @@ function checkLogged(type, number){
 		}
 	}	
 	if(login_cookie == "Usuario"){
-		//executa alguma ação de sucesso dependendo da área do conteudo
+		//executa alguma acao de sucesso dependendo da area do conteudo
 		if(type == "avaliar"){
 			//mostra mensagem de agradecimento
 			$(".avaliacao-"+number).show();
-			//tira as estrelas de avaliação
+			//tira as estrelas de avaliacao
 			$(".stars-"+number).hide();			
 		} else if(type == "favoritos"){
 			//mostra mensagem de agradecimento
-			$(".fav-1").hide();
-			$(".fav-1-1").show();
+			$(".fav-"+number).hide();
+			$(".fav-1-"+number).show();
 		} else if(type == "spam"){
 			//mostra mensagem de agradecimento
-			$(".spam-1").hide();
-			$(".spam-1-1").show();
+			$(".spam-"+number).hide();
+			$(".spam-1-"+number).show();
+		} else if(type == "comentar"){
+			//apaga texto se houver algum
+			$(".txt-comment-"+number).val("");
+			//mostra area de comentario
+			$(".new-comment-"+number).show("slow");
 		}
-		
-
 	} else{
 		//mostra mensagem de erro adequada
-		if(type == "avaliar"){ $(".em-1").show("slow");}
-		else if(type = "commentar"){ $(".em-2").show("slow");}
+		if(type == "comentar"){ $(".em-2-"+number).show("slow");}
+		else{ $(".em-1-"+number).show("slow");}
 	}
+}
+
+//cancela acao de comentario
+function cancelComment(number){
+	//esconde parte de comentario
+	$(".new-comment-"+number).hide("slow");
+	$(".txt-comment-"+number).val("");
+}
+
+//simula a postagem de comentario
+function postComment(number){
+	//esconde a parte de comentario
+	$(".new-comment-"+number).hide();
+	//mostra o comentario no board
+	var newComment = "<div class=\"inner-comment show-slow-" + number + "\"><a href=\"usuario.php\" title=\"Veja o perfil do usuÃ¡rio\">UsuÃ¡rio</a><span class=\"small\"> (5 segundos atrÃ¡s): </span>" + $(".txt-comment-"+number).val() + "</div>"
+	$(".comment-board-"+number).prepend(newComment);
+	//faz animacao do novo comentario
+	$(".show-slow-"+number).hide("fast");
+	$(".show-slow-"+number).show("slow");
+	//limpa area de texto
+	$(".txt-comment-"+number).val("");
+}
+
+//simula deletar um favorito
+function deleteFav(number){
+	var r = confirm("EstÃ¡ certo de que deseja excluir este fornecedor da lista de favoritos?");
+	if (r==true){
+		$("#fav-"+number).hide();
+	}	
 }

@@ -23,7 +23,7 @@
             <div id="login-sub" class="right">
                 <a href="#" title="Minha Conta">Minha Conta</a>
                 <br />
-                <a href="#" title="Meus Favoritos">Meus Favoritos</a>
+                <a href="favoritos.php" title="Meus Favoritos">Meus Favoritos</a>
                 <br />
                 <a href="#" title="Minhas Festas">Minhas Festas</a>
                 <br />

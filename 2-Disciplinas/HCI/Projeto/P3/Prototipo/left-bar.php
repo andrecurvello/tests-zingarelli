@@ -2,7 +2,7 @@
 <div id="left-bar">
     <h1 class="title">Pesquisar Fornecedores</h1>
     <br />
-    <p class="small">Resultados em: <strong>São Carlos/SP</strong>&nbsp;&nbsp;<span class="small">(<a href="#" title="Alterar localização">Alterar</a>)</span></p>
+    <div class="search"><p class="small">Resultados em: <strong>São Carlos/SP</strong>&nbsp;&nbsp;<span class="small">(<a href="#" title="Alterar localização">Alterar</a>)</span></p></div>
     <div class="search">
         <p>Pesquisa por palavra chave:</p>
         <form action="fornecedores.php" method="get">
@@ -18,7 +18,7 @@
             <option title="Locais" value="Locais" >Locais</option>
             <option value="Bandas">Bandas</option>
             <option value="Buffet">Buffet</option>
-            <option value="Decoração">Decoração</option>
+            <option value="Decoracao">Decoração</option>
             <option value="Bolo &amp; Doces">Bolo &amp; Doces</option>
             <option value="Bebidas">Bebidas</option>
             <option value="Artigos para Festas">Artigos para Festas</option>
