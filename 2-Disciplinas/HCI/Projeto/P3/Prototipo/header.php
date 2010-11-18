@@ -9,8 +9,8 @@
 		</div>
 		<div id="login-section">
 			<form>
-				<input id="login-id" type="text" name="login" size="10" />
-				<input id="login-pwd" type="password" name="password" size="10" />
+				Login: <input id="login-id" type="text" name="login" size="10" />
+				Senha: <input id="login-pwd" type="password" name="password" size="10" />
 				<input type="button" value="Login" onclick="checkLogin();" />
 				<a href="#" title="Cancelar Login" onclick="showMenu();" class="small">Cancelar</a>
 				<br />
