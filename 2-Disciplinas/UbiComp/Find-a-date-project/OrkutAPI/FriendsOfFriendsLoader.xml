@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Friends Loader v2" description="This is an app for testing fetching my friends data" author="Matheus Ricardo Uihara Zingarelli">
+	<ModulePrefs title="Load info of friends of friends" description="This is an app for testing fetching my friends data" author="Matheus Ricardo Uihara Zingarelli">
 		<Require feature="opensocial-0.8"/>
 		<Require feature="dynamic-height" />
 	</ModulePrefs>
