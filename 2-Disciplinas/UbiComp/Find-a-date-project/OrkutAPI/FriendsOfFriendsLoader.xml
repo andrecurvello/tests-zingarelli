@@ -2,76 +2,63 @@
 <Module>
 	<ModulePrefs title="Load info of friends of friends" description="This is an app for testing fetching my friends data" author="Matheus Ricardo Uihara Zingarelli">
 		<Require feature="opensocial-0.8"/>
-		<Require feature="dynamic-height" />
 	</ModulePrefs>
 	<Content type="html">
 		<![CDATA[
 			<script type="text/javascript">
+				
+				//for the current user, this will list all the friends s/he has
 				function loadFriends() {
 					var req = opensocial.newDataRequest();
 					
-					//use this to fetch data for a single person ID, the viewer on this case
-					//the 'viewer' is a key to access all data fetched for the person ID (viewer)
-					req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER), 'viewer');
-
-					//get friends of the current user
+					//creates an IdSpec telling that we want all friend from the current user viewing the gadget
 					var viewerFriends = opensocial.newIdSpec({ "userId" : "VIEWER", "groupId" : "FRIENDS" });
-					//set a maximum of data to be fetched and get profile Thumbnail
+					//sets that we wall the maximum of 1000 friends (Orkut's maximum)
 					var opt_params = {};
 					opt_params[opensocial.DataRequest.PeopleRequestFields.MAX] = 1000;
+					
+					//make the request. 'viewerFriends' will store all data fetched
 				    req.add(req.newFetchPeopleRequest(viewerFriends, opt_params), 'viewerFriends');
 
-					//onLoadFriends is a callback for the javascript function of the same name
+					//onLoadFriends is a callback for when we send the request
 					req.send(onLoadFriends);
 				}
 
-				//data on this case is what was fetched from loadFriends
+				//get all friends from the current user and for each we'll list all of their friends (friends of friends)
 				function onLoadFriends(data) {
 					
 					//verify if any error occurred
-					if(data.get('viewer').hadError()){
-						alert(data.get('viewer').getErrorCode());
-					}else if(data.get('viewerFriends').hadError()){
+					if(data.get('viewerFriends').hadError()){
 						alert(data.get('viewerFriends').getErrorCode());
-					}else{
-					
+					}else{					
 						//get data
-						var viewer = data.get('viewer').getData();
 						var viewerFriends = data.get('viewerFriends').getData();
-						
-						html = new Array();
-						html.push('<ul>');
+
+						//for each friend, it lists all of his/her friends
 						viewerFriends.each(function(person) {
 							if (person.getId()) {
 								//get the friend social ID
 								var friendID = person.getId();
-								html.push('<li>', friendID, '</li>');
-								//load the friends of friend (only the ones with the app installed will be sucessful)
+								//calls a function that will list all of person's friends
 								loadFriendsOfFriends(friendID);
 							}
 						});
-						html.push('</ul>');
-						document.getElementById('friends').innerHTML = html.join('');
-						gadgets.window.adjustHeight();
 					}
 				}
 				
-				//load Friends of Friends data given the user social ids
+				//get all friends of a given friend (friends of friends)
 				function loadFriendsOfFriends(friendID){
 					var req = opensocial.newDataRequest();
 
 					//get friends of friendID
 					var friendOfFriends = opensocial.newIdSpec({ "userId" : friendID, "groupId" : "FRIENDS" });
-					//set a maximum of data to be fetched and get profile Thumbnail
 					var opt_params = {};
 					opt_params[opensocial.DataRequest.PeopleRequestFields.MAX] = 1000;
 				    req.add(req.newFetchPeopleRequest(friendOfFriends, opt_params), 'friendOfFriends');
-
-					//onLoadFriends is a callback for the javascript function of the same name
 					req.send(onLoadFriendsofFriends);	
 				}
 				
-				//get data fetched by loadFriendsOfFriends
+				//get profile data for each friend of friend fetched (possible only for the ones that have the gadget installed)
 				function onLoadFriendsofFriends(data){
 					//verify if any error occurred
 					if(data.get('friendOfFriends').hadError()){
@@ -80,29 +67,131 @@
 						//get data
 						var friendOfFriends = data.get('friendOfFriends').getData();
 						
-						html = new Array();
-						html.push('<ul>');
 						friendOfFriends.each(function(person) {
 							if (person.getId()) {
-								//load person profile
-								html.push('<li>', person.getField(opensocial.Person.Field.RELATIONSHIP_STATUS), '</li>');
+								//load person profile data
+								var FoFID = person.getId();
+								loadFriendsOfFriendsData(FoFID);
 							}
 						});
-						html.push('</ul>');
-						document.getElementById('friends').innerHTML = html.join('');
-						gadgets.window.adjustHeight();
 					}
 				}
 
+				//requests profile data of a friend of friend (FoF) (possible only for the ones that have the gadget installed)
+				function loadFriendsOfFriendsData(FoFID){
+					var req = opensocial.newDataRequest();
+					
+					//these are the interested data for profile matching
+					var params = {};
+					params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = 
+						[opensocial.Person.Field.THUMBNAIL_URL,
+						opensocial.Person.Field.GENDER,
+						opensocial.Person.Field.RELATIONSHIP_STATUS,
+						opensocial.Person.Field.CURRENT_LOCATION,
+						opensocial.Person.Field.LANGUAGES_SPOKEN,
+						opensocial.Person.Field.HUMOR,
+						opensocial.Person.Field.FASHION,
+						opensocial.Person.Field.INTERESTS,
+						opensocial.Person.Field.SPORTS,
+						opensocial.Person.Field.ACTIVITIES,
+						opensocial.Person.Field.BOOKS,
+						opensocial.Person.Field.MUSIC,
+						opensocial.Person.Field.TV_SHOWS,
+						opensocial.Person.Field.MOVIES,
+						opensocial.Person.Field.FOOD,
+						opensocial.Person.Field.STATUS,
+						opensocial.Person.Field.TURN_ONS,
+						opensocial.Person.Field.TURN_OFFS,
+						opensocial.Person.Field.ROMANCE];
+						
+					req.add(req.newFetchPersonRequest(FoFID, params), 'FoFData');
+					
+					//get current user data
+					req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER, params), 'viewer');   
+					
+					req.send(matchingAnalysisPreview);
+				}
+				
+				//loads profile data of a friend of friend (FoF) (possible only for the ones that have the gadget installed)
+				//start the matching operation
+				function matchingAnalysisPreview(data){														
+					if(data.get('viewer').hadError()){
+						alert(data.get('viewer').getErrorCode());
+					}else if(data.get('FoFData').hadError()){
+						//if a error occurred, possibly the user doesn't have the gadget installed on his/her profile
+					}else{					
+						//get data
+						var FOFData = data.get('FoFData').getData();	
+						var viewer = data.get('viewer').getData();
+						
+						//verify if they have different gender (obligatory field)
+						if(FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() != viewer.getField(opensocial.Person.Field.GENDER).getDisplayValue()){				
+							//verify if they live in the same city or state
+							var addressFOF = FOFData.getField(opensocial.Person.Field.CURRENT_LOCATION);
+							var addressUser = viewer.getField(opensocial.Person.Field.CURRENT_LOCATION);
+														
+							if(addressFOF != null && addressUser != null){
+							//verify city
+							if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != null && addressUser.getField(opensocial.Address.Field.LOCALITY) != null){
+								if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != addressUser.getField(opensocial.Address.Field.LOCALITY)){
+									//verify state
+									if(addressFOF.getField(opensocial.Address.Field.REGION) != null && addressUser.getField(opensocial.Address.Field.REGION) != null){
+										if(addressFOF.getField(opensocial.Address.Field.REGION) == addressUser.getField(opensocial.Address.Field.REGION)){
+											//same state, match found
+											matchingAnalysis(FOFData, viewer);
+										}
+									}
+								}
+								else{
+									//same city, match found
+									matchingAnalysis(FOFData, viewer);
+								}
+							}//city
+							}							
+						}//gender						
+					}										
+				}
+				
+				function matchingAnalysis(FOFData, viewer){
+					//verify attributes matching
+					var match = 0;
+					
+					//debug
+					html = new Array();
+					html.push('Você: <img src="', viewer.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', viewer.getDisplayName(), '<br />');
+					html.push('Perfil em análise:  <img src="', FOFData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', FOFData.getDisplayName(), '<br />');
+					html.push('<br /><br /><strong>Matches</strong><br />');
+					//relationship status
+					if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
+						if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
+							match++;
+							html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
+						}
+					}
+					
+					var languagesFOF = FOFData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
+					var languagesUser = viewer.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
+					//alert(languagesFOF.join('|'));
+					//alert(languagesUser.join('-'));
+
+					//TODO: compare arrays
+					//TODO: dar peso maior para cidade
+					
+					html.push('<br /><br />Número de matches: ', match);
+					document.getElementById('match').innerHTML = html.join('');
+				}
+							
+				//initiates the gadget's operation
 				function init() {
 					loadFriends();
+					//findDates();
 				}
 
+				//this is the starting point of the gadget's operation
 				gadgets.util.registerOnLoadHandler(init);
 			</script>
-			<div id='main'>
-				Your friends:
-				<div id='friends'></div>
+			<div id='main'>				
+				<div id='match'></div>
 			</div>
 		]]>
 	</Content>
