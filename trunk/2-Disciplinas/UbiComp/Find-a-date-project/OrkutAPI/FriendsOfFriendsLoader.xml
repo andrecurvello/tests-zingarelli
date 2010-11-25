@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Load info of friends of friends" description="This is an app for testing fetching my friends data" author="Matheus Ricardo Uihara Zingarelli">
+	<ModulePrefs title="Find a Roomie" description="This app compares your attribute with your friend of friends attribute to recommends to you some possible room mates" author="Matheus Ricardo Uihara Zingarelli">
 		<Require feature="opensocial-0.8"/>
 	</ModulePrefs>
 	<Content type="html">
 		<![CDATA[
 			<script type="text/javascript">
+				//creates trim function for javascript Strings. Removes whitespaces
+				String.prototype.trim = function () {
+					return this.replace(/^\s*/, "").replace(/\s*$/, "");
+				}				
 				
 				//for the current user, this will list all the friends s/he has
 				function loadFriends() {
@@ -29,7 +33,7 @@
 					
 					//verify if any error occurred
 					if(data.get('viewerFriends').hadError()){
-						alert(data.get('viewerFriends').getErrorCode());
+						alert("Error loading friends: " + data.get('viewerFriends').getErrorCode());
 					}else{					
 						//get data
 						var viewerFriends = data.get('viewerFriends').getData();
@@ -62,7 +66,7 @@
 				function onLoadFriendsofFriends(data){
 					//verify if any error occurred
 					if(data.get('friendOfFriends').hadError()){
-						alert(data.get('friendOfFriends').getErrorCode());
+						alert("Error loading FoF: " + data.get('friendOfFriends').getErrorCode());
 					}else{					
 						//get data
 						var friendOfFriends = data.get('friendOfFriends').getData();
@@ -77,7 +81,7 @@
 					}
 				}
 
-				//requests profile data of a friend of friend (FoF) (possible only for the ones that have the gadget installed)
+				//requests profile data for a friend of friend (FoF) and for the current user
 				function loadFriendsOfFriendsData(FoFID){
 					var req = opensocial.newDataRequest();
 					
@@ -85,6 +89,7 @@
 					var params = {};
 					params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = 
 						[opensocial.Person.Field.THUMBNAIL_URL,
+						opensocial.Person.Field.ABOUT_ME,
 						opensocial.Person.Field.GENDER,
 						opensocial.Person.Field.RELATIONSHIP_STATUS,
 						opensocial.Person.Field.CURRENT_LOCATION,
@@ -109,76 +114,108 @@
 					//get current user data
 					req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.VIEWER, params), 'viewer');   
 					
-					req.send(matchingAnalysisPreview);
+					req.send(matchingAnalysis);
 				}
 				
 				//loads profile data of a friend of friend (FoF) (possible only for the ones that have the gadget installed)
-				//start the matching operation
-				function matchingAnalysisPreview(data){														
+				//starts the matching operation
+				function matchingAnalysis(data){														
 					if(data.get('viewer').hadError()){
-						alert(data.get('viewer').getErrorCode());
+						alert("Error loading viewer: " + data.get('viewer').getErrorCode());
 					}else if(data.get('FoFData').hadError()){
 						//if a error occurred, possibly the user doesn't have the gadget installed on his/her profile
-					}else{					
+					}else{
+						match = 0;
+												
 						//get data
 						var FOFData = data.get('FoFData').getData();	
 						var viewer = data.get('viewer').getData();
 						
-						//verify if they have different gender (obligatory field)
-						if(FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() != viewer.getField(opensocial.Person.Field.GENDER).getDisplayValue()){				
-							//verify if they live in the same city or state
+						//debug
+						html = new Array();
+						html.push('Você: <img src="', viewer.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', viewer.getDisplayName(), '<br />');
+						html.push('Perfil em análise:  <img src="', FOFData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', FOFData.getDisplayName(), '<br />');
+						html.push('<br /><br /><strong>Matches</strong><br />');
+						
+						//verify if they are the same person (current user is also a FoF of a friend)
+						if(FOFData.getId() != viewer.getId()){
+							//match location
 							var addressFOF = FOFData.getField(opensocial.Person.Field.CURRENT_LOCATION);
 							var addressUser = viewer.getField(opensocial.Person.Field.CURRENT_LOCATION);
-														
+
 							if(addressFOF != null && addressUser != null){
-							//verify city
-							if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != null && addressUser.getField(opensocial.Address.Field.LOCALITY) != null){
-								if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != addressUser.getField(opensocial.Address.Field.LOCALITY)){
-									//verify state
-									if(addressFOF.getField(opensocial.Address.Field.REGION) != null && addressUser.getField(opensocial.Address.Field.REGION) != null){
-										if(addressFOF.getField(opensocial.Address.Field.REGION) == addressUser.getField(opensocial.Address.Field.REGION)){
-											//same state, match found
-											matchingAnalysis(FOFData, viewer);
+								//verify City (locality)
+								if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != null && addressUser.getField(opensocial.Address.Field.LOCALITY) != null){
+									if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != addressUser.getField(opensocial.Address.Field.LOCALITY)){
+										//verify State (region)
+										if(addressFOF.getField(opensocial.Address.Field.REGION) != null && addressUser.getField(opensocial.Address.Field.REGION) != null){
+											if(addressFOF.getField(opensocial.Address.Field.REGION) == addressUser.getField(opensocial.Address.Field.REGION)){
+												//same state, match found
+												match += 2;
+												//debug
+												alert("Match estado + 2");
+											}
 										}
 									}
+									else{
+										//same city, match found
+										match += 3;
+										alert("Match estado + 3");
+									}//state
+								}//city
+							}//address not null
+							
+							//match relationship status
+							if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
+								if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
+									match++;
+									
+									//debug
+									alert("Match estado civil: " + FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS));
+									
+									html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
 								}
-								else{
-									//same city, match found
-									matchingAnalysis(FOFData, viewer);
-								}
-							}//city
-							}							
-						}//gender						
-					}										
-				}
+							}
+							
+							//match languages spoken -- array
+							var languagesFOF = FOFData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
+							var languagesUser = viewer.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
+							match = match + compareArrays(languagesFOF, languagesUser);
+							
+							//match sports -- array
+							var sportsFOF = FOFData.getField(opensocial.Person.Field.SPORTS);
+							var sportsUser = viewer.getField(opensocial.Person.Field.SPORTS);
+							//match = match + compareArrays(sportsFOF, sportsUser);
+							
+							html.push('<br /><br />Número de matches: ', match);
+							document.getElementById('match').innerHTML = html.join('');							
+						}//same person
+					}//get data										
+				}//function
 				
-				function matchingAnalysis(FOFData, viewer){
-					//verify attributes matching
-					var match = 0;
-					
+				//compare data inside arrays
+				function compareArrays(FoF, user){
 					//debug
-					html = new Array();
-					html.push('Você: <img src="', viewer.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', viewer.getDisplayName(), '<br />');
-					html.push('Perfil em análise:  <img src="', FOFData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', FOFData.getDisplayName(), '<br />');
-					html.push('<br /><br /><strong>Matches</strong><br />');
-					//relationship status
-					if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
-						if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
-							match++;
-							html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
+					alert(FoF);
+					alert(user);
+				
+					var num = 0; //stores the matches found within these arrays
+					for(var i = 0; i < FoF.length; i++){
+						//for each element, compares it with the elements of user
+						var j = 0;
+						while(FoF[i] != user[j] && j < user.length){
+							j++;
+						}
+						if(FoF[i] == user[j]){ //match found
+							num++;
+							//debug
+							////alert("Match! " + FoF[i]);
 						}
 					}
+					//debug
+					//alert('Matches no CompareArrays: ' + num);
 					
-					var languagesFOF = FOFData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
-					var languagesUser = viewer.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
-					//alert(languagesFOF.join('|'));
-					//alert(languagesUser.join('-'));
-
-					//TODO: compare arrays
-					//TODO: dar peso maior para cidade
-					
-					html.push('<br /><br />Número de matches: ', match);
-					document.getElementById('match').innerHTML = html.join('');
+					return num;
 				}
 							
 				//initiates the gadget's operation
