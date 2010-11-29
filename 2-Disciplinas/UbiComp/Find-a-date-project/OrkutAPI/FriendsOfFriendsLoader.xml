@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Find a Roomie" description="This app compares your attribute with your friend of friends attribute to recommends to you some possible room mates" author="Matheus Ricardo Uihara Zingarelli">
+	<ModulePrefs title="Find a Roomie - GGE" description="This app compares your attribute with your friend of friends attribute to recommends to you some possible room mates" author="Matheus Ricardo Uihara Zingarelli">
 		<Require feature="opensocial-0.8"/>
 	</ModulePrefs>
 	<Content type="html">
@@ -120,6 +120,8 @@
 				//loads profile data of a friend of friend (FoF) (possible only for the ones that have the gadget installed)
 				//starts the matching operation
 				function matchingAnalysis(data){														
+					//TODO: outra alternativa é transformar tudo em strings e fazer um search por substring (http://www.plus2net.com/javascript_tutorial/string-search.php)
+					
 					if(data.get('viewer').hadError()){
 						alert("Error loading viewer: " + data.get('viewer').getErrorCode());
 					}else if(data.get('FoFData').hadError()){
@@ -143,6 +145,34 @@
 							var addressFOF = FOFData.getField(opensocial.Person.Field.CURRENT_LOCATION);
 							var addressUser = viewer.getField(opensocial.Person.Field.CURRENT_LOCATION);
 
+							//match gender
+							if(FOFData.getField(opensocial.Person.Field.GENDER) != null && viewer.getField(opensocial.Person.Field.GENDER) != null){
+								//users with the same gender are ranked better
+								if(FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() == viewer.getField(opensocial.Person.Field.GENDER).getDisplayValue()){
+									match += 2;
+									alert("Match gender + 2");
+									html.push('Gender recebeu matching:', FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() ,'<br />');
+								}
+								else{
+									match++;
+									alert("Match gender + 1");
+									html.push('Gender não deu matching:', FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() ,'<br />');
+								}								
+							}
+							
+							//match relationship status
+							if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
+								if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
+									match++;
+									
+									//debug
+									alert("Match estado civil: " + FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS));
+									
+									html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
+								}
+							}								
+							
+							//match address
 							if(addressFOF != null && addressUser != null){
 								//verify City (locality)
 								if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != null && addressUser.getField(opensocial.Address.Field.LOCALITY) != null){
@@ -165,27 +195,128 @@
 								}//city
 							}//address not null
 							
-							//match relationship status
-							if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
-								if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
-									match++;
-									
-									//debug
-									alert("Match estado civil: " + FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS));
-									
-									html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
-								}
-							}
-							
-							//match languages spoken -- array
+							//match languages spoken -- array							
 							var languagesFOF = FOFData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
 							var languagesUser = viewer.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
-							match = match + compareArrays(languagesFOF, languagesUser);
+							if(languagesFOF != null && languagesUser != null){
+								match = match + compareArrays(languagesFOF, languagesUser);
+							}
 							
+							//match humor -- strings
+							var humorFOF = FOFData.getField(opensocial.Person.Field.HUMOR);
+							var humorUser = viewer.getField(opensocial.Person.Field.HUMOR);
+							if(humorFOF != null && humorUser != null){
+								var FOFArray = humorFOF.split(",");
+								var userArray = humorUser.split(",");
+								match += compareArrays(FOFArray, userArray);
+							}
+							
+							//match fashion -- strings
+							var fashionFOF = FOFData.getField(opensocial.Person.Field.FASHION);
+							var fashionUser = viewer.getField(opensocial.Person.Field.FASHION);
+							if(fashionFOF != null && fashionUser != null){
+								var FOFArray = fashionFOF.split(",");
+								var userArray = fashionUser.split(",");
+								match += compareArrays(FOFArray, userArray);
+							}
+							
+							//match interests -- array
+							var interFOF = FOFData.getField(opensocial.Person.Field.INTERESTS);
+							var interUser = viewer.getField(opensocial.Person.Field.INTERESTS);
+							if(interFOF != null && interUser != null){
+								match = match + compareArrays(interFOF, interUser);
+							}
+
 							//match sports -- array
 							var sportsFOF = FOFData.getField(opensocial.Person.Field.SPORTS);
 							var sportsUser = viewer.getField(opensocial.Person.Field.SPORTS);
-							//match = match + compareArrays(sportsFOF, sportsUser);
+							if(sportsFOF != null && sportsUser != null){
+								match = match + compareArrays(sportsFOF, sportsUser);
+							}
+							
+							//match activities -- array
+							var activFOF = FOFData.getField(opensocial.Person.Field.ACTIVITIES);
+							var activUser = viewer.getField(opensocial.Person.Field.ACTIVITIES);
+							if(activFOF != null && activUser != null){
+								match = match + compareArrays(activFOF, activUser);
+							}
+							
+							//match books -- array
+							var bookFOF = FOFData.getField(opensocial.Person.Field.BOOKS);
+							var bookUser = viewer.getField(opensocial.Person.Field.BOOKS);
+							if(bookFOF != null && bookUser != null){
+								match = match + compareArrays(bookFOF, bookUser);
+							}
+							
+							//match music -- array
+							var musicFOF = FOFData.getField(opensocial.Person.Field.MUSIC);
+							var musicUser = viewer.getField(opensocial.Person.Field.MUSIC);
+							if(musicFOF != null && musicUser != null){
+								match = match + compareArrays(musicFOF, musicUser);
+							}
+							
+							//match tv shows -- array
+							var tvFOF = FOFData.getField(opensocial.Person.Field.TV_SHOWS);
+							var tvUser = viewer.getField(opensocial.Person.Field.TV_SHOWS);
+							if(tvFOF != null && tvUser != null){
+								match = match + compareArrays(tvFOF, tvUser);
+							}
+							
+							//match movies -- array
+							var movieFOF = FOFData.getField(opensocial.Person.Field.MOVIES);
+							var movieUser = viewer.getField(opensocial.Person.Field.MOVIES);
+							if(movieFOF != null && movieUser != null){
+								match = match + compareArrays(movieFOF, movieUser);
+							}
+							
+							//match food -- array
+							var foodFOF = FOFData.getField(opensocial.Person.Field.FOOD);
+							var foodUser = viewer.getField(opensocial.Person.Field.FOOD);
+							if(foodFOF != null && foodUser != null){
+								match = match + compareArrays(foodFOF, foodUser);
+							}							
+							
+							//match turns on -- array
+							var tONFOF = FOFData.getField(opensocial.Person.Field.TURN_ONS);
+							var tONUser = viewer.getField(opensocial.Person.Field.TURN_ONS);
+							if(tONFOF != null && tONUser != null){
+								match = match + compareArrays(tONFOF, tONUser);
+							}		
+							
+							//match turns off -- array
+							var tOFF_FOF = FOFData.getField(opensocial.Person.Field.TURN_OFFS);
+							var tOFFUser = viewer.getField(opensocial.Person.Field.TURN_OFFS);
+							if(tOFF_FOF != null && tOFFUser != null){
+								match = match + compareArrays(tOFF_FOF, tOFFUser);
+							}		
+							
+							//match romance -- strings
+							var romanceFOF = FOFData.getField(opensocial.Person.Field.ROMANCE);
+							var romanceUser = viewer.getField(opensocial.Person.Field.ROMANCE);
+							if(romanceFOF != null && romanceUser != null){
+								var FOFArray = romanceFOF.split(",");
+								var userArray = romanceUser.split(",");
+								match += compareArrays(FOFArray, userArray);
+							}
+							
+							//match status -- array
+							
+							//match about me
+							var aboutFOF = FOFData.getField(opensocial.Person.Field.ABOUT_ME);
+							var aboutUser = viewer.getField(opensocial.Person.Field.ABOUT_ME);
+							if(aboutFOF != null && aboutUser != null){
+								 
+							//find substring related to university
+							//var univFOFStart = aboutFOF.search(/Universidade:/i) + 13;
+							//var univFOFStop = aboutFOF.search(";;");
+							//var courFOFStart = aboutFOF.search(/Curso:/i) + 13;
+							//alert(aboutFOF.match(/Universidade: [\S\s]*;/i));
+							alert(aboutFOF.substring(aboutFOF.search(/Universidade:/i),aboutFOF.search(/Curso:/i)).trim());
+							
+							//find separator
+							//find substring related to course
+							//find separator
+							}
 							
 							html.push('<br /><br />Número de matches: ', match);
 							document.getElementById('match').innerHTML = html.join('');							
@@ -196,25 +327,34 @@
 				//compare data inside arrays
 				function compareArrays(FoF, user){
 					//debug
-					alert(FoF);
-					alert(user);
+					//alert(FoF);
+					//alert(user);
+				
+					//verificar se for nulo
 				
 					var num = 0; //stores the matches found within these arrays
-					for(var i = 0; i < FoF.length; i++){
+					for(var i = 0; i < FoF.length; i++){						
 						//for each element, compares it with the elements of user
 						var j = 0;
-						while(FoF[i] != user[j] && j < user.length){
-							j++;
-						}
-						if(FoF[i] == user[j]){ //match found
-							num++;
+						var FoFData = FoF[i].toString();
+						FoFData = FoFData.trim().toUpperCase();
+						
+						//debug
+						//alert (FoFData)
+						
+						for(var j = 0; j < user.length; j++){
+							var userData = user[j].toString();
+							userData = userData.trim().toUpperCase()
 							//debug
-							////alert("Match! " + FoF[i]);
+							//alert(userData);
+							if(FoFData == userData){ //match found
+								num++;
+								//debug
+								//alert("Match! " + FoFData);
+								break;
+							}
 						}
-					}
-					//debug
-					//alert('Matches no CompareArrays: ' + num);
-					
+					}					
 					return num;
 				}
 							
