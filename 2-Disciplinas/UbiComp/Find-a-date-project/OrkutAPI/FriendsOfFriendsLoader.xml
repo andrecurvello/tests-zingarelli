@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Find a Roomie - GGE" description="This app compares your attribute with your friend of friends attribute to recommends to you some possible room mates" author="Matheus Ricardo Uihara Zingarelli">
+	<ModulePrefs title="Find a Roomie - GGE" description="This app compares your attributes with your friend of friends attributes to recommend to you some possible room mates" author="Matheus Ricardo Uihara Zingarelli">
 		<Require feature="opensocial-0.8"/>
 	</ModulePrefs>
 	<Content type="html">
 		<![CDATA[
 			<script type="text/javascript">
-				//creates trim function for javascript Strings. Removes whitespaces
+				//removes whitespaces
 				String.prototype.trim = function () {
 					return this.replace(/^\s*/, "").replace(/\s*$/, "");
-				}				
+				}
+
+				//removes HTML entities from a string
+				String.prototype.clean = function(){
+					return this.replace(/&#[0-9]+;/g,"");
+				}
 				
 				//for the current user, this will list all the friends s/he has
 				function loadFriends() {
@@ -33,7 +38,7 @@
 					
 					//verify if any error occurred
 					if(data.get('viewerFriends').hadError()){
-						alert("Error loading friends: " + data.get('viewerFriends').getErrorCode());
+						console.log("Error loading friends: " + data.get('viewerFriends').getErrorCode());
 					}else{					
 						//get data
 						var viewerFriends = data.get('viewerFriends').getData();
@@ -66,7 +71,7 @@
 				function onLoadFriendsofFriends(data){
 					//verify if any error occurred
 					if(data.get('friendOfFriends').hadError()){
-						alert("Error loading FoF: " + data.get('friendOfFriends').getErrorCode());
+						console.log("Error loading FoF: " + data.get('friendOfFriends').getErrorCode());
 					}else{					
 						//get data
 						var friendOfFriends = data.get('friendOfFriends').getData();
@@ -104,7 +109,6 @@
 						opensocial.Person.Field.TV_SHOWS,
 						opensocial.Person.Field.MOVIES,
 						opensocial.Person.Field.FOOD,
-						opensocial.Person.Field.STATUS,
 						opensocial.Person.Field.TURN_ONS,
 						opensocial.Person.Field.TURN_OFFS,
 						opensocial.Person.Field.ROMANCE];
@@ -123,9 +127,10 @@
 					//TODO: outra alternativa é transformar tudo em strings e fazer um search por substring (http://www.plus2net.com/javascript_tutorial/string-search.php)
 					
 					if(data.get('viewer').hadError()){
-						alert("Error loading viewer: " + data.get('viewer').getErrorCode());
+						console.log("Error loading viewer: " + data.get('viewer').getErrorCode());
 					}else if(data.get('FoFData').hadError()){
 						//if a error occurred, possibly the user doesn't have the gadget installed on his/her profile
+						console.log("Error loading FoF data: " + data.get('FoFData').getErrorMessage());
 					}else{
 						match = 0;
 												
@@ -135,28 +140,25 @@
 						
 						//debug
 						html = new Array();
-						html.push('Você: <img src="', viewer.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', viewer.getDisplayName(), '<br />');
-						html.push('Perfil em análise:  <img src="', FOFData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', FOFData.getDisplayName(), '<br />');
-						html.push('<br /><br /><strong>Matches</strong><br />');
+						html.push('<strong>Perfil em análise</strong><br /><img src="', FOFData.getField(opensocial.Person.Field.THUMBNAIL_URL), '" />&nbsp;', FOFData.getDisplayName(), '<br />');
+						html.push('<br /><strong>Matches</strong><br />');
 						
 						//verify if they are the same person (current user is also a FoF of a friend)
 						if(FOFData.getId() != viewer.getId()){
-							//match location
-							var addressFOF = FOFData.getField(opensocial.Person.Field.CURRENT_LOCATION);
-							var addressUser = viewer.getField(opensocial.Person.Field.CURRENT_LOCATION);
-
 							//match gender
 							if(FOFData.getField(opensocial.Person.Field.GENDER) != null && viewer.getField(opensocial.Person.Field.GENDER) != null){
 								//users with the same gender are ranked better
 								if(FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() == viewer.getField(opensocial.Person.Field.GENDER).getDisplayValue()){
-									match += 2;
-									alert("Match gender + 2");
-									html.push('Gender recebeu matching:', FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() ,'<br />');
+									match += 2;								
+									html.push('Sexo: ', FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() ,' (+2)<br />');
+									//debug
+									//console.log("Match gender + 2");
 								}
 								else{
 									match++;
-									alert("Match gender + 1");
-									html.push('Gender não deu matching:', FOFData.getField(opensocial.Person.Field.GENDER).getDisplayValue() ,'<br />');
+									html.push('Sexo: male/female<br />');
+									//debug
+									//console.log("Match gender + 1");
 								}								
 							}
 							
@@ -164,15 +166,15 @@
 							if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null && viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) != null){
 								if(FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) == viewer.getField(opensocial.Person.Field.RELATIONSHIP_STATUS)){
 									match++;
-									
+									html.push('Estado Civil: ', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
 									//debug
-									alert("Match estado civil: " + FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS));
-									
-									html.push('Estado Civil recebeu matching:', FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS) ,'<br />');
+									//console.log("Match estado civil: " + FOFData.getField(opensocial.Person.Field.RELATIONSHIP_STATUS));
 								}
 							}								
 							
-							//match address
+							//match location
+							var addressFOF = FOFData.getField(opensocial.Person.Field.CURRENT_LOCATION);
+							var addressUser = viewer.getField(opensocial.Person.Field.CURRENT_LOCATION);
 							if(addressFOF != null && addressUser != null){
 								//verify City (locality)
 								if(addressFOF.getField(opensocial.Address.Field.LOCALITY) != null && addressUser.getField(opensocial.Address.Field.LOCALITY) != null){
@@ -181,16 +183,19 @@
 										if(addressFOF.getField(opensocial.Address.Field.REGION) != null && addressUser.getField(opensocial.Address.Field.REGION) != null){
 											if(addressFOF.getField(opensocial.Address.Field.REGION) == addressUser.getField(opensocial.Address.Field.REGION)){
 												//same state, match found
-												match += 2;
+												match++;
+												html.push('Estado: ', addressFOF.getField(opensocial.Address.Field.REGION) ,'<br />');
 												//debug
-												alert("Match estado + 2");
+												//console.log("Match estado + 2");
 											}
 										}
 									}
 									else{
 										//same city, match found
-										match += 3;
-										alert("Match estado + 3");
+										match += 2;
+										html.push('Cidade: ', addressFOF.getField(opensocial.Address.Field.LOCALITY) ,' (+2)<br />');
+										//debug
+										//console.log("Match estado + 3");
 									}//state
 								}//city
 							}//address not null
@@ -199,7 +204,7 @@
 							var languagesFOF = FOFData.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
 							var languagesUser = viewer.getField(opensocial.Person.Field.LANGUAGES_SPOKEN);
 							if(languagesFOF != null && languagesUser != null){
-								match = match + compareArrays(languagesFOF, languagesUser);
+								match = match + compareArrays(languagesFOF, languagesUser, 'Idiomas: ', html);
 							}
 							
 							//match humor -- strings
@@ -208,7 +213,7 @@
 							if(humorFOF != null && humorUser != null){
 								var FOFArray = humorFOF.split(",");
 								var userArray = humorUser.split(",");
-								match += compareArrays(FOFArray, userArray);
+								match += compareArrays(FOFArray, userArray, 'Humor: ', html);
 							}
 							
 							//match fashion -- strings
@@ -217,77 +222,77 @@
 							if(fashionFOF != null && fashionUser != null){
 								var FOFArray = fashionFOF.split(",");
 								var userArray = fashionUser.split(",");
-								match += compareArrays(FOFArray, userArray);
+								match += compareArrays(FOFArray, userArray, 'Estilo de vestir: ', html);
 							}
 							
 							//match interests -- array
 							var interFOF = FOFData.getField(opensocial.Person.Field.INTERESTS);
 							var interUser = viewer.getField(opensocial.Person.Field.INTERESTS);
 							if(interFOF != null && interUser != null){
-								match = match + compareArrays(interFOF, interUser);
+								match = match + compareArrays(interFOF, interUser, 'Interesses: ', html);
 							}
 
 							//match sports -- array
 							var sportsFOF = FOFData.getField(opensocial.Person.Field.SPORTS);
 							var sportsUser = viewer.getField(opensocial.Person.Field.SPORTS);
 							if(sportsFOF != null && sportsUser != null){
-								match = match + compareArrays(sportsFOF, sportsUser);
+								match = match + compareArrays(sportsFOF, sportsUser, 'Esportes: ', html);
 							}
 							
 							//match activities -- array
 							var activFOF = FOFData.getField(opensocial.Person.Field.ACTIVITIES);
 							var activUser = viewer.getField(opensocial.Person.Field.ACTIVITIES);
 							if(activFOF != null && activUser != null){
-								match = match + compareArrays(activFOF, activUser);
+								match = match + compareArrays(activFOF, activUser, 'Atividades: ', html);
 							}
 							
 							//match books -- array
 							var bookFOF = FOFData.getField(opensocial.Person.Field.BOOKS);
 							var bookUser = viewer.getField(opensocial.Person.Field.BOOKS);
 							if(bookFOF != null && bookUser != null){
-								match = match + compareArrays(bookFOF, bookUser);
+								match = match + compareArrays(bookFOF, bookUser, 'Livros: ', html);
 							}
 							
 							//match music -- array
 							var musicFOF = FOFData.getField(opensocial.Person.Field.MUSIC);
 							var musicUser = viewer.getField(opensocial.Person.Field.MUSIC);
 							if(musicFOF != null && musicUser != null){
-								match = match + compareArrays(musicFOF, musicUser);
+								match = match + compareArrays(musicFOF, musicUser, 'Música: ', html);
 							}
 							
 							//match tv shows -- array
 							var tvFOF = FOFData.getField(opensocial.Person.Field.TV_SHOWS);
 							var tvUser = viewer.getField(opensocial.Person.Field.TV_SHOWS);
 							if(tvFOF != null && tvUser != null){
-								match = match + compareArrays(tvFOF, tvUser);
+								match = match + compareArrays(tvFOF, tvUser, 'Programas de TV: ', html);
 							}
 							
 							//match movies -- array
 							var movieFOF = FOFData.getField(opensocial.Person.Field.MOVIES);
 							var movieUser = viewer.getField(opensocial.Person.Field.MOVIES);
 							if(movieFOF != null && movieUser != null){
-								match = match + compareArrays(movieFOF, movieUser);
+								match = match + compareArrays(movieFOF, movieUser, 'Filmes: ', html);
 							}
 							
 							//match food -- array
 							var foodFOF = FOFData.getField(opensocial.Person.Field.FOOD);
 							var foodUser = viewer.getField(opensocial.Person.Field.FOOD);
 							if(foodFOF != null && foodUser != null){
-								match = match + compareArrays(foodFOF, foodUser);
+								match = match + compareArrays(foodFOF, foodUser, 'Comida: ', html);
 							}							
 							
 							//match turns on -- array
 							var tONFOF = FOFData.getField(opensocial.Person.Field.TURN_ONS);
 							var tONUser = viewer.getField(opensocial.Person.Field.TURN_ONS);
 							if(tONFOF != null && tONUser != null){
-								match = match + compareArrays(tONFOF, tONUser);
+								match = match + compareArrays(tONFOF, tONUser, 'O que me atrai: ', html);
 							}		
 							
 							//match turns off -- array
 							var tOFF_FOF = FOFData.getField(opensocial.Person.Field.TURN_OFFS);
 							var tOFFUser = viewer.getField(opensocial.Person.Field.TURN_OFFS);
 							if(tOFF_FOF != null && tOFFUser != null){
-								match = match + compareArrays(tOFF_FOF, tOFFUser);
+								match = match + compareArrays(tOFF_FOF, tOFFUser, 'Do que não gosto: ', html);
 							}		
 							
 							//match romance -- strings
@@ -296,77 +301,75 @@
 							if(romanceFOF != null && romanceUser != null){
 								var FOFArray = romanceFOF.split(",");
 								var userArray = romanceUser.split(",");
-								match += compareArrays(FOFArray, userArray);
+								match += compareArrays(FOFArray, userArray, 'Par perfeito: ', html);
 							}
-							
-							//match status -- array
-							
+														
 							//match about me
 							var aboutFOF = FOFData.getField(opensocial.Person.Field.ABOUT_ME);
 							var aboutUser = viewer.getField(opensocial.Person.Field.ABOUT_ME);
-							if(aboutFOF != null && aboutUser != null){
-								 
-							//find substring related to university
-							//var univFOFStart = aboutFOF.search(/Universidade:/i) + 13;
-							//var univFOFStop = aboutFOF.search(";;");
-							//var courFOFStart = aboutFOF.search(/Curso:/i) + 13;
-							//alert(aboutFOF.match(/Universidade: [\S\s]*;/i));
-							alert(aboutFOF.substring(aboutFOF.search(/Universidade:/i),aboutFOF.search(/Curso:/i)).trim());
-							
-							//find separator
-							//find substring related to course
-							//find separator
+							if(aboutFOF != null && aboutUser != null){								 
+								//find substring related to university							
+								var univFOF = aboutFOF.substring(aboutFOF.search(/Universidade:/i) + 14, aboutFOF.search(/Curso:/i)).clean().trim();
+								var univUser = aboutUser.substring(aboutUser.search(/Universidade:/i) + 14, aboutUser.search(/Curso:/i)).clean().trim();
+								if(univFOF != null && univUser != null && univFOF.trim() == univUser.trim()){
+									match += 2;
+									html.push('Universidade: ' + univFOF + ' (+2)<br />');
+									//debug									
+									//console.log("Match same university");
+								}
+								
+								//find substring related to course
+								var courseFOF = aboutFOF.substring(aboutFOF.search(/Curso:/i) + 7, aboutFOF.search(/%/)).clean().trim();
+								var courseUser = aboutUser.substring(aboutUser.search(/Curso:/i) + 7, aboutUser.search(/%/)).clean().trim(); 
+								if(courseFOF != null && courseUser != null && courseFOF.trim() == courseUser.trim() ){
+									//users from the same course have a better rank
+									match += 3;
+									html.push('Curso: ' + univFOF + ' (+3)<br />');
+									//debug
+									//console.log("Match same course");
+								}
 							}
 							
-							html.push('<br /><br />Número de matches: ', match);
-							document.getElementById('match').innerHTML = html.join('');							
+							html.push('<br /><br /><strong>Número de matches: </strong>', match, '<hr />');
+							document.getElementById('match').innerHTML += html.join('');							
 						}//same person
 					}//get data										
 				}//function
 				
 				//compare data inside arrays
-				function compareArrays(FoF, user){
-					//debug
-					//alert(FoF);
-					//alert(user);
-				
-					//verificar se for nulo
-				
+				function compareArrays(FoF, user, type, html){				
 					var num = 0; //stores the matches found within these arrays
 					for(var i = 0; i < FoF.length; i++){						
 						//for each element, compares it with the elements of user
 						var j = 0;
 						var FoFData = FoF[i].toString();
-						FoFData = FoFData.trim().toUpperCase();
-						
-						//debug
-						//alert (FoFData)
+						FoFData = FoFData.trim().toLowerCase();
 						
 						for(var j = 0; j < user.length; j++){
 							var userData = user[j].toString();
-							userData = userData.trim().toUpperCase()
-							//debug
-							//alert(userData);
+							userData = userData.trim().toLowerCase()
 							if(FoFData == userData){ //match found
 								num++;
-								//debug
-								//alert("Match! " + FoFData);
+								html.push(type + FoFData ,'<br />');
 								break;
 							}
 						}
-					}					
+					}
 					return num;
 				}
-							
+
 				//initiates the gadget's operation
 				function init() {
-					loadFriends();
+					loadFriends();			
+					var t = setTimeout("document.getElementById('loading').innerHTML = ''", 25000);
 					//findDates();
 				}
 
 				//this is the starting point of the gadget's operation
 				gadgets.util.registerOnLoadHandler(init);
 			</script>
+			
+			<div id='loading'><img src="http://tests-zingarelli.googlecode.com/files/loading-small.gif" alt="Carregando dados" title="Carregando dados" />Carregando...<br /></div>
 			<div id='main'>				
 				<div id='match'></div>
 			</div>
