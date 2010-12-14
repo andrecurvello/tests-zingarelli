@@ -30,6 +30,9 @@ int main(int argc, char** argv){
              //Grab the next frame from the AVI file and set a pointer to it
              frame = cvQueryFrame(g_capture);
              if(!frame) break;
+             //update trackbar position - WARNING: that causes a delay on the movie - dunno why
+             //g_slider_position++;
+             //cvSetTrackbarPos("Position", "Example2", g_slider_position);
              cvShowImage("Example2", frame);
              //Wait 33ms in case the user "stops" the video (ESC key)
              char c = cvWaitKey(33);
