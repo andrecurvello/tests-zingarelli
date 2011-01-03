@@ -1,0 +1,82 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	text-align:center;
+	width:810px;
+	margin:0 auto;
+}
+
+h1{
+	font-family:Verdana,Geneva,Tahoma,sans-serif;
+	font-weight:normal;
+	font-size:xx-large;}
+
+h2{
+	font-family:Verdana,Geneva,Tahoma,sans-serif;
+    font-size:large;
+    font-weight:normal;
+	margin:10px auto 0;
+}
+
+h3{
+	margin:25px 0 0;
+}
+
+p{
+	text-indent:25px;
+	margin:5px 0 0;
+}
+
+ul{margin:5px 10px 0;}
+
+#main-top{	
+	background:url(../img/top.jpg) top center no-repeat;
+	height:220px;
+}
+
+#top-container{
+	left:75px;
+    position: relative;
+    top:40px;
+}
+
+#main-inner{
+	background:url(../img/inner.jpg) top center repeat-y;
+	min-height:450px;
+	padding:10px 0 40px;
+	position:relative;
+	z-index:50;
+}
+
+#inner-sidebar{
+	position:relative;
+	float:right;
+	left:47px;
+}
+
+#inner-sidebar img{
+	position:relative;
+	z-Index:10;
+	margin:4px 0;
+}
+
+#inner-sidebar img.selected{
+	position:relative;
+	z-Index:100;
+}
+
+#sidebar-geral{background:url(../img/dados-tab.jpg)}
+
+#inner-text{
+	left:85px;
+    position:relative;
+    text-align:left;
+    top:25px;
+    width:76%;
+}
+
+#main-bottom{
+	background:url(../img/bottom.jpg) top center no-repeat;
+	height:14px;
+}
