@@ -1,0 +1,98 @@
+@charset "utf-8";
+/*
+* Designed by: Matheus Ricardo Uihara Zingarelli
+* Date: January, 2011
+* E-mail: zingarelli.m@gmail.com
+*
+* Last change date: January, 2011
+* By: Matheus Ricardo Uihara Zingarelli
+*/
+
+/*######## START CSS RESET ########*/
+html{
+	margin:0;
+	padding:0;
+}
+p, h1, h2, h3, h4, h5, h6, ul, li, ol{margin:0; font-weight:normal; font-size:medium}
+a{outline:none; text-decoration:none;}
+a:hover{text-decoration:underline;}
+/*######## STOP CSS RESET ########*/ 
+
+body{
+	text-align:center;
+	width:800px;
+	margin:25px auto;
+}
+
+h1{
+	font-family:Arial, Arial, Helvetica, sans-serif;
+	font-size:80px;
+	font-weight:bold;
+}
+
+h2{
+    font-family: Verdana,Geneva,sans-serif;
+    font-size: x-large;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+p{
+	font-family:Verdana, Geneva, sans-serif;
+	font-size:medium;
+	text-indent:25px;
+	margin-bottom:10px;
+}
+
+a img{border:none;}
+
+#content{border:2px solid;}
+
+#header{
+	background-color:#FF0;
+	height:200px;
+}
+
+#header-content{
+	position: relative;
+    top: 5px;
+}
+
+.rapida{
+	color:#F00;
+	font-style:italic;
+}
+
+#container{
+	background:url(../img/bg.png) repeat-x;
+    min-height: 375px;	
+}
+
+#container-text {
+    left: 40px;
+    position: relative;
+    text-align: justify;
+    top: 55px;
+    width: 450px;
+}
+
+#container-atelie {
+    margin: auto 130px;
+    position: relative;
+    text-align: justify;
+    top: 30px;
+}
+
+#atelie-button {
+    left: 520px;
+    position: relative;
+    top: -230px;
+    width: 235px;
+}
+
+#footer{
+	font-size:small;
+	text-align:right;
+	margin-right:10px;
+}
