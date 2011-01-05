@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<url>
+		<loc>http://www.carmoconfeccoes.com.br/</loc>
+		<lastmod>2009-08-11</lastmod>
+		<changefreq>monthly</changefreq>
+	</url>
+	<url>
+		<loc>http://www.carmoconfeccoes.com.br/index.html</loc>
+		<lastmod>2009-08-11</lastmod>
+		<changefreq>monthly</changefreq>
+	</url>
+	<url>
+		<loc>http://www.carmoconfeccoes.com.br/contato.html</loc>
+		<lastmod>2009-08-11</lastmod>
+		<changefreq>monthly</changefreq>
+	</url>
+	<url>
+		<loc>http://www.carmoconfeccoes.com.br/fotos.html</loc>
+		<lastmod>2009-08-11</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+</urlset>

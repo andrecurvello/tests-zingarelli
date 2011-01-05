@@ -1,0 +1,121 @@
+/*
+* Designed by: Matheus Ricardo Uihara Zingarelli
+* Date: June, 2009
+* E-mail: zingarelli.m@gmail.com
+*
+* Last change date: August, 2010
+* By: Matheus Ricardo Uihara Zingarelli
+*/
+
+/*######## START CSS RESET ########*/
+html{
+	margin:0;
+	padding:0;
+}
+p, h1, h2, h3, h4, h5, h6, ul, li, ol{margin:0; font-weight:normal; font-size:medium}
+/*######## STOP CSS RESET ########*/ 
+
+/*######## START GENERAL CSS ########*/
+body{text-align:center;color:#432d1d;}
+
+h1{
+	font-size:28px;
+	font-weight:bold;
+	text-align:center;
+}
+
+h2{
+	font-size:24px;
+	font-weight:bold;
+	margin-top:15px;
+	text-align:center;
+}
+
+h3{
+	font-size:22px;
+	font-weight:bold;
+	margin:40px auto 15px;
+}
+
+h4{font-size:13px;}
+
+p{
+	font-size:16px;
+	font-weight:bold;
+	text-indent:20px;
+	font-family:Verdana, Geneva, sans-serif;
+	margin-top:6px;
+}
+
+li
+{
+	font-size:16px;
+	font-family:Verdana, Geneva, sans-serif;	
+	margin-top:5px;
+}
+
+/*######## STOP GENERAL CSS ########*/
+/*######## START SPECIFIC CSS ########*/
+div#header{width:800px; margin:0 auto;}
+
+div#container{
+	/*background:url(img/main-fundo.jpg);*/
+	background:url(../img/bg.jpg) repeat-x;
+	border:thin #432d1D solid;
+	width:787px;
+	margin:0 auto;
+}
+
+div#footer{
+	border-top:thin #432D1D dotted;
+	padding:10px 0;
+}
+
+div#main-content{
+	float:left;
+	left:50px;
+	position:relative;
+	top:100px;
+	width:335px;
+	text-align:justify;
+}
+
+div#main-title{margin-bottom:25px;}
+
+#main-photo{
+	left:50px;
+	position:relative;
+	top:10px;
+	margin-bottom:20px;
+}
+
+div#contato-content{
+	margin:0 auto;
+	text-align:justify;
+	width:480px;
+	margin:50px auto;
+}
+
+div#est-content{margin: 25px;height:800px}
+
+div#est-left{
+	float:left;
+	margin:auto 25px;
+	text-align:left;
+	width:300px;
+}
+div#est-right{
+	float:right;
+	width:360px;
+	margin-top:40px;
+}
+
+div#est-right img{
+	border: medium solid #432d1d;
+	margin:15px auto;
+}
+
+div#map{margin-top:50px;}
+
+div#map iframe{border: medium solid #432d1d;}
+/*######## STOP SPECIFIC CSS ########*/
