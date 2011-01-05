@@ -3,7 +3,7 @@
 * Date: June, 2009
 * E-mail: zingarelli.m@gmail.com
 *
-* Last change date: August, 2010
+* Last change date: January, 2011
 * By: Matheus Ricardo Uihara Zingarelli
 */
 
@@ -69,6 +69,14 @@ div#container{
 div#footer{
 	border-top:thin #432D1D dotted;
 	padding:10px 0;
+}
+
+#webdeveloper{    
+	font-size: small;
+    margin: 0 auto;
+    padding-right: 25px;
+    text-align: right;
+    width: 800px;
 }
 
 div#main-content{
