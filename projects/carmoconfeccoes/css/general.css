@@ -34,6 +34,11 @@ a:hover{text-decoration:underline;}
 *.left{float:left;}
 *.right{float:right;}
 *.bold{font-weight:bold;}
+*.small{
+	font-size: x-small;
+    margin-top: 5px;
+    text-align: right;
+}
 /*######## STOP GENERAL CSS ########*/
 
 /*######## START CONTAINER ########*/
