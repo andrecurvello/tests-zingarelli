@@ -1,1 +1,0 @@
-<div id="webdeveloper">Site criado por: <a href="http://www.icmc.usp.br/~zinga" title="Página do desenvolvedor do site">Matheus Zingarelli</a></div>
