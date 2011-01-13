@@ -54,6 +54,8 @@ li
 	margin-top:5px;
 }
 
+.red{color:red;}
+
 /*######## STOP GENERAL CSS ########*/
 /*######## START SPECIFIC CSS ########*/
 div#header{width:800px; margin:0 auto;}
@@ -102,6 +104,15 @@ div#contato-content{
 	text-align:justify;
 	width:480px;
 	margin:50px auto;
+}
+
+#contato label{
+	width:8em;
+	float:left;
+}
+
+#contato input{
+	margin-left:0.5em;
 }
 
 div#est-content{margin: 25px;height:800px}
