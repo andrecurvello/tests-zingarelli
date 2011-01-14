@@ -1,12 +1,27 @@
+/*
+* Designed by: Matheus Ricardo Uihara Zingarelli
+* Date: January, 2011
+* E-mail: zingarelli.m@gmail.com
+*
+* Last change date: January, 2011
+* By: Matheus Ricardo Uihara Zingarelli
+*/
 @charset "utf-8";
 /* CSS Document */
 
-/* Geral */
-html{background-color:#DFFDFF;}
+/* 
+-- Colors --
+body: #4bc74e
+body-content: #64dd67
+link: #c3ebac
+text: #014603
+search: #e1f4c3
+*/
 
+/* Geral */
 body{
-	min-width:1024px;
-	margin:20px;
+	width:1000px;
+	margin:20px auto;
 }
 
 p{margin:5px 5px 0 0;}
@@ -19,13 +34,8 @@ h1{
 	text-align:center;
 }
 
-a{
-	outline:none;
-	text-decoration:none;
-}
-a:LINK{color:blue;}
-a:HOVER{text-decoration:underline;}
-a:VISITED{color:blue;}
+a{outline:none; text-decoration:none; color:#c3ebac}
+a:hover{text-decoration:underline;}
 
 strong{font-weight:bold;}
 em{font-style:italic;}
@@ -37,119 +47,15 @@ hr{width:70%;}
 *.clear{clear:both;}
 *.small{font-size:small;}
 
-/* Header */
-div#header{
-	height:160px;
-}
-
-div#logo{
-	float:left;
-	margin:10px 10px 10px 100px;
-}
-
-div#login{
-	float:right;
-	margin:10px 20px;
-	text-align:right;
-	width:220px;
-}
-
-div#login-main{
-	text-align:right;
-	margin-right:20px;
-}
-
-div#login-main img{cursor:pointer; margin-right:3px;}
-
-div#login-sub{text-align:left;}
-
 /* Container */
-div#container{
-	height:500px;
-	border:thin solid black;
+#container{
+	background:#4bc74e;
+	width:989px;
+	margin:0 auto;
 }
+#container-top{background:url(../img/body-top.png) no-repeat top center; height:22px;}
 
-/* Área de Busca */
-div#left-bar{
-	float:left;
-	width: 25%;
-	border-right:thin solid black;
-	height:inherit;
-}
+/* Header */
 
-div.search{margin: 30px 5px;}
-
-input#keysearch{width:65%;}
-
-/* Área de conteúdo */
-div#content{
-	float:right;
-	width:74%;
-	height:inherit;
-}
-
-div#empty-search{margin:75px;}
-
-/* Resultados da busca */
-div#content-list{
-	width:45%;
-	overflow:auto;
-	height:inherit;
-	border-right:thin solid black;
-}
-
-div#content-list li{
-	padding:10px 0;
-	border-top:thin dotted black;
-	min-height:70px;
-	margin:auto 5px;
-}
-
-*.photo{margin:0 8px 5px 0;}
-
-img.arrow-details{cursor:pointer;}
-
-
-/* Detalhes do fornecedor */
-div#content-details{
-	width:54%;
-	overflow:auto;
-	height:inherit;
-}
-
-div#content-details hr{margin:20px auto;}
-
-div#content-details h1{text-align:left;}
-
-div.inner-content{margin:0 10px;}
-
-div#details-empty{margin:50px 20px 0;}
-
-div.error-message{
-	border:medium solid red;
-	margin:10px 0;
-	padding:5px 5px;
-}
-
-img.avaliar{cursor:pointer;}
-
-div#photo-gallery{
-	border:thin dotted black;
-	height:60px;
-	text-align:center;
-}
-
-div#photo-gallery img{
-	border: thin solid black;
-	margin:5px;
-}
-
-div#comments{
-	border:thin solid black;
-	padding:10px;
-	margin-bottom:10px;
-}
-
-div#comments div{padding:10px 0;}
-
-div.inner-comment{border-bottom:thin solid black;}
+/* Footer */
+#footer{background:url(../img/body-bottom.png) no-repeat top center; height:187px;}
