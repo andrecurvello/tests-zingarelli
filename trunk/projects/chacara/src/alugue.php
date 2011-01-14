@@ -36,14 +36,12 @@
             //http://www.phpbuilder.com/columns/ian_gilfillan20060412.php3?page=1
             if(isset($_POST["enviar"])){
                 //send email
-                $to = "alugue@chacarazingarelli.com.br";
+                $to = "thesolitaryreader@gmail.com";
                 $subject = "Mensagem postada pelo site";
                 $telephone = $_POST["telefone"];
-                $message = $_POST["mensagem"] . " Telefone: $telephone";
-                $email = $_POST["email"]; //testar se for em branco
-                
-				echo $message;
-				
+                $email = $_POST["email"];
+                $message = $_POST["mensagem"] . " Telefone: $telephone. Email: $email";
+                				
                 function is_valid_email($email) {		
                     return preg_match('#^[a-z0-9.!\#$%&\'*+-/=?^_`{|}~]+@([0-9.]+|([^\s]+\.+[a-z]{2,6}))$#si', $email);
                 }
@@ -61,20 +59,26 @@
         
                     foreach($bad_strings as $bad_string) {
                         if(eregi($bad_string, strtolower($str_to_test))) {
-                        //possible attack caught                        
-						mail($to, "Possível ataque recebido no site", "A seguinte mensagem foi marcada como alvo de possível ataque $str_to_test");
-						echo '<p class=\'red\'>Desculpe, mas sua mensagem foi filtrada como tentativa de ataque ou spam. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
-						include 'footer.php';
-						echo'</div>';
-						include 'webdeveloper.php';
-                        exit;
+							//possible attack caught              
+							$to = "thesolitaryreader@gmail.com";
+							$subject = "Possível ataque recebido no site";
+							$message = "Pega na filtragem do contains_bad_str";
+							mail($to, $subject, $message);
+							echo '<p class=\'red\'>Desculpe, mas sua mensagem foi filtrada como tentativa de ataque ou spam. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
+							include 'footer.php';
+							echo'</div>';
+							include 'webdeveloper.php';
+							exit;
                         }
                     }
                 }
         
                 function contains_newlines($str_to_test) {
                     if(preg_match("/(%0A|%0D|\\n+|\\r+)/i", $str_to_test) != 0) {
-                        mail($to, "Possível ataque recebido no site", "A seguinte mensagem foi marcada como alvo de possível ataque $str_to_test");
+                        $to = "thesolitaryreader@gmail.com";
+						$subject = "Possível ataque recebido no site";
+						$message = "Pega na filtragem do contains_newlines";
+						mail($to, $subject, $message);
 						echo '<p class=\'red\'>Desculpe, mas sua mensagem foi filtrada como tentativa de ataque ou spam. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
 						include 'footer.php';
 						echo'</div>';
@@ -84,7 +88,10 @@
                 } 
         
                 if($_SERVER['REQUEST_METHOD'] != "POST"){
-                    mail($to, "Possível ataque recebido no site", "Houve uma tentativa de enviar request sem post");
+                    $to = "thesolitaryreader@gmail.com";
+					$subject = "Possível ataque recebido no site";
+					$message = "Houve uma tentativa de enviar request sem post";
+					mail($to, $subject, $message);
                     exit;
                 }
         
@@ -107,8 +114,7 @@
                 contains_newlines($telephone);
                 
                 //send email
-                $headers = "From: $email";
-                if (mail($to, $subject, $message, $headers)){
+                if (mail($to, $subject, $message)){
 					echo '<p>Sua mensagem foi enviada, obrigado!</p>';
 				}
 				else{
