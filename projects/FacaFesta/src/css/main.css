@@ -10,28 +10,29 @@
 /* CSS Document */
 
 /* 
--- Colors --
+-- COLORS --
 body: #4bc74e
 body-content: #64dd67
 link: #c3ebac
 text: #014603
 search: #e1f4c3
+search-text: #dedede
 */
 
-/* Geral */
+/* GERAL */
 body{
 	width:1000px;
 	margin:20px auto;
+	font-family:Verdana, Geneva, sans-serif;
+	color:#014603;
 }
 
-p{margin:5px 5px 0 0;}
+p,label{margin:5px 5px 0 0;}
 
 h1{
-	font-family:verdana;
-	font-size:22px;
-	font-weight:bold;
-	margin:20px 5px 10px;
-	text-align:center;
+	font-size: 167%;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 a{outline:none; text-decoration:none; color:#c3ebac}
@@ -45,9 +46,10 @@ hr{width:70%;}
 *.left{float:left;}
 *.right{float:right;}
 *.clear{clear:both;}
-*.small{font-size:small;}
+*.small{font-size:93%;}
+*.very-small{font-size:85%;}
 
-/* Container */
+/* CONTAINER */
 #container{
 	background:#4bc74e;
 	width:989px;
@@ -55,7 +57,58 @@ hr{width:70%;}
 }
 #container-top{background:url(../img/body-top.png) no-repeat top center; height:22px;}
 
-/* Header */
+/* HEADER */
+#header{height:195px;}
+#header img{margin-left:60px;}
+#menu{
+	font-size:116%;
+	font-weight:bold;
+	margin-right:25px;
+	text-align:right;}
+#menu-main li{display:inline;}
+#menu input{font-size:85%;margin-bottom:5px;}
+#menu-logged, #menu-logged-sub{text-align:left;margin:5px 10px 0 0;}
 
-/* Footer */
+/* SEARCH */
+#search-bar{
+	background:#e1f4c3;
+	padding: 5px 0;
+	margin-bottom:10px;
+}
+#search-bar label{font-size:161.6%;margin-left:5px}
+#search-bar input, #search-bar select{height:30px;font-size:153.9%}
+/*IE 8 hack*/
+#search-bar select{position:relative;top:3px\0/;}
+
+/* CONTENT */
+#content{
+	background:#64dd67;
+	margin: 0 auto;
+    width: 977px;
+}
+#content-top{background:url(../img/inner-top.png) no-repeat top center;height:26px;}
+#content-bottom{background:url(../img/inner-bottom.png) no-repeat top center;height:28px;}
+#content-welcome{
+	font-size: 123.1%;
+    margin: 0 auto;
+    text-align: justify;
+    text-indent: 30px;
+    width: 500px;
+	padding:50px;
+}
+
+/* FOOTER */
 #footer{background:url(../img/body-bottom.png) no-repeat top center; height:187px;}
+#footer ul{position:relative;top:10px;}
+#footer li{
+	display: inline;
+    font-size: 100%;
+	font-weight:bold;
+    margin-right: 5px;
+}
+#footer p{
+    left: -25px;
+    position: relative;
+    text-align: right;
+    top: 145px;
+}
