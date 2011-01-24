@@ -55,7 +55,7 @@ hr{width:70%;}
 	width:989px;
 	margin:0 auto;
 }
-#container-top{background:url(../img/body-top.png) no-repeat top center; height:22px;}
+#container-top{background:url(../img/body-top.png) no-repeat top center; height:22px;margin:0 auto;}
 
 /* HEADER */
 #header{height:195px;}
@@ -67,7 +67,7 @@ hr{width:70%;}
 	text-align:right;}
 #menu-main li{display:inline;}
 #menu input{font-size:85%;margin-bottom:5px;}
-#menu-logged, #menu-logged-sub{text-align:left;margin:5px 10px 0 0;}
+#menu-logged-main, #menu-logged-sub{text-align:left;margin:5px 10px 0 0;}
 
 /* SEARCH */
 #search-bar{

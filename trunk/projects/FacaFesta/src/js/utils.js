@@ -1,78 +1,101 @@
-// JavaScript Document
-$(document).ready(function(){
-	//esconde o menu de opcoes para usuario logado
-	$("#login-sub").hide();
-	//esconde a imagem de flecha para voltar no menu de opcoes de usuario logado
-	$(".arrow-left").hide();
-	//esconde o conteudo de detalhes de um fornecedor
-	$(".inner-content-1").hide();
-	$(".inner-content-2").hide();
-	//esconde as mensagens de erro de usuario nao logado
-	$(".error-message").hide();
-	//faz animacao das flechas em login e lista de resultados
-	$("img.arrow-details").hover(
-		function(){$(this).attr("src", "img/arrow-right-selected.png");},
-		function(){$(this).attr("src", "img/arrow-right.png");}
-	);
-	$("img.arrow-right").hover(
-		function(){$(this).attr("src", "img/arrow-right-selected.png");},
-		function(){$(this).attr("src", "img/arrow-right.png");}
-	);
-	$("img.arrow-left").hover(
-		function(){$(this).attr("src", "img/arrow-left-selected.png");},
-		function(){$(this).attr("src", "img/arrow-left.png");}
-	);
-	//animacao das estrelas para votar
-	$("#star-5").hover(
-		function(){
-			$(this).attr("src","img/star.png");
-			$("#star-4").attr("src","img/star.png");
-			$("#star-3").attr("src","img/star.png");
-			$("#star-2").attr("src","img/star.png");
-			$("#star-1").attr("src","img/star.png");},
-		function(){
-			$(this).attr("src","img/star-empty.png");
-			$("#star-4").attr("src","img/star-empty.png");
-			$("#star-3").attr("src","img/star-empty.png");
-			$("#star-2").attr("src","img/star-empty.png");
-			$("#star-1").attr("src","img/star-empty.png");}
-	);
-	$("#star-4").hover(
-		function(){
-			$(this).attr("src","img/star.png");
-			$("#star-3").attr("src","img/star.png");
-			$("#star-2").attr("src","img/star.png");
-			$("#star-1").attr("src","img/star.png");},
-		function(){
-			$(this).attr("src","img/star-empty.png");
-			$("#star-3").attr("src","img/star-empty.png");
-			$("#star-2").attr("src","img/star-empty.png");
-			$("#star-1").attr("src","img/star-empty.png");}
-	);
-	$("#star-3").hover(
-		function(){
-			$(this).attr("src","img/star.png");
-			$("#star-2").attr("src","img/star.png");
-			$("#star-1").attr("src","img/star.png");},
-		function(){
-			$(this).attr("src","img/star-empty.png");
-			$("#star-2").attr("src","img/star-empty.png");
-			$("#star-1").attr("src","img/star-empty.png");}
-	);		
-	$("#star-2").hover(
-		function(){
-			$(this).attr("src","img/star.png");
-			$("#star-1").attr("src","img/star.png");},
-		function(){
-			$(this).attr("src","img/star-empty.png");
-			$("#star-1").attr("src","img/star-empty.png");}
-	);
-	$("#star-1").hover(
-		function(){$(this).attr("src","img/star.png");},
-		function(){$(this).attr("src","img/star-empty.png");}
-	);	
+/*
+* Created by: Matheus Ricardo Uihara Zingarelli
+* Date: January, 2011
+* E-mail: zingarelli.m@gmail.com
+*
+* Last change date: January, 2011
+* By: Matheus Ricardo Uihara Zingarelli
+*/
+
+$(function(){
+	//hide login form
+	$("#login-form").hide();
+	
+	//hide error from wrong login
+	$("#login-error").hide();
+	
+	//action to be done when login button is pressed
+	$("#login-submit").click(function(){
+		//hide any error previoulsy raised
+		$("#login-error").hide();
+		
+		//get input
+		var username = $("input#username").val();
+		if(username == ""){
+			$("#login-error").show();
+			$("input#username").focus();
+			return false;
+		}
+		
+		var password = $("input#password").val();
+		if(password == ""){
+			$("#login-error").show();
+			$("input#username").focus();
+			return false;
+		}
+		
+		//TODO:verify SQL injection
+		
+		//TODO:encript password
+
+		
+		//send AJAX request
+		var dataString = 'username=' + username + '&password=' + password + 'fromJavascript=yes';
+		//alert(dataString);return false;
+		$.ajax({
+			type: "POST",
+			url: "do_login.php",
+			data: dataString,
+			success: function(data){
+				if(data == 'N'){ //invalid login
+					//show error message
+					$("#login-error").show();
+				}
+				else{
+					//remove error message if any
+					$("#login-error").hide;
+					//hide login menu
+					$("#menu-main").hide();
+					$("#login-form").hide();
+					//display welcome data
+					$("#menu-logged").html(data);
+				}
+			}
+		})
+		
+		//avoid page reload from submit click
+		return false;
+		
+	}); //submit button clicked
 });
 
+//show login form
+function showLogin(){
+	$("#menu-main").hide();
+	$("#login-form").show();
+}
+
+//hide login form
+function hideLogin(){
+	$("#login-form").hide();
+	$("#menu-main").show();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//deprecated
 function toggleMenu(){
 	$("#login-sub").toggle('slow');
 	changeArrow();
