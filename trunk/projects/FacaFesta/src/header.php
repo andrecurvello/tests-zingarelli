@@ -12,12 +12,11 @@
                     <ul id="menu-main">
                         <li><a href="#" title="Clique aqui para se cadastrar no site" >Cadastrar</a></li>
                         <li>|</li>
-                        <li><a href="#" title="Clique aqui para fazer login" onclick="showLogin();">Login</a></li>
+                        <li><a href="#" title="Clique aqui para fazer login" onClick="showLogin();">Login</a></li>
                     </ul>
                     <form id="login-form" name="login-form" method="post" action="do_login.php">
 						<div id="login-error">
 		                   	<p class="error">Usuário ou senha incorretos, por favor, tente novamente.</p>
-	                        <p class="small">(<a href="#" title="Clique aqui caso não se lembre de sua senha">Esqueci minha senha</a>)</p>
                         </div>
                         <label for="username">Usuário:</label>
                         <input type="text" id="username" name="username" size="15" />
@@ -25,7 +24,9 @@
                         <input type="password" id="password" name="password" size="10" />
                         <br />
                         <input type="submit" name="submit" id="login-submit" value="Ok" style="width:60px;"/>
-                        <a href="#" title="Clique aqui para cancelar o login" class="small" onclick="hideLogin();">Cancelar</a>
+                        <a href="#" title="Clique aqui para cancelar o login" class="small" onClick="hideLogin();">Cancelar</a>
+                        <br />
+                        <a href="#" class="small" title="Clique aqui caso não se lembre de sua senha">Esqueci minha senha</a>
                     </form>
                 <?php 
 					}

@@ -34,14 +34,8 @@ $(function(){
 			return false;
 		}
 		
-		//TODO:verify SQL injection
-		
-		//TODO:encript password
-
-		
 		//send AJAX request
-		var dataString = 'username=' + username + '&password=' + password + 'fromJavascript=yes';
-		//alert(dataString);return false;
+		var dataString = 'username=' + username + '&password=' + password + '&fromJavascript=yes';
 		$.ajax({
 			type: "POST",
 			url: "do_login.php",

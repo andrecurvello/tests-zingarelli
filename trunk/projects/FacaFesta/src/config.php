@@ -1,7 +1,9 @@
 <?php
 session_start();
 
-//TODO:use database authentication
-$config_username = 'demo';
-$config_password = 'demo';
+//Database connection
+define("DB_SERVER", "localhost");
+define("DB_USER", "root");
+define("DB_PASS", "admin");
+define("DB_NAME", "facafesta_dev");
 ?>
