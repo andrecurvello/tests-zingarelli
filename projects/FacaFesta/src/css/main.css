@@ -1,4 +1,4 @@
-/*
+ /*
 * Designed by: Matheus Ricardo Uihara Zingarelli
 * Date: January, 2011
 * E-mail: zingarelli.m@gmail.com
@@ -48,6 +48,7 @@ hr{width:70%;}
 *.clear{clear:both;}
 *.small{font-size:93%;}
 *.very-small{font-size:85%;}
+*.error{color:red;}
 
 /* CONTAINER */
 #container{
@@ -68,6 +69,8 @@ hr{width:70%;}
 #menu-main li{display:inline;}
 #menu input{font-size:85%;margin-bottom:5px;}
 #menu-logged-main, #menu-logged-sub{text-align:left;margin:5px 10px 0 0;}
+#login-form{width:400px;}
+#login-error{font-size:77%;margin-bottom:5px;}
 
 /* SEARCH */
 #search-bar{
