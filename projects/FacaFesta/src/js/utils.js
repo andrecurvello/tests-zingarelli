@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Created by: Matheus Ricardo Uihara Zingarelli
 * Date: January, 2011
 * E-mail: zingarelli.m@gmail.com
@@ -15,13 +15,14 @@ $(function(){
 	$("#login-error").hide();
 	
 	//action to be done when login button is pressed
-	$("#login-submit").click(function(){
+	$("#login-form").submit(function(){
 		//hide any error previoulsy raised
 		$("#login-error").hide();
 		
 		//get input
 		var username = $("input#username").val();
 		if(username == ""){
+			$("#login-error").html("<p class=\"error\">Usuário ou senha incorretos, por favor, tente novamente.");
 			$("#login-error").show();
 			$("input#username").focus();
 			return false;
@@ -29,6 +30,7 @@ $(function(){
 		
 		var password = $("input#password").val();
 		if(password == ""){
+			$("#login-error").html("<p class=\"error\">Usuário ou senha incorretos, por favor, tente novamente.");
 			$("#login-error").show();
 			$("input#username").focus();
 			return false;
@@ -43,6 +45,7 @@ $(function(){
 			success: function(data){
 				if(data == 'N'){ //invalid login
 					//show error message
+					$("#login-error").html("<p class=\"error\">Usuário ou senha incorretos, por favor, tente novamente.");
 					$("#login-error").show();
 				}
 				else{

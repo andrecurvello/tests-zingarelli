@@ -15,9 +15,12 @@
                         <li><a href="#" title="Clique aqui para fazer login" onClick="showLogin();">Login</a></li>
                     </ul>
                     <form id="login-form" name="login-form" method="post" action="do_login.php">
-						<div id="login-error">
+						<?php if($_SESSION['login-error']==1) {//wrong login information) ?>
+                        <div id="login-error">
 		                   	<p class="error">Usuário ou senha incorretos, por favor, tente novamente.</p>
                         </div>
+                        <?php }?>
+                        <div id="login-error"></div>
                         <label for="username">Usuário:</label>
                         <input type="text" id="username" name="username" size="15" />
                         <label for="password">Senha:</label>
@@ -29,11 +32,20 @@
                         <a href="#" class="small" title="Clique aqui caso não se lembre de sua senha">Esqueci minha senha</a>
                     </form>
                 <?php 
-					}
-					else{
-                    	include 'header-logged.php';
-                 	}
-				?>
+					} else{ ?>
+                    	<!--WARNING: any changes to this content has to be changed in do_login.php file as well-->
+						<p>Olá, <strong><a href="#" title="Clique para ver seu perfil no site">Usuário A</a></strong> (<a href="logout.php" title="Clique aqui para fazer logoff" class="small">sair</a>)</p>
+						<ul id="menu-logged-sub" class="right">
+							<li><a href="#" title="Crie uma nova festa">Nova Festa</a></li>
+							<li><a href="#" title="Edite ou divulge uma festa criada. Gerencie a sua lista de convidados">Gerenciar Festas</a></li>       
+						</ul>
+						<ul id="menu-logged-main" class="right">
+							<li><a href="#" title="Edite as informações do seu cadastro">Minha Conta</a></li>
+							<li><a href="#" title="Veja sua lista de fornecedores favoritos">Meus Favoritos</a></li>
+							<li><a href="#" title="Veja sua lista de contatos">Meus Contatos</a></li>
+							<li><a href="#" title="Crie uma nova festa ou gerencie festas já existentes">Minhas Festas</a></li>
+						</ul>
+                <?php }	?>
 				<div id="menu-logged"></div><!--menu-logged (for javascript validation)-->
             </div><!--menu-->
         </div><!--header-->
