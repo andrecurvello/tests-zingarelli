@@ -13,7 +13,7 @@
 -- COLORS --
 body: #4bc74e
 body-content: #64dd67
-link: #c3ebac
+link: #e7ffd8
 text: #014603
 search: #e1f4c3
 search-text: #dedede
@@ -21,7 +21,7 @@ search-text: #dedede
 
 /* GERAL */
 body{
-	width:1000px;
+	width:989px;
 	margin:20px auto;
 	font-family:Verdana, Geneva, sans-serif;
 	color:#014603;
@@ -35,7 +35,7 @@ h1{
     text-align: center;
 }
 
-a{outline:none; text-decoration:none; color:#c3ebac}
+a{outline:none; text-decoration:none; color:#e7ffd8}
 a:hover{text-decoration:underline;}
 
 strong{font-weight:bold;}
@@ -60,15 +60,15 @@ hr{width:70%;}
 
 /* HEADER */
 #header{height:195px;}
-#header img{margin-left:60px;}
+#logo{margin-left:60px;}
 #menu{
 	font-size:116%;
 	font-weight:bold;
 	margin-right:25px;
 	text-align:right;}
 #menu-main li{display:inline;}
+#menu-logged{text-align:left; margin-top:5px;}
 #menu input{font-size:85%;margin-bottom:5px;}
-#menu-logged-main, #menu-logged-sub{text-align:left;margin:5px 10px 0 0;}
 #login-form{width:400px;}
 #login-error{font-size:77%;margin-bottom:5px;}
 
@@ -80,8 +80,8 @@ hr{width:70%;}
 }
 #search-bar label{font-size:161.6%;margin-left:5px}
 #search-bar input, #search-bar select{height:30px;font-size:153.9%}
-/*IE 8 hack*/
-#search-bar select{position:relative;top:3px\0/;}
+#search-bar select{position:relative;top:3px\0/;} /*IE 8 hack*/
+#search-bar option:nth-child(even){background:#dbffdc;}
 
 /* CONTENT */
 #content{
@@ -95,7 +95,7 @@ hr{width:70%;}
 	font-size: 123.1%;
     margin: 0 auto;
     text-align: justify;
-    text-indent: 30px;
+    text-indent: 30px;	
     width: 500px;
 	padding:50px;
 }
