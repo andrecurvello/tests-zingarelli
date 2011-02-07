@@ -10,11 +10,11 @@
 $(function(){
 	//hide login form
 	$("#login-form").hide();
-	
+		
 	//hide error from wrong login
 	$("#login-error").hide();
 	
-	//action to be done when login button is pressed
+	//login validation
 	$("#login-form").submit(function(){
 		//hide any error previoulsy raised
 		$("#login-error").hide();
@@ -64,12 +64,22 @@ $(function(){
 		return false;
 		
 	}); //submit button clicked
+	
+	//focus on search input
+	$("#search-input").focusin(function(){
+		$(this).val('');								
+	});
+	$("#search-input").focusout(function(){
+		$(this).val('Digite o que está procurando');								
+	});
+	
 });
 
 //show login form
 function showLogin(){
 	$("#menu-main").hide();
 	$("#login-form").show();
+	$("#username").focus();
 }
 
 //hide login form
