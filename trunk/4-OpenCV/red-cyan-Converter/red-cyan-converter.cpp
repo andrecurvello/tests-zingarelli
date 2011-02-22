@@ -45,11 +45,11 @@ int main(int argc, char* argv[]){
             uchar* ptrL = (uchar*)(leftImg->imageData + row * leftImg->widthStep);
             
             for(int col = 0; col < rightImg->width; col++){
-                    //remove blue and green channel from the left image
-                    ptrL[3*col] = 0;
-                    ptrL[3*col+1] = 0;
-                    //remove red channel the right image
-                    ptrR[3*col+2] = 0;
+                    //remove blue and green channel from the right image
+                    ptrR[3*col] = 0;
+                    ptrR[3*col+1] = 0;
+                    //remove red channel from the left image
+                    ptrL[3*col+2] = 0;
             }            
     }
            
@@ -64,6 +64,11 @@ int main(int argc, char* argv[]){
     
     //save junctioned image
     cvSaveImage("anaglyph.bmp", anaglyph);
+    
+    /*
+    cvSaveImage("red-channel.bmp", leftImg);
+    cvSaveImage("cian-channel.bmp", rightImg);
+    */
     
     printf("\n\n\nImagem anaglifica criada com sucesso na pasta em que se encontra o programa!\n\n\n");
     
