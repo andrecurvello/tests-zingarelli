@@ -66,8 +66,8 @@ int main(int argc, char* argv[]){
     cvSaveImage("anaglyph.bmp", anaglyph);
     
     /*
-    cvSaveImage("red-channel.bmp", leftImg);
-    cvSaveImage("cian-channel.bmp", rightImg);
+    cvSaveImage("red-channel.bmp", rightImg);
+    cvSaveImage("cian-channel.bmp", leftImg);
     */
     
     printf("\n\n\nImagem anaglifica criada com sucesso na pasta em que se encontra o programa!\n\n\n");
