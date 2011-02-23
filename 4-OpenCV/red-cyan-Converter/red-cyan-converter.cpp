@@ -72,5 +72,10 @@ int main(int argc, char* argv[]){
     
     printf("\n\n\nImagem anaglifica criada com sucesso na pasta em que se encontra o programa!\n\n\n");
     
+    //Free pointers
+    cvReleaseImage(&rightImg);
+    cvReleaseImage(&leftImg);
+    cvReleaseImage(&anaglyph);
+    
     return 0;
 }
