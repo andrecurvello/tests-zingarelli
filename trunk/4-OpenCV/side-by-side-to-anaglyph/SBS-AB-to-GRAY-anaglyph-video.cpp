@@ -169,12 +169,13 @@ int main(int argc, char* argv[]){
         //if any error occurr (f.e. segmentation fault, check if you have the codec installed)
         //Huffyuv codec (lossless): http://neuron2.net/www.math.berkeley.edu/benrg/huffyuv.html
         cvWriteFrame(writer, anaglyph);  
+        
+        cvReleaseImage(&frameL);
+        cvReleaseImage(&frameR);
+        cvReleaseImage(&anaglyph);
     }
         
-    //free pointers
-    cvReleaseImage(&frameL);
-    cvReleaseImage(&frameR);
-    cvReleaseImage(&frameR);  
+    //free pointers  
     cvReleaseCapture(&capture);
     cvReleaseVideoWriter(&writer);
     
