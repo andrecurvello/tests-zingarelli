@@ -1,3 +1,7 @@
+Base de vídeos (japão)
+http://www.stereomaker.net/sample/index.html
+
+
 Problema da correspondência entre imagens
 http://vision.middlebury.edu/stereo/
 http://www.cs.umd.edu/~ogale/index.htm
