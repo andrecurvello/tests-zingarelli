@@ -14,6 +14,7 @@
 
 int main(int argc, char* argv[]){
     //load images
+    //ATTENTION!! 8bits IMAGES ONLY
     IplImage* imgL = cvLoadImage(argv[1],0);
     IplImage* imgR = cvLoadImage(argv[2],0);
     
