@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Manchetes | Notícia completa</title>
+	<!-- Yui2 CSS Reset -->
+	<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.2r1/build/reset/reset-min.css" /> 
+	<link rel="stylesheet" type="text/css" href="../css/main.css" />
+	<meta name="description" content="Página criada para a tarefa da disciplina de Hipermídia SCC5811 - ICMC - USP - São Carlos" />		
+	<script type="text/javascript" src="../js/jquery-1.4.3.min.js"></script>
+	<script type="text/javascript" src="../js/utils.js"></script>
+</head>
+<body>
+<div id="container">
+	<div id="header">
+		<div id="logo"><a href="../index.html"><img src="../img/manchetes.png" alt="Manchetes" title="Manchetes" /></a></div>
+		<p>Página de notícias recomendadas por <a href="#" title="Veja o perfil do usuário">Matheus</a></p>
+		<div id="menu">
+			<div id="menu-list">
+			<ul>
+				<li><a href="#" title="Veja seção de Destaques">Destaques</a></li>
+				<li><a href="#" title="Veja seção de Notícias Locais">Locais</a></li>
+				<li><a href="#" title="Veja seção de Economia">Economia</a></li>
+				<li><a href="#" title="Veja seção de Política">Política</a></li>
+				<li><a href="#" title="Veja seção de Esportes">Esportes</a></li>
+				<li><a href="#" title="Veja seção de Notícias Internacionais">Internacional</a></li>
+				<li><a href="#" title="Veja seção de Entretenimento">Entretenimento</a></li>
+			</ul>
+			</div>
+		</div>
+	</div>
+	<div id="content">
+		<div id="main-section">
+			<h2>ESPORTES</h2>
+			<h3>Caso Tiago Leifert expõe insatisfação com a Globo no Twitter</h3>
+			<p class="date">26/03/2011 - 07h00 | UOL</p>
+			<p>Tiago Leifert, uma das grandes estrelas do jornalismo da Globo, se irritou com alguns seguidores no Twitter, abandonou a ferramenta e voltou soltando críticas virulentas aos seus detratores. A resposta dos internautas a todo o imbróglio, mais uma vez, colocou em xeque a imparcialidade do jornalista e da emissora, e incendiou uma insatisfação que já era sentida por outros profissionais da casa.<br /><br />A personificação das críticas a uma empresa, no caso um canal de TV, são comuns no Twitter. Mas a pressão sobre a Globo cresceu nas últimas semanas por conta do noticiário dominante no futebol brasileiro.<br /><br />A emissora abandonou a licitação do Clube dos 13 e está negociando os direitos de transmissão separadamente. Até o momento, tem dez clubes sob um contrato que é amplamente questionado pela entidade comandada por Fábio Koff, e ameaça seguir avançando nos bastidores. Em sua programação, o canal evita o assunto e, quando é obrigado a citá-lo, não entra em detalhes para evitar maiores transtornos. <br /><br />Ao mesmo tempo, viu crescer a ira dos são-paulinos na última terça-feira, quando a tabela do Campeonato Brasileiro deste ano foi divulgada. O clube do Morumbi terá só cinco jogos na TV aberta no primeiro turno, contra 14 do Corinthians, 12 do Palmeiras e seis do Santos.<br /><br />O baixo número irritou a torcida, que viu nisso uma forma de pressão em Juvenal Juvênio, presidente do São Paulo e aliado do Clube dos 13. Pelo Twitter, os mais exaltados criaram o termo #SPFCMaiorGloboCBF para espalhar as mensagens de indignação contra a Globo, que, na visão do público, teria agido em conluio com a CBF.<br /><br />A irritação, como não poderia deixar de ser, respingou nos profissionais. Tiago Leifert, apresentador da versão paulista do Globo Esporte, foi um dos alvos mais fáceis, mas outros nomes como André Rizek e Mauricio Noriega, ambos do Sportv, também foram bombardeados com questões e acusações sobre o assunto (veja o box abaixo).</p>
+			<br />
+			<p><em>Fonte:</em> <a href="http://esporte.uol.com.br/futebol/ultimas-noticias/2011/03/26/caso-tiago-leifert-expoe-insatisfacao-com-a-globo-no-twitter.jhtm" title="Vá para a página de onde a notícia foi extraída">UOL</a></p>
+			<p><a href="#" title="Coloque esta notícia na sua página de recomendações">Recomendar esta notícia</a></p>
+			<div id="tags">
+				<p>Palavras-chave <span class="small">(<a href="#" onclick="addTag();" title="adicione palavras-chave para esta notícia">adicionar palavra-chave</a>)</span></p>
+				<p id="tag-input">
+						<input type="text" class="txt-tag"/>
+						<input type="submit" onclick="postTag()" value="Adicionar" />
+						<a href="#" onclick="cancelTag()" title="Cancelar adição de palavra-chave">Cancelar</a>
+				</p>
+				<ul id="tag-list">
+					<li><a href="#" title="veja outras notícias que possuem esta palavra-chave">descaso,</a></li>
+					<li><a href="#" title="veja outras notícias que possuem esta palavra-chave">carinha do globo esporte,</a></li>
+					<li><a href="#" title="veja outras notícias que possuem esta palavra-chave">twitter</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="comments">		
+			<h3>Comentários <span class="small">(<a href="#" onclick="addComment();" title="Comente esta notícia">adicionar comentário</a>)</span></h3>
+			<div class="new-comment">
+				<textarea class="txt-comment" rows="3" cols="34"></textarea>
+				<input type="submit" value="Postar" onclick="postComment();" />
+				<a href="#" onclick="cancelComment()" title="Cancelar comentário">Cancelar</a>
+			</div>
+			<div class="comment-box">
+				<p><a href="#" title="Veja o perfil do usuário">Adolfo</a><span class="small"> (1 hora atrás)</span></p>
+				<p>Muito legal!</p>
+				<hr />
+				<p><a href="#" title="Veja o perfil do usuário">Rosimeire</a> (3 dias atrás)</p>
+				<p>Isso cheira pilantragem. Cuidado, acionistas!!</p>
+				<hr />
+				<p><a href="#" title="Veja o perfil do usuário">Gilmar</a> (3 dias atrás)</p>
+				<p>Não vejo a hora de poder investir.</p>
+			</div>
+		</div>
+	</div>
+		<div id="footer">
+		<p>Instituto de Ciências Matemáticas e de Computação - ICMC - USP/São Carlos</p>
+		<p>SCC5811 - Fundamentos de Sistemas Hipermídia e Web - Prof. Renata Pontin</p>
+		<p>Aluno: Matheus Ricardo Uihara Zingarelli - 5377855 (<a href="http://www.icmc.usp.br/~zinga" title="Vá para a página pessoal do aluno">~zinga</a>)</p>
+	</div>
+</div>
+</body>
+</html>
