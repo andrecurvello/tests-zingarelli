@@ -31,7 +31,5 @@
 |         peso
 |         
 | Observação 1: Considerando o vértice zero como ponto de partida
-| Observação 2: Professor, ao contrário do que o professor falou, este algoritmo
-|               tomou mais de 8 horas de trabalho. Isso está correto ou eu que
-|               ainda preciso dominar melhor meu pensamento lógico?
+| Observação 2: Considerando o infinito como sendo 100000
  ---
