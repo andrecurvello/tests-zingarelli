@@ -1,0 +1,11 @@
+Engineering a Design Method for Web Content Management Implementations
+
+Segundo o artigo, implementações de aplicativos que suportem o WCM são demorados e consomem tempo devido:
+* Aplicações WCM envolvem customizações e integrações com sistemas "back-office".
+* O WCM é colaborativo, que implica no fato de multiplos usuários diferentes trabalham em cima do mesmo conteúdo e da mesma funcionalidade.
+* WCM usa diversos canais (web, mobile...) para propósitos diferentes (vendas, propagandas...) ás vezes em um contexto personalizado.
+* Sistemas WCM envolvem pessoas e processos, incluindo trocas de controle.
+
+Para aceletar o processo de desenvolvimento e aumentar a qualidade e satisfação dos usuários, foi apresentado um método de engenharia web (Web Engineering Method [WEM]) como uma engenharia web voltado para sistemas de WCMS para se obter alta manutenibilidade. O WEM está integrado com os métodos tradicionais de implementação, que envolvema Orientação, Definição, Design, Realização e Implementação. O artigo em sí apresenta e desenvolve a fase de Design (outros artigos falam das outras partes...).
+
+...

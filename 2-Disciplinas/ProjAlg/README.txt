@@ -1,0 +1,1 @@
+Professor, ao contrário do que foi falado, estes algoritmos tomaram 3 dias de trabalho. Isso está correto ou eu que ainda preciso dominar melhor meu raciocínio lógico?
