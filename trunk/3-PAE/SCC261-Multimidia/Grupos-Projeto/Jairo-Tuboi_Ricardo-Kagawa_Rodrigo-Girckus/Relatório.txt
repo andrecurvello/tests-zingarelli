@@ -1,0 +1,80 @@
+SCC0261 MULTIMÍDIA - 1º SEMESTRE DE 2011
+DOCENTE: RUDINEI GOULARTE
+
+PROJETO: COMPRESSÃO DE IMAGEM DIGITAL PARTE 1
+
+
+ALUNOS:
+	Jairo Toshio Tuboi 		6427250
+	Ricardo Takashi Kagawa		5634712
+	Rodrigo Luis Gava Girckus 	5967770
+
+
+Integrante que fez o upload do projeto: Jairo Toshio Tuboi
+
+
+1. Estruturas de dados e algoritmos utilizados
+
+	No arquivo codec.h temos 2 estruturas: 
+		- BITMAP_FILE_HEADER e BITMAP_INFO_HEADER: correspondem aos cabeçalhos do arquivo bitmap.
+
+	No arquivo parte1.h temos:
+		- ColorMatrices: corresponde à imagem em cores separadas.
+		- ColorBlocks: corresponde à imagem separada por blocos e cores.
+		- EncodedPixel: corresponde ao valor de uma cor de um pixel codificado.
+
+	Algoritmo da codificação: 
+		1. Lemos os cabeçalhos do arquivo bitmap.
+		2. Verificamos os cabeçalhos.
+		3. Lemos o corpo do arquivo bitmap byte a byte.
+		4. Separamos os bytes em 3 matrizes de cores.
+		5. Separamos cada matriz de cor em blocos de 8 por 8 pixels.
+		6. Normalizamos cada byte decrementando seu valor em 128.
+		7. Codificamos cada byte: 
+			7.1. Números positivos são mantidos sem alteração.
+			7.2. Números negativos têm seus bits invertidos.
+			7.3. O número 0 tem comprimento nulo.
+			7.4. O bit mais à esquerda dos números positivos é 1.
+			7.5. O bit mais à esquerda dos números negativos é 0.
+		8. Escrevemos o metarquivo.
+			8.1. Escrevemos o tamanho da imagem em blocos.
+			8.2. Escrevemos o tamanho de cada byte codificado.
+		9. Escrevemos o arquivo binário.
+			9.1. Escrevemos um byte de cada vez devido a problema de endianess.
+			9.2. Copiamos um bit de cada vez para um buffer antes de escrever o byte no arquivo.
+			9.3. Escrevemos o byte no arquivo quando o buffer estiver cheio.
+			9.4. Escrevemos o conteúdo remanescente do buffer antes de terminar.
+
+	Algoritmo da decodificação:
+		Esse algorítmo é simétrico ao algorítmo da codificação.
+
+2. Justificativas das decisões de projeto
+
+- BITMAP_FILE_HEADER e BITMAP_INFO_HEADER: 
+	São definidos pelo padrão bitmap.
+
+- ColorMatrices: 
+	A imagem bitmap é uma matriz de pixels, então é natural representá-la como tal. Como 
+devemos separar as cores da imagem e mantê-las em estrutura compatível, a estrutura mantém 3
+matrizes de bytes. Além disso, por conveniência, também mantém o tamanho em pixels das matrizes.
+
+- ColorBlocks: 
+	De forma análoga à estrutura ColorMatrices, representamos cada bloco por uma matriz.
+Para manter a estrutura simples, optamos por usar vetores de blocos ao invés de matrizes de 
+blocos. Essa estrutura também mantém a contagem de blocos.
+
+- EncodedPixel: 
+	Como o valor de cada byte codificado não tem tamanho uniforme no arquivo, essa estrutura
+associa cada valor ao seu tamanho em bits.
+
+- Função de Codificação: 
+	Como temos o tamanho em bits de cada valor armazenado no metarquivo, é possível 
+representar o zero usando uma cadeia de bits vazia. Posteriormente, o tamanho de cada valor
+será escrito juntamente com o respectivo valor, então esse método ainda será viável no futuro.
+Essa representação é a que consideramos mais eficiente, por não acrescentar bits à representação
+sugerida.
+
+- Escrita do Arquivo Binário
+	Devido a problemas com endianess, tivemos de escrever os bytes individualmente (de outra
+forma, poderíamos escrever 4 por vez, usando uma variável do tipo int). Os bits são copiados 
+individualmente para simplificar a manipulação do buffer.
