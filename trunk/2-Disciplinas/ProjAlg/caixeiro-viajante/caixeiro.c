@@ -154,5 +154,7 @@ int main(int argc, char* argv[]){
     }
     printf("%d\n%d", ciclo_minimo[0], ciclo_minimo[vertices]);
     
+    fclose(fp);
+    
     return 0;
 }
