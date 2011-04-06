@@ -1,0 +1,32 @@
+Base de vídeos (japão)
+http://www.stereomaker.net/sample/index.html
+
+
+Problema da correspondência entre imagens
+http://vision.middlebury.edu/stereo/
+http://www.cs.umd.edu/~ogale/index.htm
+http://www.cs.umd.edu/~domke/2005iccvwdv/
+
+
+Aulas sobre estereoscopia
+http://www.umiacs.umd.edu/~ramani/cmsc828d/
+http://www.ferris.edu/faculty/burtchr/sure340.html
+http://www.dgeo.udec.cl/yuras/tutoriales/rsnote/cp10/cp10-11.htm
+
+Técnicas de medida de qualidade
+http://compression.ru/video/quality_measure/index_en.html
+
+
+http://idgnow.uol.com.br/computacao_pessoal/2010/07/05/cerca-de-70-dos-japoneses-nao-se-interessam-por-tvs-3d-diz-pesquisa/
+
+http://www.freeimageslive.com/
+
+
+http://idgnow.uol.com.br/computacao_pessoal/2010/08/02/pesquisa-80-das-tvs-vendidas-nos-eua-em-2014-terao-3d/
+
+
+
+http://citeseerx.ist.psu.edu/viewdoc/similar?doi=10.1.1.50.1674&type=ab
+
+
+http://www.ri.cmu.edu
