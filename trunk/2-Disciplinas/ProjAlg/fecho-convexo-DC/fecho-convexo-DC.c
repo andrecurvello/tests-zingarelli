@@ -17,13 +17,13 @@
   3 - Em cada região, descobre qual o ponto mais distante dos extremos, calculando
       a área do triângulo que é formado. Este ponto mais distante é outro vértice
       do fecho convexo.
-  4 - Recursivamente, faz 3, considerando um dos extremos originais e o ponto
-      mais distante
+  4 - Recursivamente, faz 3, considerando o extremo esquerdo e o ponto mais 
+      distante e depois o ponto mais distante e o extremo direito.
    
   Complexidade: pior caso - Ômega(n^2) ; caso médio - Ômega(n)
   
-  Entrada: arquivo texto no formato:
-           número_pontos N
+  Entrada: dados no formato abaixo. Escrever cada dado em uma linha
+           número_pontos_N
            p1x p1y
            p2x p2y
            .
@@ -31,14 +31,15 @@
            .
            pNx pNy
            
-  Saída: Coordenadas das extremidades das arestas no formato abaixo. A cada duas linhas, temos uma aresta:
+  Saída: Coordenadas dos vértices que formam o fecho convexo:
          coord1x coord1y
          coord2x coord2y
          .
          .
          .
          coordMx coordMy
-  Observe que pontos adjacentes aparecerão mais de uma vez na saída.
+  
+  Utilização: fecho-convexo-DC
          
 --------------------*/
 
@@ -121,16 +122,6 @@ void merge(Pontos *vet, int inicio, int fim, int m){
                }
            }
      }
-     
-     //debug
-     /*printf("L1\n");
-     for(i = 0; i < n1; i++){
-           printf("X: %d | Y: %d\n", L1[i].pX, L1[i].pY);
-     }
-     printf("L2\n");
-     for(i = 0; i < n2; i++){
-           printf("X: %d | Y: %d\n", L2[i].pX, L2[i].pY);
-     }*/
 }
 
 /* 
@@ -152,59 +143,63 @@ void mergeSort(Pontos *vet, int inicio, int fim){
 
 /*
   Dado um vetor de pontos e dois pontos (p1 e p2) extremos deste vetor, cria um 
-  sub-vetor que contém todos os pontos acima de p1p2. Então, verifica qual ponto
-  neste sub-vetor é mais distante de p1p2, denominado pMax. Este ponto é vértice
-  do fecho convexo. Recursivamente, calcula novamente para os segmentos p1pMax e
-  pMaxp2 para encontrar mais vértices do fecho.
+  sub-vetor que contém todos os pontos acima ou abaixo de p1p2, dependendo do mode.
+  Então, verifica qual ponto neste sub-vetor é mais distante de p1p2, denominado 
+  pMax. Este ponto é vértice do fecho convexo. Recursivamente, calcula novamente
+  para os segmentos p1pMax e pMaxp2 para encontrar mais vértices do fecho.
   Entradas: vet - vetor de pontos
             p1,p2 - pontos extremos do vetor de pontos
             n - quantidade de pontos
+            mode - 0: verificar UpperHull ; 1: verificar LowerHull 
 */
-void verificarUpperHull(Pontos *vet, Pontos p1, Pontos p2, int n){
-     if(n < 3){ //vetor contém somente os extremos, formam aresta do fecho
-          //salvar aresta
-          //debug
-          printf("Nao ha mais pontos acima ou estao na reta\n");
-     }
-     else{     
+void verificarPontos(Pontos *vet, Pontos p1, Pontos p2, int n, int mode){
+     if(n > 2){ //elimina vetor que tenha somente os extremos     
          /* 
-            Para encontrar o upperHull, calculamos a equação geral da reta p1p2 (aX+bY=-c)
-            Em cada ponto de vet, verificamos o sinal do resultado de se aplicar o 
-            ponto na equação encontrada. Pontos à esquerda fazem parte do upper hull
+            Para encontrar o upperHull ou o lowerHull, calculamos a equação geral
+            da reta p1p2 (aX+bY=-c) Em cada ponto de vet, verificamos o sinal do
+            resultado de se aplicar o ponto na equação encontrada. Pontos à 
+            esquerda fazem parte do Upperhull e pontos à direita fazem parte do
+            LowerHull
          */
          int a, b, c, i, j;
-         Pontos upperHull[n];//terá no máximo n pontos (se todos os pontos forem alinhados)
+         /*
+            Temos dois subvetores, um com extremos em p1 e pMax e outro com 
+            extremos em pMax e p2. Temos também um vetor de pontos com os 
+            candidatos a fazerem parte destes subvetores
+         */
+         Pontos p1pMax[n];//terá no máximo n pontos (se todos os pontos forem alinhados)
+         Pontos pMaxp2[n];//terá no máximo n pontos (se todos os pontos forem alinhados)
+         Pontos candidato[n];
          Pontos pMax;
+                  
+         //eq. geral da reta
          a = p1.pY - p2.pY;
          b = p2.pX - p1.pX;
          c = -( p1.pX*p2.pY - p1.pY*p2.pX );
          
          j = 0;
-         
-         //debug
-         printf("\nResultados dos pontos\nc=%d\n", c);
-         
          for(i = 1; i < n - 1; i++){ //elimino primeiro e último elementos (são p1 e p2)
                //verifico sinal do ponto na equação da reta
                int result = a*vet[i].pX + b*vet[i].pY;
                
-               //debug
-               printf("Result (%d, %d): %d\n", vet[i].pX, vet[i].pY, result);
-               
-               if(result > c){ //faz parte do upperHull
-                   upperHull[j].pX = vet[i].pX;
-                   upperHull[j].pY = vet[i].pY;
-                   j++;
+               switch(mode){
+                   case 0:               
+                       if(result > c){ //faz parte do upperHull
+                           candidato[j].pX = vet[i].pX;
+                           candidato[j].pY = vet[i].pY;
+                           j++;
+                       }
+                       break;
+                   case 1:
+                       if(result < c){ //faz parte do lowerHull
+                           candidato[j].pX = vet[i].pX;
+                           candidato[j].pY = vet[i].pY;
+                           j++;
+                       }
+                       break;
                }
          }
-         
-         //debug
-         printf("UpperHull\n");
-         for(i = 0; i < j; i++){
-               printf("X: %d | Y: %d\n", upperHull[i].pX, upperHull[i].pY);
-         }
-         printf("\n\nAreas do Upperhull, %d pontos\n", j);
-         
+                  
          /*
             pMax será o ponto que forma um triângulo com p1 e p2 de maior área. A área
             é metade do determinante formado por estes pontos. Como só estou interessado
@@ -215,100 +210,95 @@ void verificarUpperHull(Pontos *vet, Pontos p1, Pontos p2, int n){
          if(j!=0){ //j é 0 quando todos os pontos estão alinhados
              int maxArea = 0;
              for(i = 0; i < j; i++){
-                   int area = p1.pX*p2.pY + upperHull[i].pX*p1.pY + p2.pX*upperHull[i].pY -
-                              upperHull[i].pX*p2.pY - p2.pX*p1.pY - p1.pX*upperHull[i].pY;
-                              
-                   //debug
-                   printf("Area de (%d, %d): %d\n",upperHull[i].pX,upperHull[i].pY, area);
-                              
-                   if(area > maxArea){
-                           maxArea = area;
-                           pMax.pX = upperHull[i].pX;
-                           pMax.pY = upperHull[i].pY;
+                   int area = p1.pX*p2.pY + candidato[i].pX*p1.pY + p2.pX*candidato[i].pY -
+                              candidato[i].pX*p2.pY - p2.pX*p1.pY - p1.pX*candidato[i].pY;
+                                                            
+                   switch(mode){
+                       case 0:
+                           if(area > maxArea){
+                                   maxArea = area;
+                                   pMax.pX = candidato[i].pX;
+                                   pMax.pY = candidato[i].pY;
+                           }
+                           break;
+                       case 1:
+                           if(area < maxArea){ //no lowerHull o valor da área é negativo
+                                   maxArea = area;
+                                   pMax.pX = candidato[i].pX;
+                                   pMax.pY = candidato[i].pY;
+                           }
+                           break;
                    }
              }
              
-             //debug
-             printf("PMax\nX: %d | Y: %d\n", pMax.pX, pMax.pY);
+             //pMax faz parte do fecho, imprime pMax
+             printf("%d %d\n", pMax.pX, pMax.pY);
+         
+             //p1 é extremo esquerdo de p1pMax
+             p1pMax[0].pX = p1.pX;
+             p1pMax[0].pY = p1.pY;
+             //pMax é extremo esquerdo de pMaxp2
+             pMaxp2[0].pX = pMax.pX;
+             pMaxp2[0].pY = pMax.pY;
              
-             //recursão
-             //debug
-             printf("\nUpperhull p1(%d, %d) | pMax(%d, %d)\n", p1.pX, p1.pY, pMax.pX, pMax.pY);
+             /*
+                Copia candidatos para os suvetores, eliminando o que for pMax.
+                Já temos a primeira posição de cada subvetor, que é o extremo
+                esquerdo (p1 ou pMax) já adicionados. Começa a partir da posição 1
+             */
+             int posicao = 1;
+             for(i = 0; i < j; i++){
+                   if((candidato[i].pX != pMax.pX) || (candidato[i].pY != pMax.pY)){
+                       p1pMax[posicao].pX = candidato[i].pX;
+                       p1pMax[posicao].pY = candidato[i].pY;
+                       pMaxp2[posicao].pX = candidato[i].pX;
+                       pMaxp2[posicao].pY = candidato[i].pY;
+                       posicao++;
+                   }
+             }
              
-             verificarUpperHull(upperHull, p1, pMax, j+1);
+             //pMax é extremo direito de p1pMax
+             p1pMax[j].pX = pMax.pX;
+             p1pMax[j].pY = pMax.pY;
+             //p2 é extremo esquerdo de pMaxp2
+             pMaxp2[j].pX = p2.pX;
+             pMaxp2[j].pY = p2.pY;
              
-             //debug
-             printf("\nUpperhull pMax(%d, %d) | p2(%d, %d)\n", pMax.pX, pMax.pY, p2.pX, p2.pY);
-             
-             verificarUpperHull(upperHull, pMax, p2, j+1);
-         }
-     }
+             switch(mode){
+                 case 0:
+                     //recursão
+                     verificarPontos(p1pMax, p1, pMax, j+1, 0);
+                     verificarPontos(pMaxp2, pMax, p2, j+1, 0);
+                     break;
+                 case 1:
+                     //recursão
+                     verificarPontos(p1pMax, p1, pMax, j+1, 1);
+                     verificarPontos(pMaxp2, pMax, p2, j+1, 1);
+                     break;
+             }
+         }//end if j != 0
+     }//end if n > 2
 }
 
-int main(int argc, char* argv[]){    
-    //lê dados do arquivo
-    FILE *fp;
-    fp = fopen(argv[1], "r");
-
-//debug
-    if(!fp) {printf("\nErro na abertura do arquivo"); return -1;}
-       
+int main(int argc, char* argv[]){       
     int n, i;
-    fscanf(fp, "%d", &n);
-    Pontos vet_pontos[n];
+    //leitura dos dados do arquivo
+    scanf("%d", &n);
+    Pontos vet_pontos[n]; //armazena todos os pontos
     for(i = 0; i < n; i++){
-       fscanf(fp, "%d %d", &vet_pontos[i].pX, &vet_pontos[i].pY);
+       scanf("%d %d", &vet_pontos[i].pX, &vet_pontos[i].pY);
     }
-    
-    //debug
-    /*printf("Lista Original\n");
-    for(i = 0; i < n; i++){
-       printf("X: %d | Y: %d\n", vet_pontos[i].pX, vet_pontos[i].pY);
-    }*/
     
     //ordena pontos pelo eixo X
     mergeSort(vet_pontos, 0, n-1);
     
-    //debug
-    printf("Lista Ordenada por X\n");
-    for(i = 0; i < n; i++){
-       printf("X: %d | Y: %d\n", vet_pontos[i].pX, vet_pontos[i].pY);
-    }
-    
-    verificarUpperHull(vet_pontos, vet_pontos[0], vet_pontos[n-1], n);
-    //verificarLowerHull()
+    printf("%d %d\n", vet_pontos[0].pX, vet_pontos[0].pY);
+    printf("%d %d\n", vet_pontos[n-1].pX, vet_pontos[n-1].pY);
     
     
-    fclose(fp);
+    //chama método DC
+    verificarPontos(vet_pontos, vet_pontos[0], vet_pontos[n-1], n, 0);
+    verificarPontos(vet_pontos, vet_pontos[0], vet_pontos[n-1], n, 1);
+        
+    return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
