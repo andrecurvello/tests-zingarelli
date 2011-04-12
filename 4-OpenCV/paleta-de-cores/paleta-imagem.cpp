@@ -10,7 +10,7 @@
   Last modification: April, 6th 2011
   
   Usage:
-        paleta-imagem <image.bmp> {O | 1} {-e | -d} <auxiliary_image.bmp>
+        paleta-imagem <image.bmp> {O | 1} {-e | [-d <auxiliary_image.bmp>]}
         
         0: side-by-side image
         1: above/below image
@@ -74,14 +74,53 @@ void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int w
            aux - auxiliary image
            imageType - 0 to create a side-by-side image or 1 to create a above-below one           
 */
-void revertAnaglyph(IplImage *frame, IplImage **stereoPair, IplImage *aux, int imageType){
-     //TODO
-     /*
-       Case imageType = side-by-side     
-       Copy values from frame (G and B channels) and aux (R channel)to stereoPair
-       until half of total width. For the other half, copy R channel from frame and
-       G and B channels from aux
-     */
+void revertAnaglyph(IplImage *frame, IplImage *aux, int imageType){
+    IplImage *stereoPair;
+    int width = frame->width;
+    int height = frame->height;      
+    
+    //new image will have double width or double height, depending on the image type
+    CvSize size;
+    switch(imageType){
+        case 0: //side-by-side type
+             size = cvSize( width*2, height);
+             break;
+        case 1: //above-below type
+             size = cvSize( width, height*2);
+             break;                
+    }
+    
+    //copy image properties
+    stereoPair = cvCreateImage(size, frame->depth, frame->nChannels);
+    cvZero(stereoPair);
+    
+     switch(imageType){
+         case 0:
+              for(int row = 0; row < frame->height; row++){
+                  //set pointer to the correct position in each row
+                  uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
+                  uchar* ptrAux = (uchar*)(aux->imageData + row * aux->widthStep);
+                  uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
+                  for(int col = 0; col < frame->width; col++){
+                      /* Copy values from frame (G and B channels) and aux (R 
+                      channel) to stereoPair for the first half of image width */
+                      ptrStp[3*col] = ptrAn[3*col];
+                      ptrStp[3*col+1] = ptrAn[3*col+1];
+                      ptrStp[3*col+2] = ptrAux[3*col+2];
+                      /* Copy values from frame (R channel) and aux (G and B 
+                      channels) to stereoPair for the rest of image width */
+                      ptrStp[3*(col+frame->width)] = ptrAux[3*col];
+                      ptrStp[3*(col+frame->width)+1] = ptrAux[3*col+1];
+                      ptrStp[3*(col+frame->width)+2] = ptrAn[3*col+2];
+                  }                  
+              }
+              
+              break;
+         case 1:
+              break;
+     }
+     cvSaveImage("Par_Estereo.bmp",stereoPair);          
+     cvReleaseImage(&stereoPair);
      
      /*
        Case imageType = above-below
@@ -201,7 +240,7 @@ int main(int argc, char* argv[]){
     }
     // ----- Anaglyph reversion
     else if(!strcmp(argv[3],"-d")){            
-        IplImage *stereoPair, *aux;
+        IplImage *aux;
         
         //get auxiliary image
         aux = cvLoadImage(argv[4], 1);
@@ -210,33 +249,9 @@ int main(int argc, char* argv[]){
            exit(-1);
         }
         
-        int width = frame->width;
-        int height = frame->height;      
-        
-        //new image will have double width or double height, depending on the image type
-        CvSize size;
-        switch(imageType){
-            case 0: //side-by-side type
-                 size = cvSize( width*2, height);
-                 break;
-            case 1: //above-below type
-                 size = cvSize( width, height*2);
-                 break;
-            default:
-                 printf("Command call: paleta-imagem <arquivo> {O | 1} {-e | -d}\n");
-                 printf("\n0:side-by-side or 1:above/below");
-                 printf("\n-e:encode (transform to anaglyph) or -d:decode (transform to stereo image)");
-                 exit(-1);                    
-        }
-        
-        //copy image properties
-        stereoPair = cvCreateImage(size, frame->depth, frame->nChannels);
-        cvZero(stereoPair);
-        
         //revert anaglyph image to stereo pair
-        revertAnaglyph(frame, &stereoPair, aux, imageType);
+        revertAnaglyph(frame, aux, imageType);
         
-        cvReleaseImage(&stereoPair);
         cvReleaseImage(&aux);
     }
     else{
