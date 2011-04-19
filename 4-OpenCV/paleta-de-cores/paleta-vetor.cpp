@@ -2,7 +2,7 @@
   This program executes the conversion of a stereo pair of images into an anaglyph
   image as well as the reversion, from an anaglyph image to a stereo pair. The
   stereo pair can be of two types: side-by-side or above below. In the reversion
-  process, an auxiliary image is used, which contains channels that were disposed 
+  process, an auxiliary vector is used, which contains channels that were disposed 
   in the anaglyph process.
 
   Developed by: Matheus Ricardo Uihara Zingarelli
@@ -10,7 +10,7 @@
   Last modification: April, 12th 2011
   
   Usage:
-        paleta-imagem <image.bmp> {O | 1} {-e | [-d <auxiliary_image.bmp>]}
+        paleta-imagem <image.bmp> {O | 1} {-e | -d}
         
         0: side-by-side image
         1: above/below image
@@ -70,14 +70,13 @@ void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int w
   Get an anaglyph image and create the stereo pair, using an auxiliary image to
   get channels disposed in the anaglyph process.
   Entries: frame - anaglyph image
-           stereoPair - stereoPair to be formed
-           aux - auxiliary image
            imageType - 0 to create a side-by-side image or 1 to create a above-below one           
 */
-void revertAnaglyph(IplImage *frame, IplImage *aux, int imageType){
+void revertAnaglyph(IplImage *frame, int imageType){
     IplImage *stereoPair;
     int width = frame->width;
-    int height = frame->height;      
+    int height = frame->height;  
+    int imageSize = width*height;    
     
     //new image will have double width or double height, depending on the image type
     CvSize size;
@@ -94,67 +93,70 @@ void revertAnaglyph(IplImage *frame, IplImage *aux, int imageType){
     stereoPair = cvCreateImage(size, frame->depth, frame->nChannels);
     cvZero(stereoPair);
     
+    //get data from disposed channels
+    FILE *fp = fopen("pixelData.dat", "rb");       
+    uchar *vet = (uchar*)malloc(3*imageSize);
+    fread(vet, sizeof(uchar), 3*imageSize, fp);
+    fclose(fp);
+    int count=0;
     switch(imageType){
         case 0:
              for(int row = 0; row < frame->height; row++){
                  //set pointer to the correct position in each row
                  uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
-                 uchar* ptrAux = (uchar*)(aux->imageData + row * aux->widthStep);
                  uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
                  for(int col = 0; col < frame->width; col++){
-                     /* Copy values from frame (G and B channels) and aux (R 
+                     /* Copy values from frame (G and B channels) and vet (R 
                      channel) to stereoPair for the first half of image width */
                      ptrStp[3*col] = ptrAn[3*col];
                      ptrStp[3*col+1] = ptrAn[3*col+1];
-                     ptrStp[3*col+2] = ptrAux[3*col+2];
-                     /* Copy values from frame (R channel) and aux (G and B 
+                     ptrStp[3*col+2] = vet[count];
+                     /* Copy values from frame (R channel) and vet (G and B 
                      channels) to stereoPair for the rest of image width */
-                     ptrStp[3*(col+frame->width)] = ptrAux[3*col];
-                     ptrStp[3*(col+frame->width)+1] = ptrAux[3*col+1];
+                     ptrStp[3*(col+frame->width)] = vet[count+(2*imageSize)];
+                     ptrStp[3*(col+frame->width)+1] = vet[count+imageSize];
                      ptrStp[3*(col+frame->width)+2] = ptrAn[3*col+2];
+                     
+                     count++;
                  }                  
-             }
-             
+             }             
              break;
         case 1:
              for(int row = 0; row < frame->height; row++){
                  //set pointer to the correct position in each row
                  uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
-                 uchar* ptrAux = (uchar*)(aux->imageData + row * aux->widthStep);
                  uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
                  for(int col = 0; col < frame->width; col++){
-                     /* Copy values from frame (G and B channels) and aux (R 
+                     /* Copy values from frame (G and B channels) and vet (R 
                      channel) to stereoPair for the first half of image height */
                      ptrStp[3*col] = ptrAn[3*col];
                      ptrStp[3*col+1] = ptrAn[3*col+1];
-                     ptrStp[3*col+2] = ptrAux[3*col+2];
+                     ptrStp[3*col+2] = vet[count];
+                     
+                     count++;
                  }
-             }
+            }
+            count = 0;
             for(int row = 0; row < frame->height; row++){
                  //set pointer to the correct position in each row
                  uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
-                 uchar* ptrAux = (uchar*)(aux->imageData + row * aux->widthStep);
                  uchar* ptrStp = (uchar*)(stereoPair->imageData + (row + frame->height) * stereoPair->widthStep);
                  for(int col = 0; col < frame->width; col++){
-                     /* Copy values from frame (G and B channels) and aux (R 
-                     channel) to stereoPair for the first half of image height */
-                     ptrStp[3*col] = ptrAux[3*col];
-                     ptrStp[3*col+1] = ptrAux[3*col+1];
+                     /* Copy values from frame (R channel) and vet (G and B 
+                     channels) to stereoPair for the first half of image height */
+                     ptrStp[3*col] = vet[count+(2*imageSize)];
+                     ptrStp[3*col+1] = vet[count+imageSize];
                      ptrStp[3*col+2] = ptrAn[3*col+2];
+                     
+                     count++;
                  }
-             }
-             break;
+            }
+            break;
      }
      cvSaveImage("Par_Estereo.bmp",stereoPair);
      printf("Reversao para par estereo feita com sucesso! - Par_Estereo.bmp\n");       
      cvReleaseImage(&stereoPair);
-     
-     /*
-       Case imageType = above-below
-       Copy values from frame (G and B channels) and aux (R channel)to stereoPair
-       until half of total height. For the other half, copy R channel from frame and
-       G and B channels from aux
-     */
+     free(vet);
 }
 
 
@@ -166,20 +168,17 @@ void revertAnaglyph(IplImage *frame, IplImage *aux, int imageType){
 */
 void createAnaglyph(IplImage *frameL, IplImage *frameR){
     IplImage *anaglyph; 
-    /* The following vectors will hold channels lost during anaglyph transformation */
-    uchar *disposed_Rleft; 
-    uchar *disposed_Gright;
-    uchar *disposed_Bright;
+    /* The following vector will hold channels lost during anaglyph transformation */
+    uchar *disposed_channels;
     
     //prepare anaglyph image
     CvSize size = cvGetSize(frameL);
     anaglyph = cvCreateImage(size, frameL->depth, frameL->nChannels);
     cvZero(anaglyph);
     
-    //prepare vectors
-    disposed_Rleft = (uchar*)malloc(frameL->width*frameL->height);
-    disposed_Gright = (uchar*)malloc(frameR->width*frameR->height);
-    disposed_Bright = (uchar*)malloc(frameR->width*frameR->height);
+    //prepare vector
+    int imageSize = frameL->width*frameL->height;
+    disposed_channels = (uchar*)malloc(3*imageSize);
     
     //anaglyph transformation
     int count = 0;
@@ -194,9 +193,9 @@ void createAnaglyph(IplImage *frameL, IplImage *frameR){
                     ptrA[3*col+1] = ptrL[3*col+1];
                     ptrA[3*col] = ptrL[3*col];
                     //copy remain channels to their corresponding vectors
-                    disposed_Bright[count] = ptrR[3*col];
-                    disposed_Gright[count] = ptrR[3*col+1];
-                    disposed_Rleft[count] = ptrL[3*col+2];
+                    disposed_channels[count] = ptrL[3*col+2]; //red
+                    disposed_channels[count+imageSize] = ptrR[3*col+1]; //green
+                    disposed_channels[count+(2*imageSize)] = ptrR[3*col]; //blue
                     count++;
             }            
     }
@@ -206,32 +205,32 @@ void createAnaglyph(IplImage *frameL, IplImage *frameR){
     
     cvReleaseImage(&anaglyph);
     
-    //save vectors
-    FILE *fR, *fG, *fB;
-    fR = fopen("pixelData_Red.dat", "w");
-    fG = fopen("pixelData_Green.dat", "w");
-    fB = fopen("pixelData_Blue.dat", "w");
+    //save vector
+    FILE *fp;
+    fp = fopen("pixelData.dat", "wb");
     
-    if(!fR || !fG || !fB){
+    if(!fp){
         printf("Erro na criacao de arquivo das paletas de cores. Favor verificar\n");
         exit(-1);
     }
     
-    fwrite(disposed_Rleft, sizeof(uchar), count, fR);
-    fwrite(disposed_Gright, sizeof(uchar), count, fG);
-    fwrite(disposed_Bright, sizeof(uchar), count, fB);
+    fwrite(disposed_channels, sizeof(uchar), 3*imageSize, fp);
     
-    fclose(fR);
-    fclose(fG);
-    fclose(fB);
+    fclose(fp);
+    free(disposed_channels);
     printf("\nImagem anaglifica criada com sucesso! - anaglyph.bmp\n");
+}
+
+/* Prints help message to user */
+void printHelp(){
+    printf("Chamada do programa: paleta-vetor <arquivo> {O | 1} {-e | -d}\n");
+    printf("\n0:side-by-side ou 1:above/below");
+    printf("\n-e:encode (transformacao anaglifica) ou -d:decode (reversao para par estereo)");
 }
 
 int main(int argc, char* argv[]){
     if(argc < 4){
-        printf("Chamada do programa: paleta-vetor <arquivo> {O | 1} {-e | -d}\n");
-        printf("\n0:side-by-side ou 1:above/below");
-        printf("\n-e:encode (transformacao anaglifica) ou -d:decode (reversao para par estereo)");
+        printHelp();
         exit(-1);  
     }
     
@@ -271,9 +270,7 @@ int main(int argc, char* argv[]){
                  size = cvSize( width, height/2);
                  break;
             default:
-                 printf("Chamada do programa: paleta-vetor <arquivo> {O | 1} {-e | -d}\n");
-                 printf("\n0:side-by-side ou 1:above/below");
-                 printf("\n-e:encode (transformacao anaglifica) ou -d:decode (reversao para par estereo)");
+                 printHelp();
                  exit(-1);                    
         }
         
@@ -294,25 +291,11 @@ int main(int argc, char* argv[]){
         cvReleaseImage(&frameR);
     }
     // ----- Anaglyph reversion
-    else if(!strcmp(argv[3],"-d")){            
-        IplImage *aux;
-        
-        //get auxiliary image
-        aux = cvLoadImage(argv[4], 1);
-        if(!aux){
-           printf("Erro ao abrir imagem.");
-           exit(-1);
-        }
-        
-        //revert anaglyph image to stereo pair
-        revertAnaglyph(frame, aux, imageType);
-        
-        cvReleaseImage(&aux);
+    else if(!strcmp(argv[3],"-d")){
+        revertAnaglyph(frame, imageType);
     }
     else{
-        printf("\n\nChamada ao programa: paleta-vetor <arquivo> {O | 1} {-e | -d}\n");
-        printf("\n0:side-by-side ou 1:above/below");
-        printf("\n-e:encode (tranformcao anaglifica) or -d:decode (reversao para par estereo)\n\n");
+        printHelp();
         exit(-1);      
     }
     
