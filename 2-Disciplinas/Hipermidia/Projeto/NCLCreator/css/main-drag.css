@@ -1,0 +1,48 @@
+/*CSS Document*/
+
+.box {
+    border: 1px solid orange;
+    height: 100px;
+    left: 50px;
+    position: relative;
+    top: 50px;
+    width: 100px;
+	text-align:center;
+	background:white;
+}
+
+.right{float:right;}
+.left{float:left;}
+
+
+#desktop {
+    border: 1px solid;
+    float: left;
+    height: 90%;
+    width: 70%;
+}
+
+#toolbar {
+    border: 1px solid;
+    float: left;
+    height: 90%;
+    left: 20px;
+    position: relative;
+    width: 20%;
+}
+
+#toolbar a{
+	margin-left:20px;
+}
+
+#selectable{
+    left: 50px;
+    position: relative;
+    text-align: center;
+    top: 60px;
+    width: 90%;
+}
+
+/*CSS to work with selectable elements*/
+#selectable .ui-selecting{background:#F9EACC;}
+#selectable .ui-selected{background:#FCD894;}
