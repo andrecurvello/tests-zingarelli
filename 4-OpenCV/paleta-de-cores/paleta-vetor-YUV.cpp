@@ -210,11 +210,14 @@ void createAnaglyph(IplImage *frameL, IplImage *frameR){
                U = 0.565f * B - Y;
                V = 0.713f * R - Y;
             */
-            /*TODO: resolver essa conversão*/
-            float Y = 0.299f * ptrAux[3*col+2] + 0.587f * ptrAux[3*col+2] + 0.114f * ptrAux[3*col];
+            /* TODO: resolver essa conversão
+               Não copiar os cálculos para um IplImage, pois o openCV não salva YUV.
+               Fazer os calculos e salvar em um arquivo com a extensão .YUV
+            */
+            float Y = 0.299f * ptrAux[3*col+2] + 0.587f * ptrAux[3*col+1] + 0.114f * ptrAux[3*col];
             ptrAn[3*col] = Y; //Y
-            ptrAn[3*col+1] = 0.565f * ptrAux[3*col] - Y; //U
-            ptrAn[3*col+2] = 0.713f * ptrAux[3*col+2] - Y; //V
+            ptrAn[3*col+1] = 0.565f * (ptrAux[3*col] - Y); //U
+            ptrAn[3*col+2] = 0.713f * (ptrAux[3*col+2] - Y); //V
         }
     }
     
