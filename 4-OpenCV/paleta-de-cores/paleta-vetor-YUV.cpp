@@ -9,7 +9,7 @@
 
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: April, 30th 2011
-  Last modification: April, 30th 2011
+  Last modification: May, 5th 2011
   
   Usage:
         paleta-imagem <image.bmp> {-sbs | -ab} {-e | -d}
@@ -24,6 +24,103 @@
 #include <cv.h>
 #include <highgui.h>
 
+/* Convert an image from YUV to RGB format, using the folliwng formuat
+   YUV to RGB:
+       R = Y + 1.403f * V
+       G = Y - 0.344f * U - 0.714f * V
+       B = Y + 1.77f * U
+   Entry: yuvImg - file containg YUV data
+*/
+void YUVtoBGR(char *yuvImg){
+     FILE *fp;
+     int width, height;
+     IplImage *bgrImg;
+     float *vet; //holds YUV data
+    
+     //get image width and height from YUV file
+     fp = fopen(yuvImg, "rb");    
+     fscanf(fp, "%d %d", &width, &height);
+     int imageSize = width*height;
+     
+     //We will create a 24bits RGB image
+     CvSize size = cvSize(width, height);
+     bgrImg = cvCreateImage(size, IPL_DEPTH_8U, 3);
+     cvZero(bgrImg);
+     
+     //get YUV data and convert to RGB
+     vet = (float*)malloc(3*imageSize*sizeof(float));
+     fread(vet, sizeof(float), 3*imageSize, fp);
+     printf("Convertendo de RGB para YUV... ");
+     int count = 0;
+     for(int row = 0; row < bgrImg->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptr = (uchar*)(bgrImg->imageData + row * bgrImg->widthStep);
+        for(int col = 0; col < bgrImg->width; col++){
+            // Y -> first imageSize elements of vet -> vet[count]
+            // U -> next imageSize elements of vet ->  vet[count+imageSize]
+            // V -> last imageSize elements of vet ->  vet[count+2*imageSize]
+            ptr[3*col+2] = (uchar)(vet[count] + 1.403f * vet[count+2*imageSize]); //R
+            ptr[3*col+1] = (uchar)(vet[count] - 0.344f * vet[count+imageSize] - 0.714f * vet[count+2*imageSize]);//G
+            ptr[3*col] = (uchar)(vet[count] + 1.77f * vet[count+imageSize]);//B
+            count++;
+        }
+     }
+     
+     cvSaveImage("anaglyphYUV2RGB.bmp", bgrImg);
+     cvReleaseImage(&bgrImg);
+     free(vet);
+     
+}
+
+/* 
+   Convert an image from RGB to YUV format, using the following formula
+   RGB TO YUV:
+       Y = 0.299f * R + 0.587 * G + 0.114 * B
+       U = 0.565f * (B - Y);
+       V = 0.713f * (R - Y);
+   Entry: img - image to be converted
+*/
+void BGRtoYUV(IplImage *img){
+    float *yuvImg;
+    int imageSize = img->width * img->height;
+    FILE *fp;
+    
+    //allocate vector containing YUV data
+    //first imageSize positions holds Y data
+    //next imageSize positions holds U data
+    //last imageSize positions holds V data
+    yuvImg = (float*) malloc(3*imageSize*sizeof(float));
+        
+    //RGB to YUV conversion
+    printf("Convertendo de RGB para YUV... ");
+    int count = 0;
+    for(int row = 0; row < img->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrAn = (uchar*)(img->imageData + row * img->widthStep);
+        for(int col = 0; col < img->width; col++){
+            float Y = 0.299f * ptrAn[3*col+2] + 0.587f * ptrAn[3*col+1] + 0.114f * ptrAn[3*col];
+            yuvImg[count] = Y; //Y
+            yuvImg[count+imageSize] = 0.565f * (ptrAn[3*col] - Y); //U
+            yuvImg[count+2*imageSize] = 0.713f * (ptrAn[3*col+2] - Y); //V
+            count++;
+        }
+    }
+    
+    //save YUV file
+    fp = fopen("anaglyph.yuv","wb");
+    if(!fp){
+        printf("Erro na criacao de arquivo de imagem YUV. Favor verificar\n");
+        exit(-1);
+    }
+    //first data from file have the image's width and height
+    fprintf(fp, "%d %d", img->width, img->height);
+    fwrite(yuvImg, sizeof(float),3*imageSize, fp);
+    
+    fclose(fp);
+    free(yuvImg);
+    printf("OK!\n");
+}
+
 /*
   Separate images from a side-by-side or above/below image. Given the original
   image dimensions, set a ROI (region of interest) based on the image type. If
@@ -37,6 +134,7 @@
             if it has above-below images                
 */
 void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int width, int height, char *imageType){    
+    printf("Separando Imagens... ");
     if(!strcmp(imageType,"-sbs")){
         //set ROI to cut the image on the left (half of the original)
         cvSetImageROI(frame, cvRect(0,0, width/2, height));            
@@ -64,7 +162,8 @@ void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int w
         cvCopy(frame, *frameR);            
         //reset ROI
         cvResetImageROI(frame);
-    }    
+    }  
+    printf("OK!\n");
 }
 
 /*
@@ -73,11 +172,8 @@ void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int w
   Entries: frame - anaglyph image
            imageType - -sbs to create a side-by-side image or -ab to create a above-below one           
 */
-void revertAnaglyph(IplImage *frame, char *imageType){
-    IplImage *stereoPair;
-    int width = frame->width;
-    int height = frame->height;  
-    int imageSize = width*height;    
+void revertAnaglyph(char *yuvImg, char *imageType){
+    /*IplImage *stereoPair;
     
     //new image will have double width or double height, depending on the image type
     CvSize size;
@@ -88,15 +184,18 @@ void revertAnaglyph(IplImage *frame, char *imageType){
         size = cvSize( width, height*2);
     }
     
-    //copy image properties
-    stereoPair = cvCreateImage(size, frame->depth, frame->nChannels);
+    //We will create a RGB 24bits image
+    stereoPair = cvCreateImage(size, IPL_DEPTH_8U, 3);
     cvZero(stereoPair);
     
     //get data from disposed channels
-    FILE *fp = fopen("pixelData.dat", "rb");       
+    fp = fopen("pixelData.dat", "rb");       
     uchar *vet = (uchar*)malloc(3*imageSize);
     fread(vet, sizeof(uchar), 3*imageSize, fp);
     fclose(fp);
+    
+    
+    printf("Revertendo imagem anaglifica para par estereo... ");
     int count=0;
     if(!strcmp(imageType, "-sbs")){    
         for(int row = 0; row < frame->height; row++){
@@ -104,13 +203,13 @@ void revertAnaglyph(IplImage *frame, char *imageType){
             uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
             uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
             for(int col = 0; col < frame->width; col++){
-                /* Copy values from frame (R and B channels) and vet (G 
-                channel) to stereoPair for the first half of image width */
+                // Copy values from frame (R and B channels) and vet (G 
+                // channel) to stereoPair for the first half of image width
                 ptrStp[3*col] = ptrAn[3*col];
                 ptrStp[3*col+2] = ptrAn[3*col+2];
                 ptrStp[3*col+1] = vet[count];
-                /* Copy values from frame (G channel) and vet (R and B 
-                channels) to stereoPair for the rest of image width */
+                // Copy values from frame (G channel) and vet (R and B 
+                // channels) to stereoPair for the rest of image width
                 ptrStp[3*(col+frame->width)] = vet[count+(2*imageSize)];
                 ptrStp[3*(col+frame->width)+2] = vet[count+imageSize];
                 ptrStp[3*(col+frame->width)+1] = ptrAn[3*col+1];
@@ -125,8 +224,8 @@ void revertAnaglyph(IplImage *frame, char *imageType){
              uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
              uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
              for(int col = 0; col < frame->width; col++){
-                 /* Copy values from frame (R and B channels) and vet (G 
-                 channel) to stereoPair for the first half of image height */
+                 // Copy values from frame (R and B channels) and vet (G 
+                 // channel) to stereoPair for the first half of image height 
                  ptrStp[3*col] = ptrAn[3*col];
                  ptrStp[3*col+1] = vet[count];
                  ptrStp[3*col+2] = ptrAn[3*col+2];
@@ -140,8 +239,8 @@ void revertAnaglyph(IplImage *frame, char *imageType){
              uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
              uchar* ptrStp = (uchar*)(stereoPair->imageData + (row + frame->height) * stereoPair->widthStep);
              for(int col = 0; col < frame->width; col++){
-                 /* Copy values from frame (G channel) and vet (R and B 
-                 channels) to stereoPair for the rest of image height */
+                 // Copy values from frame (G channel) and vet (R and B 
+                 // channels) to stereoPair for the rest of image height
                  ptrStp[3*col] = vet[count+(2*imageSize)]; //blue
                  ptrStp[3*col+2] = vet[count+imageSize]; //red
                  ptrStp[3*col+1] = ptrAn[3*col+1];
@@ -151,11 +250,10 @@ void revertAnaglyph(IplImage *frame, char *imageType){
         }
      }
      cvSaveImage("Par_Estereo.bmp",stereoPair);
-     printf("Reversao para par estereo feita com sucesso! - Par_Estereo.bmp\n");       
+     printf("Ok!\n");       
      cvReleaseImage(&stereoPair);
-     free(vet);
+     free(vet);*/
 }
-
 
 /*
   Get the stereo pair and create the green-magenta anaglyph. Copy the removed channels
@@ -164,28 +262,26 @@ void revertAnaglyph(IplImage *frame, char *imageType){
   Entries: frameL, frameR - stores left and right image, respectively
 */
 void createAnaglyph(IplImage *frameL, IplImage *frameR){
-    IplImage *anaglyph, *aux; 
-    /* The following vector will hold channels lost during anaglyph transformation */
-    uchar *disposed_channels;
+    IplImage *anaglyph; 
+    uchar *disposed_channels; //hold channels lost during anaglyph transformation
     
     //prepare anaglyph image
     CvSize size = cvGetSize(frameL);
     anaglyph = cvCreateImage(size, frameL->depth, frameL->nChannels);
-    aux = cvCreateImage(size, frameL->depth, frameL->nChannels);
     cvZero(anaglyph);
-    cvZero(aux);
     
     //prepare vector
     int imageSize = frameL->width*frameL->height;
     disposed_channels = (uchar*)malloc(3*imageSize);
     
     //anaglyph transformation
+    printf("Criando imagem anaglifica... ");
     int count = 0;
     for(int row = 0; row < frameL->height; row++){
             //set pointer to the correct position in each row
             uchar* ptrR = (uchar*)(frameR->imageData + row * frameR->widthStep);
             uchar* ptrL = (uchar*)(frameL->imageData + row * frameL->widthStep);
-            uchar* ptrA = (uchar*)(aux->imageData + row * aux->widthStep);
+            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
             for(int col = 0; col < frameL->width; col++){
                     //copy green channel from the right image and red and blue channel from the left image
                     ptrA[3*col+1] = ptrR[3*col+1];
@@ -199,47 +295,30 @@ void createAnaglyph(IplImage *frameL, IplImage *frameR){
             }            
     }
     
-    //RGB to YUV conversion
-    for(int row = 0; row < frameL->height; row++){
-        //set pointer to the correct position in each row
-        float* ptrAn = (float*)(anaglyph->imageData + row * anaglyph->widthStep);
-        uchar* ptrAux = (uchar*)(aux->imageData + row * aux->widthStep);
-        for(int col = 0; col < frameL->width; col++){
-            /* RGB TO YUV 
-               Y = 0.299f * R + 0.587 * G + 0.114 * B
-               U = 0.565f * B - Y;
-               V = 0.713f * R - Y;
-            */
-            /* TODO: resolver essa conversão
-               Não copiar os cálculos para um IplImage, pois o openCV não salva YUV.
-               Fazer os calculos e salvar em um arquivo com a extensão .YUV
-            */
-            float Y = 0.299f * ptrAux[3*col+2] + 0.587f * ptrAux[3*col+1] + 0.114f * ptrAux[3*col];
-            ptrAn[3*col] = Y; //Y
-            ptrAn[3*col+1] = 0.565f * (ptrAux[3*col] - Y); //U
-            ptrAn[3*col+2] = 0.713f * (ptrAux[3*col+2] - Y); //V
-        }
-    }
-    
     //save junctioned image
     cvSaveImage("anaglyph.bmp", anaglyph);
-    
-    cvReleaseImage(&anaglyph);
+    printf("OK!\n");
     
     //save vector
+    printf("Criando paleta de cores... ");
     FILE *fp;
     fp = fopen("pixelData.dat", "wb");
     
     if(!fp){
-        printf("Erro na criacao de arquivo das paletas de cores. Favor verificar\n");
+        printf("Erro!\n\tErro na criacao de arquivo das paletas de cores. Favor verificar\n");
         exit(-1);
     }
     
     fwrite(disposed_channels, sizeof(uchar), 3*imageSize, fp);
     
     fclose(fp);
-    free(disposed_channels);
-    printf("\nImagem anaglifica criada com sucesso! - anaglyph.bmp\n");
+    free(disposed_channels);    
+    
+    printf("OK!\n");
+    
+    //save image in YUV color space
+    BGRtoYUV(anaglyph);    
+    cvReleaseImage(&anaglyph);
 }
 
 /* Prints help message to user */
@@ -255,23 +334,20 @@ int main(int argc, char* argv[]){
         exit(-1);  
     }
     
-    IplImage *frame;
     char *imageType = argv[2]; //-sbs:sid-by-side or -ab:above/below
-    
-    //load image
-    //images are loaded by openCV with color channels in this order: BGR
-    frame = cvLoadImage(argv[1], 1);  
-    
-    //Simple error handling
-    if(!frame){
-       printf("Erro ao abrir imagem.");
-       exit(-1);
-    }
     
     // ----- Anaglyph conversion
     if(!strcmp(argv[3],"-e")){    
-        IplImage *frameL, *frameR;
-            
+        printf("--- CONVERSAO DE IMAGEM ANAGLIFICA PARA PAR ESTEREO ---\n");
+        IplImage *frame, *frameL, *frameR;        
+        //load image
+        //images are loaded by openCV with color channels in this order: BGR
+        frame = cvLoadImage(argv[1], 1);
+        //Simple error handling
+        if(!frame){
+           printf("Erro ao abrir imagem.");
+           exit(-1);
+        }            
         //some verifications regarding the image
         if(frame->width % 2 != 0){
               printf("Imagem possui largura não divisível por 2. Favor cortar!");
@@ -302,24 +378,25 @@ int main(int argc, char* argv[]){
         
         //divide frames in two
         separateImages(frame, &frameL, &frameR, width, height, imageType);
-        
-        
+                
         //create anaglyph and auxiliary image
         createAnaglyph(frameL, frameR);      
-        
+                
+        cvReleaseImage(&frame);
         cvReleaseImage(&frameL);
         cvReleaseImage(&frameR);
     }
     // ----- Anaglyph reversion
     else if(!strcmp(argv[3],"-d")){
-        revertAnaglyph(frame, imageType);
+        printf("--- REVERSAO DE IMAGEM ANAGLIFICA PARA PAR ESTEREO ---\n");
+        //revertAnaglyph(argv[1], imageType);
+        YUVtoBGR(argv[1]);
+        //TODO:integrar a reversão de YUV pra RGB com a reversão para par estéreo. Verificar como salvar os dados em inteiro
     }
     else{
         printHelp();
         exit(-1);      
     }
-    
-    cvReleaseImage(&frame);
     
     return 0;
 }

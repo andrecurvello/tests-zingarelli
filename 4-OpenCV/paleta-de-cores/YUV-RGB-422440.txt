@@ -1,0 +1,65 @@
+Caros Rudinei e Mahteus,
+
+  Que notícia boa! Foi medido algum PSNR?
+
+  Considerando uma imagem file_in com de largura 'larg' e altura 'alt' e os canais R, G, B atribuímos os valores aos canais Y, U e V com o código abaixo:
+
+//conversao RGB para YUV       
+for(j = 0; j < file_in.larg; j++)
+    for(i = 0; i < file_in.alt; i++)
+    {
+            file_in.Y[j][i] = 0.299f * file_in.R[j][i]  + 0.587f * file_in.G[j][i] + 0.114f * file_in.B[j][i];
+            file_in.U[j][i] = 0.565f * file_in.B[j][i] - file_in.Y[j][i];
+            file_in.V[j][i] = 0.713f * file_in.R[j][i] - file_in.Y[j][i];
+
+    }//for(i = 0; i < file_in.alt; i++)
+
+  E a reversão:
+
+//conversao YUV para RGB
+for(j = 0; j < file_in.larg; j++)
+    for(i = 0; i < file_in.alt; i++)
+    {
+        file_out.R[j][i] = file_out.Y[j][i] + 1.403f * file_out.V[j][i];
+        file_out.G[j][i] = file_out.Y[j][i] - 0.344f * file_out.U[j][i] - 0.714f * file_out.V[j][i];
+        file_out.B[j][i] = file_out.Y[j][i] + 1.77f * file_out.U[j][i];
+
+    }//for(i = 0; i < file_in.alt; i++)
+
+
+  A transformação para 4:2:2 (ou 4:4:0 - mais indicada pelo artigo sendo escrito), é feita no macrobloco quadrado de largura 'tjan', como segue no código abaixo:
+
+//transformando em 4:2:2
+for(i = 0; i < file_in.ni * tjan; i++)
+{
+    k = 0;
+    for(j = 0; j < file_in.nj * tjan / 2; j++)
+    {
+        file_in.UV[j][i] = (file_in.U[k][i] + file_in.U[k + 1][i]) / 2;
+        file_in.UV[j + file_in.nj * tjan / 2][i] = (file_in.V[k][i] + file_in.V[k + 1][i]) / 2;
+        k += 2;
+
+    }//for(j = 0; j < file_in.nj * tjan / 2; j++)
+
+}//for(j = 0; j < file_in.larg; j++)
+
+
+//transformando em 4:4:0
+for(j = 0; j < file_in.nj * tjan; j++)
+{
+    k = 0;
+
+    for(i = 0; i < file_in.ni * tjan / 2; i++)
+    {
+
+        file_in.UV[j][i] = (file_in.U[j][k] + file_in.U[j][k + 1]) / 2;
+        file_in.UV[j][i + file_in.ni * tjan / 2] = (file_in.V[j][k] + file_in.V[j][k + 1]) / 2;
+        k += 2;
+
+    }//for(i = 0; i < file_in.ni * tjan / 2; i++)
+
+}//for(j = 0; j < file_in.larg; j++)
+
+
+
+  Caso apareçam dúvidas é só escrever.
