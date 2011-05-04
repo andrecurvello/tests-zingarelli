@@ -63,3 +63,11 @@ for(j = 0; j < file_in.nj * tjan; j++)
 
 
   Caso apareçam dúvidas é só escrever.
+ ====================
+  Caro Matheus,
+
+  Fiquei pensando até agora pouco a respeito da compactação a ser efetuada em seu trabalho, e acredito que existe 
+  um modo mais simples de melhorar o PSNR sem ter que representar os dados na estrutura que havia sugerido anteriormente. A estrutura que propus é interessante para valores muito baixos a serem representados por floats, mas ocupa 2 bytes (com exceção de poucos valores). No seu trabalho, mesmo com os erros de arredondamento, será necessário gravar em estruturas de 1 byte antes de aplicar a compressão sem perda pra obter ganho. Assim, encaminho 2 soluções, considerando o truncamento: guardar os dados em um vetor de bytes, se possível com sinal; se não for possível representar em uchar com a soma do shift.
+
+  Em relação ao email anterior, acho que preciso entender melhor como vc guarda as informações da paleta pra ver se é possível fazer  como vc mencionou (Y + paletas de R, G e B).
+

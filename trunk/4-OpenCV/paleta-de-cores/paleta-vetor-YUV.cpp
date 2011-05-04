@@ -24,18 +24,30 @@
 #include <cv.h>
 #include <highgui.h>
 
-/* Convert an image from YUV to RGB format, using the folliwng formuat
+/* 
+   Given a float number, returns a character with the number rounded. 
+   Input: num - float number
+   Output: rounded number stored in a signed char type
+*/
+uchar roundFloat(float num){
+     int round = (int)num;
+     if(num - round > 0.5)//rounds to ceil
+            return (uchar)num+1;
+     else return (uchar)num;
+}
+
+/* Convert an image from YUV to RGB format, using the following formula
    YUV to RGB:
        R = Y + 1.403f * V
        G = Y - 0.344f * U - 0.714f * V
        B = Y + 1.77f * U
-   Entry: yuvImg - file containg YUV data
+   Input: yuvImg - file containg YUV data
 */
 void YUVtoBGR(char *yuvImg){
      FILE *fp;
      int width, height;
      IplImage *bgrImg;
-     float *vet; //holds YUV data
+     uchar *vet; //holds YUV data
     
      //get image width and height from YUV file
      fp = fopen(yuvImg, "rb");    
@@ -48,8 +60,8 @@ void YUVtoBGR(char *yuvImg){
      cvZero(bgrImg);
      
      //get YUV data and convert to RGB
-     vet = (float*)malloc(3*imageSize*sizeof(float));
-     fread(vet, sizeof(float), 3*imageSize, fp);
+     vet = (uchar*)malloc(3*imageSize*sizeof(uchar));
+     fread(vet, sizeof(uchar), 3*imageSize, fp);
      printf("Convertendo de RGB para YUV... ");
      int count = 0;
      for(int row = 0; row < bgrImg->height; row++){
@@ -59,9 +71,9 @@ void YUVtoBGR(char *yuvImg){
             // Y -> first imageSize elements of vet -> vet[count]
             // U -> next imageSize elements of vet ->  vet[count+imageSize]
             // V -> last imageSize elements of vet ->  vet[count+2*imageSize]
-            ptr[3*col+2] = (uchar)(vet[count] + 1.403f * vet[count+2*imageSize]); //R
-            ptr[3*col+1] = (uchar)(vet[count] - 0.344f * vet[count+imageSize] - 0.714f * vet[count+2*imageSize]);//G
-            ptr[3*col] = (uchar)(vet[count] + 1.77f * vet[count+imageSize]);//B
+            ptr[3*col+2] = roundFloat(vet[count] + 1.403f * vet[count+2*imageSize]); //R
+            ptr[3*col+1] = roundFloat(vet[count] - 0.344f * vet[count+imageSize] - 0.714f * vet[count+2*imageSize]);//G
+            ptr[3*col] = roundFloat(vet[count] + 1.77f * vet[count+imageSize]);//B
             count++;
         }
      }
@@ -78,10 +90,11 @@ void YUVtoBGR(char *yuvImg){
        Y = 0.299f * R + 0.587 * G + 0.114 * B
        U = 0.565f * (B - Y);
        V = 0.713f * (R - Y);
-   Entry: img - image to be converted
+   Image is saved in a binary file containing signed char elements
+   Input: img - image to be converted
 */
 void BGRtoYUV(IplImage *img){
-    float *yuvImg;
+    uchar *yuvImg;
     int imageSize = img->width * img->height;
     FILE *fp;
     
@@ -89,7 +102,7 @@ void BGRtoYUV(IplImage *img){
     //first imageSize positions holds Y data
     //next imageSize positions holds U data
     //last imageSize positions holds V data
-    yuvImg = (float*) malloc(3*imageSize*sizeof(float));
+    yuvImg = (uchar*) malloc(3*imageSize*sizeof(uchar));
         
     //RGB to YUV conversion
     printf("Convertendo de RGB para YUV... ");
@@ -99,9 +112,9 @@ void BGRtoYUV(IplImage *img){
         uchar* ptrAn = (uchar*)(img->imageData + row * img->widthStep);
         for(int col = 0; col < img->width; col++){
             float Y = 0.299f * ptrAn[3*col+2] + 0.587f * ptrAn[3*col+1] + 0.114f * ptrAn[3*col];
-            yuvImg[count] = Y; //Y
-            yuvImg[count+imageSize] = 0.565f * (ptrAn[3*col] - Y); //U
-            yuvImg[count+2*imageSize] = 0.713f * (ptrAn[3*col+2] - Y); //V
+            yuvImg[count] = roundFloat(Y); //Y
+            yuvImg[count+imageSize] = roundFloat(0.565f * (ptrAn[3*col] - Y)); //U
+            yuvImg[count+2*imageSize] = roundFloat(0.713f * (ptrAn[3*col+2] - Y)); //V
             count++;
         }
     }
@@ -114,7 +127,7 @@ void BGRtoYUV(IplImage *img){
     }
     //first data from file have the image's width and height
     fprintf(fp, "%d %d", img->width, img->height);
-    fwrite(yuvImg, sizeof(float),3*imageSize, fp);
+    fwrite(yuvImg, sizeof(uchar),3*imageSize, fp);
     
     fclose(fp);
     free(yuvImg);
@@ -127,7 +140,7 @@ void BGRtoYUV(IplImage *img){
   it's side-by-side, the ROI will be half of the original image's width. If it's
   above-below, the ROI will be half of the original image's height. Only the pixels
   inside the ROI will be copied by cvCopy
-  Entries: frame - original image
+  Input: frame - original image
            frameL, frameR - stores left and right image, respectively
            width, height - original image dimensions
            imageType - -sbs if the original image has side-by-side images, -ab
@@ -169,7 +182,7 @@ void separateImages(IplImage *frame, IplImage **frameL, IplImage **frameR, int w
 /*
   Get an anaglyph image and create the stereo pair, using an auxiliary image to
   get channels disposed in the anaglyph process.
-  Entries: frame - anaglyph image
+  Input: frame - anaglyph image
            imageType - -sbs to create a side-by-side image or -ab to create a above-below one           
 */
 void revertAnaglyph(char *yuvImg, char *imageType){
@@ -259,7 +272,7 @@ void revertAnaglyph(char *yuvImg, char *imageType){
   Get the stereo pair and create the green-magenta anaglyph. Copy the removed channels
   to an auxiliary file to be reused in order to make the reverse process (from 
   anaglyph to stereo pair, without any losses).
-  Entries: frameL, frameR - stores left and right image, respectively
+  Input: frameL, frameR - stores left and right image, respectively
 */
 void createAnaglyph(IplImage *frameL, IplImage *frameR){
     IplImage *anaglyph; 
@@ -391,7 +404,7 @@ int main(int argc, char* argv[]){
         printf("--- REVERSAO DE IMAGEM ANAGLIFICA PARA PAR ESTEREO ---\n");
         //revertAnaglyph(argv[1], imageType);
         YUVtoBGR(argv[1]);
-        //TODO:integrar a reversão de YUV pra RGB com a reversão para par estéreo. Verificar como salvar os dados em inteiro
+        //TODO:integrar a reversão de YUV pra RGB com a reversão para par estéreo. Verificar como salvar os dados em uchar shiftado
     }
     else{
         printHelp();
