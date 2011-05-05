@@ -64,6 +64,7 @@ void YUVtoBGR(char *yuvImg){
      fread(vet, sizeof(uchar), 3*imageSize, fp);
      printf("Convertendo de RGB para YUV... ");
      int count = 0;
+     /* Fórmula do Léo
      for(int row = 0; row < bgrImg->height; row++){
         //set pointer to the correct position in each row
         uchar* ptr = (uchar*)(bgrImg->imageData + row * bgrImg->widthStep);
@@ -74,6 +75,35 @@ void YUVtoBGR(char *yuvImg){
             ptr[3*col+2] = roundFloat(vet[count] + 1.403f * vet[count+2*imageSize]); //R
             ptr[3*col+1] = roundFloat(vet[count] - 0.344f * vet[count+imageSize] - 0.714f * vet[count+2*imageSize]);//G
             ptr[3*col] = roundFloat(vet[count] + 1.77f * vet[count+imageSize]);//B
+            count++;
+        }
+     }*/
+     
+     /*test using OpenCV function
+     for(int row = 0; row < bgrImg->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptr = (uchar*)(bgrImg->imageData + row * bgrImg->widthStep);
+        for(int col = 0; col < bgrImg->width; col++){
+            ptr[3*col+2] = (uchar)vet[count+2*imageSize]; //R
+            ptr[3*col+1] = (uchar)vet[count+imageSize];//G
+            ptr[3*col] = (uchar)vet[count];//B
+            count++;
+        }
+     }
+     cvCvtColor(bgrImg, bgrImg, CV_YCrCb2BGR);    
+     */ 
+     
+     // Using openCV formula
+     for(int row = 0; row < bgrImg->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptr = (uchar*)(bgrImg->imageData + row * bgrImg->widthStep);
+        for(int col = 0; col < bgrImg->width; col++){
+            // Y -> first imageSize elements of vet -> vet[count]
+            // U -> next imageSize elements of vet ->  vet[count+imageSize]
+            // V -> last imageSize elements of vet ->  vet[count+2*imageSize]
+            ptr[3*col+2] = roundFloat(vet[count] + 1.403f * (vet[count+2*imageSize] - 128)); //R
+            ptr[3*col+1] = roundFloat(vet[count] - 0.344f * (vet[count+imageSize] - 128) - 0.714f * (vet[count+2*imageSize] - 128));//G
+            ptr[3*col] = roundFloat(vet[count] + 1.77f * (vet[count+imageSize] - 128));//B
             count++;
         }
      }
@@ -107,6 +137,7 @@ void BGRtoYUV(IplImage *img){
     //RGB to YUV conversion
     printf("Convertendo de RGB para YUV... ");
     int count = 0;
+    /* fórmula do Léo
     for(int row = 0; row < img->height; row++){
         //set pointer to the correct position in each row
         uchar* ptrAn = (uchar*)(img->imageData + row * img->widthStep);
@@ -115,6 +146,36 @@ void BGRtoYUV(IplImage *img){
             yuvImg[count] = roundFloat(Y); //Y
             yuvImg[count+imageSize] = roundFloat(0.565f * (ptrAn[3*col] - Y)); //U
             yuvImg[count+2*imageSize] = roundFloat(0.713f * (ptrAn[3*col+2] - Y)); //V
+            count++;
+        }
+    }*/
+    
+    /*test using openCV function
+    IplImage *result;
+    CvSize size = cvGetSize(img);
+    result = cvCreateImage(size, img->depth, img->nChannels);
+    cvZero(result);
+    cvCvtColor(img, result, CV_BGR2YCrCb);
+    for(int row = 0; row < result->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrAn = (uchar*)(result->imageData + row * result->widthStep);
+        for(int col = 0; col < result->width; col++){
+            yuvImg[count] = (uchar)ptrAn[3*col]; //Y
+            yuvImg[count+imageSize] = (uchar)ptrAn[3*col+1];//U
+            yuvImg[count+2*imageSize] = (uchar)ptrAn[3*col+2]; //V
+            count++;
+        }
+    }*/
+        
+    //OpenCV Formula
+    for(int row = 0; row < img->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrAn = (uchar*)(img->imageData + row * img->widthStep);
+        for(int col = 0; col < img->width; col++){
+            float Y = 0.299f * ptrAn[3*col+2] + 0.587f * ptrAn[3*col+1] + 0.114f * ptrAn[3*col];
+            yuvImg[count] = roundFloat(Y); //Y
+            yuvImg[count+imageSize] = roundFloat(0.564f * (ptrAn[3*col] - Y) + 128); //U
+            yuvImg[count+2*imageSize] = roundFloat(0.713f * (ptrAn[3*col+2] - Y) + 128); //V
             count++;
         }
     }
