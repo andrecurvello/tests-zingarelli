@@ -23,7 +23,7 @@
   OBSERVAÇÃO[2]: também devido a essa ambiguidade, não sabíamos se as palavras
                 inválidas deveriam ser consideradas no total de palavras do texto.
                 Com isso, optamos por considerar apenas as palavras válidas para
-                serem calculadas no total.
+                serem calculadas no total, e descartamos repetições.
 */
 
 #include <stdlib.h>
@@ -74,6 +74,8 @@ char lowerCaseChar (char simbolo){
 
 /* 
    Verifica se uma palavra é válida de acordo com os requisitos ([A-Z][a-z][-][0-9])
+   Caso a palavra possua um símbolo que não pertença ao intervalo do requisito,
+   a palavra não é considerada válida
    Entradas: 
             string - palavra a ser verificada
             pa - recebe a palavra verificada. RAIZA: Serve pra mais alguma coisa?
@@ -87,7 +89,7 @@ int verificaPalavraValida(char *string, char *pa){
     	    (!((string[i]>=65)&&(string[i]<=90)))&&
     	    (!((string[i]>=97)&&(string[i]<=122)))&&
     	    (string[i]!=45)){
-    	    break; //palavra possui caracteres inválidos
+    	    return 0; //palavra possui caracteres inválidos
         }
     	pa[i] = string[i];
     	i++;	
@@ -148,22 +150,18 @@ void inserePalavra(char *stringValida, palavra *palavrasValidas, int qtde, int t
   palavras válidas que este possui. De acordo com os requisitos, uma palavra é 
   válida se contém apenas letras de A a Z, hífen, e os dígitos de 0 a 9, ignorando
   diferenças entre letras minúsculas e maiúsculas.
-   Entradas: 
-             texto - RAIZA: serve para que este??
-             palavrasValidas - lista de palavras válidas do texto
+   Entrada: palavrasValidas - lista de palavras válidas do texto
 */
-int leitura (char *texto, palavra *palavrasValidas){
+int leitura (palavra *palavrasValidas){
   int qtde=0;
   int tam;
   FILE *pt;
   pt=fopen("input.txt","r");  
   //TODO: definir o tamanho máximo da palavra
   char *string = (char*)malloc(sizeof(char)*40);  
-  char *stringValida = (char*)malloc(sizeof(char)*40);  
+  char *stringValida = (char*)malloc(sizeof(char)*40);
   while (!feof(pt)){
       fscanf(pt,"%s",string); //lê arquivo até encontrar espaço, newline ou tab
-      strcat (texto,string);
-      strcat (texto," ");
       tam = verificaPalavraValida(string, stringValida);
       if (tam>0){ //palavra válida, insere na lista caso ainda não exista
     	  if (!existePalavra(stringValida, palavrasValidas, qtde)){
@@ -171,6 +169,7 @@ int leitura (char *texto, palavra *palavrasValidas){
     	      qtde++;
     	  }
       }
+          	      
   }
   fclose(pt); 
   free(string); 
@@ -287,7 +286,7 @@ void imprimeAlfabeto(simbolo *alfabeto){
 void escreve(const int tamAlfabeto,simbolo *alfabeto, const int qtdePalavras){
     int i;
     FILE *pt;
-    pt=fopen("output.txt","a");  
+    pt=fopen("5377855-7493726-output-Horspool.txt","a");  
     //tamanho do alfabeto
     fprintf(pt,"\n%d\n",tamAlfabeto);
     //símbolos do alfabeto
@@ -359,13 +358,12 @@ void imprimeShiftTable(palavra *palavrasValidas, int tam){
 /*int main(){
     int i;
     
-    char *texto = (char*)malloc(sizeof(char)*4000); 
     //TODO:decidir o tamanho máximo da lista de palavras  
-    palavra *palavrasValidas = (palavra*)malloc(sizeof(palavra)*4000);     
+    palavra *palavrasValidas = (palavra*)malloc(sizeof(palavra)*50000);     
     simbolo *alfabeto = (simbolo*)malloc(sizeof(simbolo)*126-32+1); //armazena os símbolos de 32 a 126 da tabela ASCII
     
     //Cálculo do número total de palavras válidas no texto
-    const int QTDE_PALAVRAS = leitura (texto,palavrasValidas);
+    const int QTDE_PALAVRAS = leitura (palavrasValidas);
     
     //debug -->
     //printf ("Qtde de palavras validas encontradas = %d\n", QTDE_PALAVRAS);  
@@ -388,7 +386,6 @@ void imprimeShiftTable(palavra *palavrasValidas, int tam){
     //imprimeShiftTable(palavrasValidas, QTDE_PALAVRAS);
     //<-- debug
     
-    free(texto);
     free(palavrasValidas);
     free(alfabeto);
     return 0;

@@ -1,4 +1,3 @@
-//TODO: mostrar a posição da palavra no texto
 /*
   ICMC - USP/São Carlos         Entrega: 12/05/2011
   SCC5900-1.2001 - Projeto de Algoritmos
@@ -17,6 +16,14 @@
             - linha em branco
   
   Utilizando o algoritmo de Horspool
+  
+  OBSERVAÇÕES:
+        - Copie o texto e cole em um editor de textos simples, como o Notepad
+    do Windows, sem quebra de linha. Foi observado que textos extraídos de .zip
+    ou de editores que fazem quebra de linha adicionam caracteres a mais que irão
+    atrapalhar na hora de dizer onde começa cada ocorrência da palavra no texto.
+        - O programa possui uma limitação de entrada de no máximo 60000 palavras
+    válidas possíveis, bem como no máximo 500000 ocorrências de cada uma delas.
 */
 #include <stdio.h>
 #include <time.h>
@@ -33,7 +40,7 @@
 void horspool(palavra *listaPalavras, int qtde){    
     //armazena arquivo de texto em memória
     FILE *pt;
-    pt=fopen("input.txt","r");
+    pt=fopen("input.txt","rb");
     fseek (pt , 0 , SEEK_END);
     long tamTexto = ftell (pt); //tamanho do arquivo
     rewind (pt);
@@ -48,8 +55,9 @@ void horspool(palavra *listaPalavras, int qtde){
     constroiShiftTable(listaPalavras, qtde);
     
     //faz a busca de cada palavra no texto
-    pt=fopen("output.txt","a");  //TODO: mudar o nome
-    int i, ocorrencia;    
+    pt=fopen("5377855-7493726-output-Horspool.txt","a");
+    int i, j, ocorrencia;
+    int posicoes[500000]; //índices em que a palavra ocorre no texto  
     for(i=0; i<qtde; i++){//para cada palavra
         if(listaPalavras[i].tamPalavra>=2){
             //palavra
@@ -70,7 +78,8 @@ void horspool(palavra *listaPalavras, int qtde){
                     k++;
                 }
                 if(k == listaPalavras[i].tamPalavra){//matching de palavra
-                    ocorrencia++;
+                    posicoes[ocorrencia] = j - k + 1;
+                    ocorrencia++;                    
                     j++; //shift para continuar procurando mais ocorrências
                 }
                 else{
@@ -92,25 +101,28 @@ void horspool(palavra *listaPalavras, int qtde){
             fprintf(pt,"%d\n", ocorrencia);
             
             //posição de cada ocorrência no texto
+            for(j=0; j<ocorrencia; j++){
+                fprintf(pt, "%d ",posicoes[j]);
+            }
             
             //hora do dia      
             time(&rawtime);
             timeinfo = localtime(&rawtime);
-            fprintf (pt,"%s\n", asctime(timeinfo));
+            fprintf (pt,"\n%s\n", asctime(timeinfo));
         }
     }//for
+    free(texto);
     fclose(pt);    
 }
 
 int main(int argc, char*argv[]){
     //---------Análise do alfabeto
-    char *texto = (char*)malloc(sizeof(char)*4000); 
     //TODO:decidir o tamanho máximo da lista de palavras  
-    palavra *palavrasValidas = (palavra*)malloc(sizeof(palavra)*4000);     
+    palavra *palavrasValidas = (palavra*)malloc(sizeof(palavra)*60000);     
     simbolo *alfabeto = (simbolo*)malloc(sizeof(simbolo)*126-32+1); //armazena os símbolos de 32 a 126 da tabela ASCII
     
     //Cálculo do número total de palavras válidas no texto
-    const int QTDE_PALAVRAS = leitura (texto,palavrasValidas);
+    const int QTDE_PALAVRAS = leitura (palavrasValidas);
     //contagem de frequência de símbolos
     const int TAM_ALFABETO = calculaAlfabeto(alfabeto);
     //escrita no arquivo da análise feita
@@ -122,7 +134,6 @@ int main(int argc, char*argv[]){
     //debug-->
     //imprimeShiftTable(palavrasValidas, QTDE_PALAVRAS);
     //<--debug
-    free(texto);
     free(palavrasValidas);
     free(alfabeto);
     return 0;
