@@ -43,6 +43,8 @@ typedef struct ShiftSimbolo{
 typedef struct Palavra{
   char* p; //palavra formada por símbolos do alfabeto presente no texto
   shiftSimbolo shiftTable[4000]; //tabela de shift para cada símbolo de cada palavra TODO: VERIFICAR TAMANHO
+  int badSymbolTable [126-32+1];
+  int *goodSufixTable;
   int tamPalavra; //tamanho da palavra
 } palavra;
 
@@ -283,10 +285,10 @@ void imprimeAlfabeto(simbolo *alfabeto){
         - o número total de palavras válidas no texto (palavras com hífen são 
           consideradas como uma única palavra)
 */
-void escreve(const int tamAlfabeto,simbolo *alfabeto, const int qtdePalavras){
+void escreve(const int tamAlfabeto,simbolo *alfabeto, const int qtdePalavras, char* arquivo){
     int i;
     FILE *pt;
-    pt=fopen("5377855-7493726-output-Horspool.txt","a");  
+    pt=fopen(arquivo,"w");  
     //tamanho do alfabeto
     fprintf(pt,"\n%d\n",tamAlfabeto);
     //símbolos do alfabeto
@@ -354,40 +356,74 @@ void imprimeShiftTable(palavra *palavrasValidas, int tam){
     }
 }
 
-/* Chamada do Programa */
-/*int main(){
-    int i;
-    
-    //TODO:decidir o tamanho máximo da lista de palavras  
-    palavra *palavrasValidas = (palavra*)malloc(sizeof(palavra)*50000);     
-    simbolo *alfabeto = (simbolo*)malloc(sizeof(simbolo)*126-32+1); //armazena os símbolos de 32 a 126 da tabela ASCII
-    
-    //Cálculo do número total de palavras válidas no texto
-    const int QTDE_PALAVRAS = leitura (palavrasValidas);
-    
-    //debug -->
-    //printf ("Qtde de palavras validas encontradas = %d\n", QTDE_PALAVRAS);  
-    //imprimePalavrasValidas(palavrasValidas,QTDE_PALAVRAS);
-    //<-- debug
-    
-    //Análise do alfabeto e contagem de frequência de símbolos
-    //const int TAM_ALFABETO = calculaAlfabeto(palavrasValidas, QTDE_PALAVRAS, alfabeto);
-    const int TAM_ALFABETO = calculaAlfabeto(alfabeto);
-    
-    //debug -->
-    //imprimeAlfabeto(alfabeto);
-    //<-- debug
-    
-    escreve(TAM_ALFABETO,alfabeto,QTDE_PALAVRAS);
-    
-    constroiShiftTable(palavrasValidas, QTDE_PALAVRAS);
-    
-    //debug -->
-    //imprimeShiftTable(palavrasValidas, QTDE_PALAVRAS);
-    //<-- debug
-    
-    free(palavrasValidas);
-    free(alfabeto);
-    return 0;
-  
-}*/
+
+void constroiBadSymbolTable(palavra *palavrasValidas, int qtde){
+  int i,j,k;
+  for (i=0;i<qtde;i++){
+      for (j=0;j<126-32+1;j++)      
+	  palavrasValidas[i].badSymbolTable[j]=palavrasValidas[i].tamPalavra;
+      k=0;
+      for (j=palavrasValidas[i].tamPalavra-1;j>0;j--){
+	  palavrasValidas[i].badSymbolTable[palavrasValidas[i].p[k]-32]=j;
+	  k++;
+      }
+  }
+}
+
+void imprimeBadSymbolTable(palavra *palavrasValidas, int qtde){
+  int i,j,k;
+  char simbolo;
+  for (i=0;i<qtde;i++){
+      for (j=0;j<126-32+1;j++)      {
+	    if(!strcmp("marta",palavrasValidas[i].p)){
+	      simbolo = j;
+	      if ((!((simbolo>=48)&&(simbolo<=57)))&&
+		  (!((simbolo>=65)&&(simbolo<=90)))&&
+		  (!((simbolo>=97)&&(simbolo<=122)))&&
+		  (simbolo!=45)) //símbolo é inválido
+		  ;
+	      else printf("%c - %d\n",j,palavrasValidas[i].badSymbolTable[j]);
+	    }
+      }
+  }
+}
+
+int substring(char* p, int pos, int tam){
+  int i,j,k;
+  for (i=pos-1+(tam-1)-pos;i>=0;i--){
+      k=i;
+      for (j=tam-1;j>=pos;j--){
+	  if ((p[k]!=p[j])||(k<0)){
+	     break;}
+	  else k--;
+      }      
+      
+      if ((j<pos)||(k<0))
+	  return tam-1-i;	
+  }
+  return -1;  
+}
+
+void constroiGoodSufixTable(palavra *palavrasValidas, int qtde){
+  int i,j,k;
+  for (i=0;i<qtde;i++){	
+      palavrasValidas[i].goodSufixTable = (int*)malloc(sizeof(int)*palavrasValidas[i].tamPalavra+1);
+      for (j=0;j<palavrasValidas[i].tamPalavra-1;j++){
+	   k= substring(palavrasValidas[i].p,palavrasValidas[i].tamPalavra-1-j,palavrasValidas[i].tamPalavra);
+	   if (k==-1) 
+	      palavrasValidas[i].goodSufixTable[j]=palavrasValidas[i].tamPalavra;
+	   else 
+	      palavrasValidas[i].goodSufixTable[j]=k;
+      }  
+  }
+}
+
+void imprimeGoodSufixTable(palavra *palavrasValidas, int qtde){
+  int i,j,k;
+  for (i=0;i<qtde;i++){	
+      for (j=0;j<palavrasValidas[i].tamPalavra-1;j++){
+	printf("%d ", palavrasValidas[i].goodSufixTable[j]);
+      }  
+      printf("\n");
+  }
+}
