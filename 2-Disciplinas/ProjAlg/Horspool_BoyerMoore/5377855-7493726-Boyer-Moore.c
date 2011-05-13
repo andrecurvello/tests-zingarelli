@@ -24,9 +24,6 @@
     atrapalhar na hora de dizer onde começa cada ocorrência da palavra no texto.
         - O programa possui uma limitação de entrada de no máximo 60000 palavras
     válidas possíveis, bem como no máximo 500000 ocorrências de cada uma delas.
-        - Símbolos com acentuação geram dois símbolos na hora da leitura do arquivo,
-    o que prejudicou a execução do algoritmo. Com isso, muitas ocorrências de
-    palavras foram perdidas, pois o shift não contava com esses símbolos acentuados 
 */
 #include <stdio.h>
 #include <time.h>
@@ -61,11 +58,30 @@ void boyerMoore(palavra *listaPalavras, int qtde){
     fread (texto,1,tamTexto,pt);
     fclose(pt);
     
-    //cria tabelas
+    //Tratamento no texto
+   int a,b,count=0;
+   a=0; 
+   for (b=0;b<tamTexto;b++){
+	if ((texto[b]>=1)&&(texto[b]<=256)){
+	    texto[a]=texto[b]; a++; //printf("%c",texto[a]); a++;    
+	}
+	if (b<tamTexto-2){
+	    //if (!((texto[b]>=1)&&(texto[b]<=256))&&!((texto[b+1]>=1)&&(texto[b+1]<=256))){
+	    if (!((texto[b]>=1)&&(texto[b]<=256))){
+		//texto[a]=texto[b]; printf("%c.",texto[b]); a++;count++; 		
+		texto[a]=-1; a++; //printf ("%c",texto[a]); a++;
+	    }
+	}
+   }
+   texto[a]='\0';
+   tamTexto-=count;
+   
+       //cria tabelas
     constroiBadSymbolTable(listaPalavras, qtde);   
     constroiGoodSufixTable(listaPalavras, qtde);
 
     int posicoes[500000]; //índices em que a palavra ocorre no texto  
+    
     
     //faz a busca de cada palavra no texto
     pt=fopen("5377855-7493726-output-Boyer-Moore.txt","a");
@@ -99,19 +115,21 @@ void boyerMoore(palavra *listaPalavras, int qtde){
 				k=tam-1-p;   //qntde de acerto	= posicao de t menos a posicao do q deu o miss
 
 				caracter = texto[t-k];
+				if ((caracter>=65)&&(caracter<=90))
+				      caracter = caracter+32;				
 		
 				if ((!((caracter>=48)&&(caracter<=57)))&& (!((caracter>=65)&&(caracter<=90)))&&
 					(!((caracter>=97)&&(caracter<=122)))&& (caracter!=45))
-					  t1 = 5;
-				else t1 = listaPalavras[i].badSymbolTable[texto[t-k]-32];
+					  t1 = listaPalavras[i].tamPalavra;
+				else t1 = listaPalavras[i].badSymbolTable[caracter-32];
 		
 				d1 = maior(t1-k,1);
 				if (k>0){
 					d2 = listaPalavras[i].goodSufixTable[k-1];
 					d = maior(d1,d2);
 				}
-				else d=d1;	    
-				t+=d;	      
+				else d=d1;
+				t=t+d;
 				}
 				//fim do algoritmo
 				    //grava no arquivo quantas vezes encontrou a palavra	    
@@ -145,7 +163,7 @@ int main(int argc, char*argv[]){
     char *arquivo=(char*)malloc(sizeof(char)*45);
     strcpy(arquivo,"5377855-7493726-output-Boyer-Moore.txt");   
     escreve(TAM_ALFABETO,alfabeto,QTDE_PALAVRAS,arquivo);
-    
+     
     //---------String Matching
     boyerMoore(palavrasValidas, QTDE_PALAVRAS);
     
