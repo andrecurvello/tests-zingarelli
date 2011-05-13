@@ -15,7 +15,7 @@
             - em uma linha: time of the day
             - linha em branco
   
-  Utilizando o algoritmo de Horspool
+  Utilizando o algoritmo de Boyer-Moore
   
   OBSERVAÇÕES:
         - Copie o texto e cole em um editor de textos simples, como o Notepad
@@ -24,20 +24,29 @@
     atrapalhar na hora de dizer onde começa cada ocorrência da palavra no texto.
         - O programa possui uma limitação de entrada de no máximo 60000 palavras
     válidas possíveis, bem como no máximo 500000 ocorrências de cada uma delas.
+        - Símbolos com acentuação geram dois símbolos na hora da leitura do arquivo,
+    o que prejudicou a execução do algoritmo. Com isso, muitas ocorrências de
+    palavras foram perdidas, pois o shift não contava com esses símbolos acentuados 
 */
 #include <stdio.h>
 #include <time.h>
 #include "alphabet_analysis.c"
 
+int maior(int num1, int num2){
+    if (num1>num2)
+	return num1;
+    return num2;
+}
+
 /*
-    Utiliza o algoritmo de Horspool para encontrar o número de ocorrências e a
+    Utiliza o algoritmo de Boyer Moore para encontrar o número de ocorrências e a
     posição de cada ocorrência de cada palavra na lista de palavras em relação
     a um texto.
     Entradas:
         listaPalavras - lista de palavras
         qtde - quantidade de palavras na lista
 */
-void horspool(palavra *listaPalavras, int qtde){    
+void boyerMoore(palavra *listaPalavras, int qtde){    
     //armazena arquivo de texto em memória
     FILE *pt;
     pt=fopen("input.txt","rb");
@@ -51,66 +60,74 @@ void horspool(palavra *listaPalavras, int qtde){
     }
     fread (texto,1,tamTexto,pt);
     fclose(pt);
-    //cria a tabela de shift
-    constroiShiftTable(listaPalavras, qtde);
+    
+    //cria tabelas
+    constroiBadSymbolTable(listaPalavras, qtde);   
+    constroiGoodSufixTable(listaPalavras, qtde);
+
+    int posicoes[500000]; //índices em que a palavra ocorre no texto  
     
     //faz a busca de cada palavra no texto
-    pt=fopen("5377855-7493726-output-Horspool.txt","a");
-    int i, j, ocorrencia;
-    int posicoes[500000]; //índices em que a palavra ocorre no texto  
-    for(i=0; i<qtde; i++){//para cada palavra
-        if(listaPalavras[i].tamPalavra>=2){
-            //palavra
+    pt=fopen("5377855-7493726-output-Boyer-Moore.txt","a");
+
+    char caracter;
+    int i,j,t,p,d,tam,k,t1,d2,d1,qtde_achou;
+    for (i=0;i<qtde;i++){
+	tam =listaPalavras[i].tamPalavra;
+	if(tam>=2){
+            //grava no arquivo a palavra
             fprintf(pt,"%s\n",listaPalavras[i].p);
-            //hora do dia
+            //grava no arquivo a hora do dia
             time_t rawtime;
             struct tm * timeinfo;        
             time(&rawtime);
             timeinfo = localtime(&rawtime);
             fprintf (pt,"%s", asctime(timeinfo));
-    
-            ocorrencia = 0;
-            int j = listaPalavras[i].tamPalavra-1; //guarda a posição para o último caracter da palavra
-            while(j < tamTexto){ //enquanto não atingiu o fim do texto
-                int k = 0; //número de caracteres que deram match
-                //enquanto houver matching de cada caracter
-                while(k < listaPalavras[i].tamPalavra && listaPalavras[i].p[listaPalavras[i].tamPalavra - k - 1] == lowerCaseChar(texto[j-k])){
-                    k++;
-                }
-                if(k == listaPalavras[i].tamPalavra){//matching de palavra
-                    posicoes[ocorrencia] = j - k + 1;
-                    ocorrencia++;                    
-                    j++; //shift para continuar procurando mais ocorrências
-                }
-                else{
-                    //Validação adicional!!
-                    //estamos considerando apenas um subconjunto de caracteres da 
-                    //tabela ASCII como sendo símbolos válidos. Qualquer outro símbolo 
-                    //fora da tabela ASCII, tal como ç, ¬ dentre outros serão considerados
-                    // inválidos e o shift será o tamanho da palavra
-                    if(texto[j]<32 || texto[j]>126){
-                        j += listaPalavras[i].tamPalavra;
-                    }
-                    else{
-                        j += listaPalavras[i].shiftTable[lowerCaseChar(texto[j])-32].shiftStep;
-                    }
-                }
-            }//while
-            
-            //número de ocorrências
-            fprintf(pt,"%d\n", ocorrencia);
-            
-            //posição de cada ocorrência no texto
-            for(j=0; j<ocorrencia; j++){
-                fprintf(pt, "%d ",posicoes[j]);
-            }
-            
-            //hora do dia      
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
-            fprintf (pt,"\n%s\n", asctime(timeinfo));
-        }
-    }//for
+				//inicia algoritmo
+				t=tam-1;
+				qtde_achou=0;
+				while (t<tamTexto){
+				p=tam-1; k=t;
+				while (lowerCaseChar(texto[k])==listaPalavras[i].p[p] && (p>=0)){
+					p--;k--;
+				}
+				if (p<0){
+					posicoes[qtde_achou]=t-(tam-1);
+					qtde_achou++;
+				}
+		
+				k=tam-1-p;   //qntde de acerto	= posicao de t menos a posicao do q deu o miss
+
+				caracter = texto[t-k];
+		
+				if ((!((caracter>=48)&&(caracter<=57)))&& (!((caracter>=65)&&(caracter<=90)))&&
+					(!((caracter>=97)&&(caracter<=122)))&& (caracter!=45))
+					  t1 = 5;
+				else t1 = listaPalavras[i].badSymbolTable[texto[t-k]-32];
+		
+				d1 = maior(t1-k,1);
+				if (k>0){
+					d2 = listaPalavras[i].goodSufixTable[k-1];
+					d = maior(d1,d2);
+				}
+				else d=d1;	    
+				t+=d;	      
+				}
+				//fim do algoritmo
+				    //grava no arquivo quantas vezes encontrou a palavra	    
+				    fprintf(pt,"%d\n",qtde_achou);
+				    //grava no arquivo as posicoes em que a palavra foi encontrada
+				for (j=0;j<qtde_achou;j++){
+				fprintf(pt,"%d ",posicoes[j]);	      
+				}
+				    //grava no arquivo a hora do dia
+				    time(&rawtime);
+				    timeinfo = localtime(&rawtime);
+				    fprintf (pt,"\n%s\n", asctime(timeinfo));
+
+			}
+    } 
+
     free(texto);
     fclose(pt);    
 }
@@ -126,15 +143,12 @@ int main(int argc, char*argv[]){
     const int TAM_ALFABETO = calculaAlfabeto(alfabeto);
     //escrita no arquivo da análise feita
     char *arquivo=(char*)malloc(sizeof(char)*45);
-    strcpy(arquivo,"5377855-7493726-output-Horspool.txt");   
+    strcpy(arquivo,"5377855-7493726-output-Boyer-Moore.txt");   
     escreve(TAM_ALFABETO,alfabeto,QTDE_PALAVRAS,arquivo);
     
     //---------String Matching
-    horspool(palavrasValidas, QTDE_PALAVRAS);
+    boyerMoore(palavrasValidas, QTDE_PALAVRAS);
     
-    //debug-->
-    //imprimeShiftTable(palavrasValidas, QTDE_PALAVRAS);
-    //<--debug
     free(palavrasValidas);
     free(alfabeto);
     return 0;
