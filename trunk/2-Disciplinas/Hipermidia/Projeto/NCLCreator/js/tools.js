@@ -31,30 +31,40 @@ $(function(){
 		}
 	});
 	
-	$("#getNCL").click(function(){
+	$("#getNCL").submit(function(){
 		//get width, height, top and left position of each region
+		arr = new Array();
 		$(".box").each(function(index){
-			style = $(this).attr("style").split(' ');
-			regId = $(this).attr("id");
-			document.write('ID: ' + regId + '<br />');
-			for(i = 0; i < style.length; i++){//for each attribute, store the ones we're interested in
-				switch(style[i]){
-					case "left:":
-						document.write('left: '+style[i+1]+'<br />');
-						break;
-					case 'top:':
-						document.write('top: '+style[i+1]+'<br />');
-						break;
-					case 'width:':
-						document.write('width: '+style[i+1]+'<br />');
-						break;
-					case 'height:':
-						document.write('height: '+style[i+1]+'<br />');
-						break;
-				}
-			}
-			//TODO:construid JSON com os dados e enviar para o PHP
+			/*var left = $(this).css("left");
+			var top = $(this).css("top");
+			var width = $(this).css("width");
+			var height = $(this).css("height");
+			document.write(left);
+			document.write(top);
+			document.write(width);
+			document.write(height);*/
+			arr[0] = $(this).attr("id");
+			arr[1] = $(this).css("left");
+			arr[2] = $(this).css("top");
+			arr[3] = $(this).css("width");
+			arr[4] = $(this).css("height");
+			//TODO:construir JSON com os dados e enviar para o PHP fazer funcionar
 		});
+		bigarr[]=arr;
+		dados = [0,02,36,6];
+		//send AJAX request 
+		alert("entrando");
+		$.post('getNCL.php', {array: bigarr }, 
+			function(data){
+				if (data){
+					$("#toolbar").append("<a href='teste.xml'>Download do arquivo</a>");				
+				}
+				else{
+					document.write('nada');					
+				}
+			});
+		alert("saindo");
 		return false;
 	});
+
 });
