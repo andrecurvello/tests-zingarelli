@@ -36,8 +36,8 @@ class NCLDocument {
 		$doc->formatOutput = true;
 		
 		/*set file to be downloaded by user*/
-		header('Content-type: "text/xml"; charset="ISO-8859-1"');
-    	header('Content-disposition: attachment; filename="example.xml"');
+		/*header('Content-type: "text/xml"; charset="ISO-8859-1"');
+    	header('Content-disposition: attachment; filename="example.xml"');*/
 		
 		$ncl = $doc->createElement("ncl");
 		$ncl->setAttribute("id",$appName);
@@ -73,7 +73,7 @@ class NCLDocument {
 			$desc = $descriptorbase->appendChild($desc);
 		}
 		
-		foreach($this->port as $reg) {
+		/*foreach($this->port as $reg) {
 			$port = $doc->createElement("port");
 			$port->setAttribute('id',$reg['id']);
 			$port->setAttribute('component',$reg['component']);
@@ -87,8 +87,8 @@ class NCLDocument {
 			$media->setAttribute("src",$reg['src']);
 			$media->setAttribute("descriptor",$reg['descriptor']);
 			$media = $body->appendChild($media);
-		}		
+		}		*/
 		
-		print $doc->saveXML();
+		$doc->save("teste.xml");
 	}
 }?>
