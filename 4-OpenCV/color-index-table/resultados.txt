@@ -1,0 +1,21 @@
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
+1 - Conversão do par estéreo para YCbCr e armazenamento de Cb e Cr de cada imagem na tabela de índice de cores. Cálculo do Y para a reversão através do anaglífico green-magenta. Sem subsampling.
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
+Resultados:
+- Sem subsampling, a tab. de índ. de cores possui um tamanho 1/3 maior do que a imagem anaglífica, gerando no total um arquivo maior do que o par estéreo
+- O processo de reversão gera um par estéreo visível, porém a imagem fica distorcida, apresentando dados misturados de cada imagem do par estéreo.
+- PSNR em média 22dB.
+- Ao utilizar o par estéreo revertido para obter um novo anaglífico, este perde todas as características de profundidade.
+
+
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
+1 - Conversão do par estéreo para YCbCr e armazenamento de Cb e Cr de cada imagem na tabela de índice de cores. Cálculo do Y para a reversão através do anaglífico green-magenta.
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
+Resultados:
+- a tabela de índices é 1/3 menor do que a imagem anaglífica, gerando no total um arquivo 16% menor do que o par estéreo. (arquivo original: 1306624bytes, arquivo comprimido com a técnica: 1093632).
+- O PSNR giou em torno de 22dB tbm.
+- Na comparação da imagem formada sem subamostragem e com subamostragem, obteve-se um PSNR de 50dB.
+
+
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
+-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
