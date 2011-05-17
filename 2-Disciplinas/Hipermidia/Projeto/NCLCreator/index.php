@@ -10,14 +10,18 @@
 </head>
 <body>
 	<div id="desktop">
+		<!-- Elementos sem backgroun -->
 		<div id="selectable">
 		</div>		
+		<!-- Elementos de mídia (imagens, vídeo, flash) -->
+		<div id="image"></div>
 	</div>
 	<div id="toolbar">
 		<a href="#" id="createRegion">Criar região</a><br />
 		<a href="#" id="createTextBox">Criar caixa de texto</a><br />
 		<a href="#" id="createVideo">Adicionar vídeo</a><br />
 		<a href="#" id="createSound">Adicionar som</a><br />
+		<a href="#" id="createImage">Adicionar imagem</a><br />
 		<form action="getNCL.php" id="getNCL" method="post">
 			<input id="btngetNCL" type="submit" title="Gerar Arquivo NCL" value="Gerar Arquivo NCL" />
 		</form>
