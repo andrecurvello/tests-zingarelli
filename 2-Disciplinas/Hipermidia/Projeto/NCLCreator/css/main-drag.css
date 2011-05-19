@@ -1,17 +1,33 @@
 /*CSS Document*/
 form{margin:0}
+ul{padding:0}
 
 a:VISITED{color: blue;}
+
+html{background:#259f92;}
+body{
+	margin:0 auto;
+	background:url(../img/bg.jpg) repeat-x;
+	font-family:"Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+h1{
+    font-family: "Comic Sans MS",cursive;
+    font-size: 32pt;
+    margin-bottom: 15px;
+    text-align: center;
+    text-decoration: underline;
+}
 
 .box {
     border: 1px solid orange;
     height: 100px;
-    left: 50px;
-    position: relative;
-    top: 50px;
+    left: 0;
+    position: absolute;
+    top: 0;
     width: 100px;
 	text-align:center;
-	background:url("../img/backyardigans-1-thumb.jpg");
+	background:#dbf7bb;
 }
 
 .right{float:right;}
@@ -19,31 +35,37 @@ a:VISITED{color: blue;}
 
 
 #desktop {
-    border: 1px solid;
-    height: 550px;
+    border: 2px solid;
+    height: 530px;
     width: 1000px;
     margin: 0 auto 10px auto;
+	background:#95b76d;
+	-moz-border-radius:10px; 
+	-webkit-border-radius:10px;
 }
 
 #toolbar {
-    border: 1px solid;
+    border: 2px solid;
     width: 1000px;
-    height: 190px;
+    height: 150px;
     margin: 0 auto;
+	background:#95b76d;
+	-moz-border-radius:20px; 
+	-webkit-border-radius:20px;	
 }
 
-#menu, #sub-menu{margin:20px}
+#menu{margin:10px 0 0 50px;}
 
 #menu li{list-style:none;margin-bottom:5px;}
 
-#selectable{
-    left: 50px;
+#sub-menu{margin:20px 0 20px 20px;}
+
+#selectable, #media{
+    left: 0;
     position: relative;
-    text-align: center;
-    top: 60px;
-    width: 90%;
+    top: 0;
 }
 
 /*CSS to work with selectable elements*/
 #selectable .ui-selecting{background:#F9EACC;}
-/*#selectable .ui-selected{background:#FCD894;}*/
+#selectable .ui-selected{background:#dbf7bb;}
