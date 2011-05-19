@@ -7,7 +7,7 @@ class NCLDocument {
 //	private $link;
 //	private $bind;
 		
-	public function addRegion($id,$left,$top,$width,$height,$descriptorName) {
+	public function addRegion($id,$left=0,$top=0,$width,$height,$descriptorName) {
 		$this->regionBase[] = array(
 			'id'			=>	$id,
 			'left'			=>	$left,	
@@ -127,8 +127,6 @@ class NCLDocument {
 		*/
 		
 		
-		
-		/*
 		foreach($this->port as $reg) {
 			$port = $doc->createElement("port");
 			$port->setAttribute('id',$reg['id']);
@@ -143,8 +141,7 @@ class NCLDocument {
 			$media->setAttribute("src",$reg['src']);
 			$media->setAttribute("descriptor",$reg['descriptor']);
 			$media = $body->appendChild($media);
-		}	
-		*/
+		}
 		
 		
 		//Cria os links e os binds....

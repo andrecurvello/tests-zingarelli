@@ -10,21 +10,39 @@
 </head>
 <body>
 	<div id="desktop">
-		<!-- Elementos sem backgroun -->
+		<!-- Elementos sem background -->
 		<div id="selectable">
 		</div>		
 		<!-- Elementos de mídia (imagens, vídeo, flash) -->
 		<div id="image"></div>
 	</div>
 	<div id="toolbar">
-		<a href="#" id="createRegion">Criar região</a><br />
-		<a href="#" id="createTextBox">Criar caixa de texto</a><br />
-		<a href="#" id="createVideo">Adicionar vídeo</a><br />
-		<a href="#" id="createSound">Adicionar som</a><br />
-		<a href="#" id="createImage">Adicionar imagem</a><br />
-		<form action="getNCL.php" id="getNCL" method="post">
-			<input id="btngetNCL" type="submit" title="Gerar Arquivo NCL" value="Gerar Arquivo NCL" />
-		</form>
+		<ul id="menu" class="left">
+			<li><a href="#" id="createRegion" title="Adicionar região">Adicionar região</a></li>
+			<li><a href="#" id="createTextBox" title="Adicionar caixa de texto">Adicionar caixa de texto</a></li>
+			<li><a href="#" id="createVideo" title="Adicionar vídeo">Adicionar vídeo</a></li>
+			<li><a href="#" id="createSound" title="Adicionar som">Adicionar som</a></li>
+			<li>
+				<a href="#" id="createImage" title="Adicionar imagem">Adicionar imagem</a>
+			</li>		
+			<li>
+				<form action="getNCL.php" id="getNCL" method="post">
+					<input id="btngetNCL" type="submit" title="Gerar NCL" value="Gerar NCL" />
+				</form>
+			</li>
+		</ul>
+		<div id="sub-menu" class="left">
+			<div id="text-menu" >
+				<textarea rows="6" cols="20"></textarea>
+				<input type="button" id="btnText" value="Ok" />
+			</div>
+			<div id="image-menu" >
+				<span>Localização da imagem: </span>
+				<input type="file" id="imagePath"/>
+				<input type="submit" id="btnImage" value="Ok" />
+				<span><a href="#" title="Cancelar" id="cancelImage">Cancelar</a></span>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

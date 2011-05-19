@@ -1,4 +1,7 @@
 /*CSS Document*/
+form{margin:0}
+
+a:VISITED{color: blue;}
 
 .box {
     border: 1px solid orange;
@@ -17,23 +20,21 @@
 
 #desktop {
     border: 1px solid;
-    float: left;
-    height: 90%;
-    width: 65%;
+    height: 550px;
+    width: 1000px;
+    margin: 0 auto 10px auto;
 }
 
 #toolbar {
     border: 1px solid;
-    float: left;
-    height: 90%;
-    left: 20px;
-    position: relative;
-    width: 30%;
+    width: 1000px;
+    height: 190px;
+    margin: 0 auto;
 }
 
-#toolbar a{
-	margin-left:20px;
-}
+#menu, #sub-menu{margin:20px}
+
+#menu li{list-style:none;margin-bottom:5px;}
 
 #selectable{
     left: 50px;

@@ -1,4 +1,7 @@
 $(function(){
+	$("#image-menu").hide();
+	$("#text-menu").hide();
+	
 	idCounter = 0;
 	
 	$("#desktop").click(function(){
@@ -9,22 +12,23 @@ $(function(){
 		$("#selectable").append("<div class='box' id='box-"+ idCounter++ +"'>Drag and Resize me!</div>")
 	});
 	
+	/*Tratamendo para adição de imagem*/
 	$("#createImage").click(function(){
-		sourcePath = prompt("Caminho da imagem");
-		$("#image").append("<img class='image' src='"+sourcePath+"'>");
-		$("#image img").resizable();
-		//infelizmente, a imagem consegue ultrapassar a área delimitada para se trabalhar...
-		//tutorial tirado em http://bugs.jqueryui.com/ticket/3446
+		$("#image-menu").show('fast');
 	});
-	
-	/*Tratamento para mídias*/
-	$("#image").css("width","1px");
-	$("#image")
-		.draggable({
-			containment:'#desktop',
-			stack:'#desktop div',
-			opacity:0.40});
-	
+	$("#cancelImage").click(function(){$("#image-menu").hide('fast');});
+	$("#btnImage").click(function(){alert("oi");
+		$("#image").append("<div style='width:1px;' class='image-wrapper'><img id='image-"+ idCounter++ +"' class='image' src='"+$("#imagePath").val()+"'></div>");
+		$("#image div").draggable({
+							containment:'#desktop', //define os limites de onde a região pode ser arrastada
+							stack:'#desktop div', //define o z-index da imagem, que regiões ficarão abaixo dela
+							opacity:0.40,
+							grid: [10, 10]}); //nível de opacidade para quando se está arrastando a imagem
+		$("#image img").resizable({grid: [10, 10]});
+		//infelizmente, a imagem consegue ultrapassar a área delimitada para se trabalhar, pois quem é draggable é a div.
+		//não é possível tornar a imagem draggable e resizable. Por isso é criado um div.
+		//tutorial tirado em http://bugs.jqueryui.com/ticket/3446	
+	});
 	
 	/*Tratamento para outros (que nome dar??)*/
 	$("#selectable").selectable({
@@ -33,8 +37,9 @@ $(function(){
 				.draggable({
 					containment:'#desktop',
 					stack:'#desktop div',
-					opacity:0.40})
-				.resizable();
+					opacity:0.40,
+					grid: [10, 10] })
+				.resizable({grid: [10, 10]});
 		},
 		selected:function(event, ui){
 			$(".ui-selected")
@@ -42,7 +47,7 @@ $(function(){
 					containment:'#desktop',
 					stack:'#desktop div',
 					opacity:0.40})
-				.resizable();	
+				.resizable({grid: [10, 10]});	
 		},
 		unselected:function(event, ui){
 			$(".ui-selectee").draggable('destroy').resizable('destroy');
@@ -54,31 +59,27 @@ $(function(){
 		arr = new Array();
 		control = 0;
 		$(".box").each(function(index){
-			/*var left = $(this).css("left");
-			var top = $(this).css("top");
-			var width = $(this).css("width");
-			var height = $(this).css("height");
-			document.write(left);
-			document.write(top);
-			document.write(width);
-			document.write(height);
-			arr[0] = $(this).attr("id");
-			arr[1] = $(this).css("left");
-			arr[2] = $(this).css("top");
-			arr[3] = $(this).css("width");
-			arr[4] = $(this).css("height"); */
-			
-			//Esse foi o jeito que consegui de fazer o troço...
-			//Não tenho certeza sobre o "region" se e preciso ou não... De qualquer forma, aí está....
-			//Zinga: Ta, entendi que o region é pra vc controlar que tipo está sendo passado, blz...
 			arr[control] = ['region', $(this).attr("id"), $(this).css("left"), $(this).css("top"), $(this).css("width"), $(this).css("height"), "descriptor-" + $(this).attr("id")];
+			control++;
+		});
+		$(".image").each(function(index){
+			arr[control] = ['media',
+			                "region-"+$(this).attr("id"),
+			                $(this).parent().css("left"),
+			                $(this).parent().css("top"), 
+			                $(this).css("width"), 
+			                $(this).css("height"), 
+			                "descriptor-" + $(this).attr("id"), 
+			                $(this).attr("id"), 
+			                "image/jpeg",
+			                $(this).attr("src")];
 			control++;
 		});
 		//send post request 
 		$.post('getNCL.php', {array: arr }, 
 			function(data){
 				if (data){
-					$("#toolbar").append("<a href='teste.xml'>Download do arquivo</a>");				
+					$("#sub-menu").append("<a target='_blank' href='teste.xml'>Download do arquivo</a>");				
 				}
 				else{
 					document.write('nada');					
