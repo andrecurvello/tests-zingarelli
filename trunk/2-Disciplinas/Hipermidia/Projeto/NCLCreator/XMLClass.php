@@ -163,6 +163,6 @@ class NCLDocument {
 		}	*/
 		
 		
-		$doc->save("teste.xml");
+		$doc->save("teste.ncl");
 	}
 }?>

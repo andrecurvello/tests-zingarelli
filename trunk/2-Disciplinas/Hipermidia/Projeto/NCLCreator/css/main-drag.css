@@ -36,7 +36,7 @@ h1{
 
 #desktop {
     border: 2px solid;
-    height: 530px;
+    height: 550px;
     width: 1000px;
     margin: 0 auto 10px auto;
 	background:#95b76d;
@@ -47,7 +47,7 @@ h1{
 #toolbar {
     border: 2px solid;
     width: 1000px;
-    height: 150px;
+    height: 130px;
     margin: 0 auto;
 	background:#95b76d;
 	-moz-border-radius:20px; 

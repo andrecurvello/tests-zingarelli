@@ -111,7 +111,7 @@ $(function(){
 			                $(this).css("height"), 
 			                "descriptor-" + $(this).attr("id"), 
 			                $(this).attr("id"), 
-			                "image/jpeg", //colocar descritor de video
+			                "video/mpeg", //colocar descritor de video
 			                srcVideo];
 			control++;
 		});
@@ -132,7 +132,7 @@ $(function(){
 		$.post('getNCL.php', {array: arr }, 
 			function(data){
 				if (data){
-					$("#sub-menu").append("<a target='_blank' href='teste.xml'>Download do arquivo</a>");				
+					$("#sub-menu").append("<a target='_blank' href='teste.ncl'>Download do arquivo</a>");				
 				}
 				else{
 					alert('error');					
