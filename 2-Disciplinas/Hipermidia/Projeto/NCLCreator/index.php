@@ -22,7 +22,6 @@
 		<ul id="menu" class="left">
 			<li><a href="#" id="createRegion" title="Adicionar região">Adicionar região</a></li>
 			<li><a href="#" id="createVideo" title="Adicionar vídeo">Adicionar vídeo</a></li>
-			<li><a href="#" id="createFlash" title="Adicionar flash">Adicionar flash</a></li>
 			<li><a href="#" id="createImage" title="Adicionar imagem">Adicionar imagem</a></li>		
 			<li>
 				<form action="getNCL.php" id="getNCL" method="post">
