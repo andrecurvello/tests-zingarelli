@@ -1,0 +1,53 @@
+SCC0261 MULTIMÍDIA - 1º SEMESTRE DE 2011
+DOCENTE: RUDINEI GOULARTE
+
+PROJETO: COMPRESSÃO DE IMAGEM DIGITAL PARTE 3
+
+
+ALUNOS:
+    Jairo Toshio Tuboi         6427250
+    Ricardo Takashi Kagawa        5634712
+    Rodrigo Luis Gava Girckus     5967770
+
+
+Integrante que fez o upload do projeto: Jairo Toshio Tuboi
+
+
+1. Estruturas de dados e algoritmos utilizados
+ 
+    No arquivo parte3.h temos:
+	- FloatingPointBlock: bloco de numeros floats para calcular os coeficientes DCT.
+	- DCTMultipliers: multiplicadores para calcular os coeficientes DCT.
+
+    Algoritmo da codificação: 
+        1. Lemos os cabeçalhos do arquivo bitmap.
+        2. Verificamos os cabeçalhos.
+        3. Lemos o corpo do arquivo bitmap byte a byte.
+        4. Separamos os bytes em 3 matrizes de cores.
+        5. Separamos cada matriz de cor em blocos de 8 por 8 pixels.
+        6. Normalizamos cada byte decrementando seu valor em 128.
+	7*. Aplicamos a DCT2.
+	8*. Aplicamos a quantização.
+        9. Vetorizamos os blocos.
+        10. Codificamos os valores do DC da cada bloco por diferença.
+        11. Geramos os códigos Huffman dos metadados DCs.
+        12. Codificamos os valores do AC da cada bloco por carreira.
+        13. Geramos os códigos Huffman dos metadados ACs.
+	14. Escrevemos o cabeçalho no arquivo binário.
+        15. Escrevemos o decodificador Huffman para DCs no arquivo binário.
+        16. Escrevemos o decodificador Huffman para ACs no arquivo binário.
+        17. Codificamos e escrevemos no arquivo binário os DCs codificados.
+        18. Codificamos e escrevemos no arquivo binário os ACs codificados.
+    *: Novos passos adicionados à parte 3.
+
+    Algoritmo da decodificação:
+        Esse algorítmo é simétrico ao algorítmo da codificação sem contar a parte em que a árvore de Huffman é lida direto do arquivo ao invés de ser construídos a partir dos dados.
+
+
+2. Justificativas das decisões de projeto
+
+- Os multiplicadores foram armazenados no DCTMultipliers para não ter que ficar recalculando a cada coeficiente DCT.
+
+- Usamos a DCT normalizada para usar a mesma transformação para decodificar.
+
+- Usamos o arredondamento half even por motivos estatísticos.
