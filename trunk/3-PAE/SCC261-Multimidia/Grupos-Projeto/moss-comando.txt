@@ -1,1 +1,1 @@
-./moss -l c -d grupo1/*.c grupo1/*.h grupo2/*.c grupo2/*.h grupo3/*.c grupo3/*.h grupo4/*.c grupo4/*.h grupo6/*.c grupo6/*.h grupo7/*.c grupo7/*.h grupo8/*.c grupo8/*.h 
+./moss -l c -d grupo1/*.c grupo1/*.h grupo2/*.c grupo2/*.h grupo3/*.c grupo3/*.h grupo4/*.c grupo4/*.h grupo6/*.c grupo6/*.h grupo7/*.c grupo7/*.h grupo8/*.c grupo8/*.h grupo10/*.c grupo10/*.h 
