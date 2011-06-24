@@ -2,3 +2,4 @@
 - Artigo do Adikari 2005 propõe uma compressão de vídeos estéreo baseado no H.264 explorando disparidade e correlação. Seria bom utilizá-lo na revisão bibliográfica.
 - Ver artigos do Journal do Léo na parte de compressão
 - As propostas de trabalho visam mostrar o que falta ser feito e como se resolver isso. Estratégias de resolução.
+- Livro do Lipton, pag 27 do pdf tem que 8% da população não enxerga imagem estereo.
