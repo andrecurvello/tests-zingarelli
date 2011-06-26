@@ -70,11 +70,12 @@ a img{border:none;}
 }
 
 #container-text {
-    left: 40px;
     position: relative;
     text-align: justify;
     top: 55px;
     width: 450px;
+	margin: auto;
+}
 }
 
 #container-atelie {
