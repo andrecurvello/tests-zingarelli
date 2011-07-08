@@ -3,3 +3,4 @@
 - Ver artigos do Journal do Léo na parte de compressão
 - As propostas de trabalho visam mostrar o que falta ser feito e como se resolver isso. Estratégias de resolução.
 - Livro do Lipton, pag 27 do pdf tem que 8% da população não enxerga imagem estereo.
+- Referência lista de jogos ps3 3D: http://blog.us.playstation.com/2011/07/01/stereoscopic-3d-on-ps3-updated-list-of-all-3d-games-and-movies/
