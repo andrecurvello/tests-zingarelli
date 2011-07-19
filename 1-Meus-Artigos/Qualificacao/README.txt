@@ -6,3 +6,4 @@
 - Referência lista de jogos ps3 3D: http://blog.us.playstation.com/2011/07/01/stereoscopic-3d-on-ps3-updated-list-of-all-3d-games-and-movies/
 - Site do Video Quality Experts Group (VQEG) com base de testes e documentos de padrões http://www.its.bldrdoc.gov/vqeg/
 - ITU-T Recommendation http://www.itu.int/en/ITU-T/publications/Pages/recs.aspx
+- Ler o Livro do Mendiburu para a parte introdutória
