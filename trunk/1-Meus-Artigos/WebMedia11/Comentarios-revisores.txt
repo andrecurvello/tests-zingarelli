@@ -1,0 +1,20 @@
+----------------------- REVIEW 1 ---------------------
+PAPER: 41
+TITLE: Reversing Anaglyph Videos Into Stereo Pairs
+AUTHORS: Matheus Ricardo Uihara Zingarelli, Leonardo Antonio Andrade and Rudinei Goularte
+
+OVERALL RATING: 2 (accept)
+REVIEWER'S CONFIDENCE: 0 (null)
+
+This paper clearly presents a novel technique for reversing anaglyph videos into stereo parts; the technical description is readable even for an outsider and the experiment is well organized and performed, confirming the authors' claims
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 41
+TITLE: Reversing Anaglyph Videos Into Stereo Pairs
+AUTHORS: Matheus Ricardo Uihara Zingarelli, Leonardo Antonio Andrade and Rudinei Goularte
+
+OVERALL RATING: 2 (accept)
+REVIEWER'S CONFIDENCE: 1 (low)
+
+Este artigo apresenta uma proposta de codificação e posterior recuperação de pares stereo que resulta numa perda de percepção de profundidade aceitável. A problemática de compressão de video 3D, a proposta de uso da técnica de reversão de video anáglifico, os métodos utilizados, os experimentos realizados e os resultados obtidos foram apresentados de forma clara e coerente. Entretanto teria sido interessante poder ter mais resultados com reduções diferentes.
