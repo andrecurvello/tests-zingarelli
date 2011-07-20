@@ -7,3 +7,5 @@
 - Site do Video Quality Experts Group (VQEG) com base de testes e documentos de padrões http://www.its.bldrdoc.gov/vqeg/
 - ITU-T Recommendation http://www.itu.int/en/ITU-T/publications/Pages/recs.aspx
 - Ler o Livro do Mendiburu para a parte introdutória
+- Lembrar de deixar palavras em inglês em itálico.
+- referência para monitores autoestereocópicos: ver dodgson
