@@ -85,7 +85,6 @@ void reverseAnaglyph(char *file, char *imageType){
     printf("OK!\n");
     
     //recreate complement, type 4:4:4
-    //TODO: VERIFY THIS STEP
     printf("Recreating complement... ");
     int k = 0; //iterate through cit data   
     count = 0; //iterate through luminance data
@@ -94,25 +93,32 @@ void reverseAnaglyph(char *file, char *imageType){
             //set pointer to the correct position in each row
             uchar* ptrC = (uchar*)(complement->imageData + row * complement->widthStep);                
             //return to type 4:4:4
+            //when in an odd row, we need to copy values from the last row due to 
+            //4:4:0 subsampling. We achieve this by returning complement->width
+            //positions in k's value.
+            if(row % 2 != 0){
+                k -= complement->width;
+            }            
             for(int col = 0; col < complement->width; col++){
                 ptrC[3*col] = Y[count]; //luminance
                 ptrC[3*col+1] = cit[k]; //Cb
                 ptrC[3*col+2] = cit[k+(imageSize/2)]; //Cr      
-                count++;                        
-            }
-            //only increment k if it's an odd row (odd rows receive the same 
-            //Cb and Cr from even rows due to 4:4:0 subsampling)
-            if(row % 2 != 0){
+                count++;
                 k++;
             }
-        }
+        }        
     }
     printf("OK!\n");
+    
+    //TODO: above-below
     
     //convert from YCbCr to RGB color space
     cvCvtColor(complement, complement, CV_YCrCb2BGR);
     cvCvtColor(anaglyph, anaglyph, CV_YCrCb2BGR);
-    cvSaveImage("complement-reversed.bmp", complement);
+    
+    //debug anaglyphs RGB
+    //cvSaveImage("complement-reversed.bmp", complement);
+    //cvSaveImage("green-magenta-reversed.bmp", anaglyph);
     
     //Reverting..
     printf("Reverting anaglyph image to stereo pair... ");
@@ -185,7 +191,7 @@ void reverseAnaglyph(char *file, char *imageType){
     reversed[strlen(file)+8-11] = 'r';
     reversed[strlen(file)+8-12] = '-';
     cvSaveImage(reversed, stereoPair);
-    printf("Ok!\n");       
+    printf("OK!\n");       
     cvReleaseImage(&stereoPair);
     cvReleaseImage(&anaglyph);
     free(Y);
@@ -204,7 +210,7 @@ void reverseAnaglyph(char *file, char *imageType){
 void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     IplImage *anaglyph, *complement;
     
-    //prepare anaglyph image
+    //green-magenta anaglyph
     CvSize size = cvGetSize(frameL);
     anaglyph = cvCreateImage(size, frameL->depth, frameL->nChannels);
     cvZero(anaglyph);
@@ -236,11 +242,19 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     }
     printf("OK!\n");
     
+    //debug anaglyphs RGB
+    //cvSaveImage("green-magenta.bmp", anaglyph);
+    //cvSaveImage("complementary.bmp", complement);
+        
     //YCbCr conversion
     printf("Converting from RGB to YCbCr color space... ");
     cvCvtColor(complement, complement, CV_BGR2YCrCb);
     cvCvtColor(anaglyph, anaglyph, CV_BGR2YCrCb);
     printf("OK!\n");
+    
+    //debug anaglyphs YCbCr
+    //cvSaveImage("green-magenta-YUV.bmp", anaglyph);
+    //cvSaveImage("complementary-YUV.bmp", complement);
     
     //----- 4:4:0 SUBSAMPLING
     
@@ -279,12 +293,19 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     for(int row = 0; row < complement->height; row++){
         //set pointer to the correct position in each row
         uchar* ptrAn = (uchar*)(complement->imageData + row * complement->widthStep);
-        //subsampling Cr and Cb on even rows
+        //copy values of Cb and Cr on even rows
         if(row % 2 == 0){
-            for(int col = 0; col < (complement->width)/2; col++){
-                //TODO: STORE AVERAGE VALUE PIXELS OF EVEN AND ODD ROWS
+            for(int col = 0; col < complement->width; col++){
                 cit[count]                   = ptrAn[3*col+1]; //Cb
                 cit[count+(imageSize/2)]     = ptrAn[3*col+2]; //Cr
+                count++;
+            }
+        }
+        else{//return width positions on cit and calculate the average values including Cr and Cr of odd rows
+            count -= complement->width;
+            for(int col = 0; col < complement->width; col++){
+                cit[count]                   = (cit[count]+ ptrAn[3*col+1])/2; //Cb
+                cit[count+(imageSize/2)]     = (cit[count+(imageSize/2)] + ptrAn[3*col+2])/2; //Cr
                 count++;
             }
         }
@@ -337,10 +358,8 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     fileAnaglyph[strlen(file)+8-10] = 'n';
     fileAnaglyph[strlen(file)+8-11] = 'a';
     fileAnaglyph[strlen(file)+8-12] = '-';
-    cvSaveImage(fileAnaglyph, anaglyph);    
-    //cvSaveImage("complement.bmp", complement);
-
-    
+    cvSaveImage(fileAnaglyph, anaglyph);  //YCbCr  
+        
     free(fileAnaglyph);
     cvReleaseImage(&anaglyph);
 }
