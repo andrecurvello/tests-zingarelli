@@ -23,3 +23,9 @@ Início da estratégia utilizando o anáglifo complementar, isto é, cria-se o anágl
 	2.3 Pasta "Anaglifico-complementar" -> "sub-440-no-par-estereo" > ABORDAGEM PARA O SAC 2011
 	===============================================================
 	Primeira abordagem para melhorar a compressão obtida na abordagem 2.2. Agora iremos armazenar tanto o anáglifo principal quanto o complementar (sem a componente Y) convertidos para YCbCr e utilizando a subamostragem 4:4:0. Esse tipo de subamostragem foi testado pelo Leonardo A. Andrade e se mostrou de qualidade superior ante os outros tipos de subamostragem. A hipótese é que isso ocorre porque na 4:4:0, a subamostragem é feita horizontalmente (de uma linha armazena as componentes Y, Cb e Cr de cada pixel, da próxima, apenas a componente Y e assim por diante), o que não afetaria tanto pelo fato de a gente ter os olhos na horizontal. Na 4:2:2, a subamostragem é feita verticalmente (a cada pixel, numa varredura da esquerda para a direita, de cima para baixo, é amostrado as componentes Y, Cb e Cr, e no próximo pixel, somente a componente Y, e assim por diante). Com a 4:2:2, temos perda na resolução horizontal, o que afetaria a qualidade por nossa visão também ser na horizontal.
+		========================================================================
+		2.3.1 Mudança para subamostragem 4:4:0 apenas no anaglífico complementar
+		========================================================================
+		Fazendo 4:4:0 apenas no anaglífico complementar já mostrou melhorias no PSNR, porém, bem pequenas. Utilizando a imagem hei02.bmp, o PSNR na abordagem 2.2 foi de: (R)33,8311 (G)32,3433 (B)34,2682
+		O PSNR utilizando a abordagem 2.3.1 foi de: (R)34,0332 (G)32,5591 (B) 34,5182.
+		Com isso, conseguiu-se uma melhoria de (R)0,2021 (G)0,2158 (B)0,25
