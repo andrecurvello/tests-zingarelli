@@ -1,7 +1,7 @@
 /* 
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: August, 3rd 2011
-  Last modification: August, 3rd 2011
+  Last modification: August, 8th 2011
   
   Anaglyph conversion / reversion using YCbCr color space with 4:4:0 subsampling
   on both images of the stereo pair.
@@ -18,6 +18,105 @@
 #include <stdio.h>
 #include <cv.h>
 #include <highgui.h>
+
+#define WITHOUT_Y 0
+#define WITH_Y 1
+
+/*
+  Apply 4:4:0 subsampling on an image.
+  Input: 
+        image - image source to be subsampled
+        keepY - boolean variable to keep or not the luminance (Y) component
+  Output: data subsampled
+*/
+uchar *subsampling440(IplImage *image, int keepY){
+    //YCbCr conversion
+    printf("Converting from RGB to YCbCr color space... ");
+    cvCvtColor(image, image, CV_BGR2YCrCb);
+    printf("OK!\n");
+    
+    //container for subsampled data
+    int imageSize = image->width * image->height;
+    /* 
+      subData variable may or may not hold data the luminance component. For a normal
+      image, we would have 3 matrices, each holding data from one of the components
+      (one for Y, one for Cb and one for Cr) and each with a lenght of width*height
+      pixels, thus needing to store 3*imageSize pixels. If the Y is not needed
+      (for the color index table), this reduces into storing 2*imageSize pixels.
+      And since we're applying a 4:4:0 subsampling, we're reducing data from Cb 
+      and Cr to a half, thus needing to store 1/2*imageSize pixels for Cb and 1/2*imageSize
+      pixels for Cr, which means we only need to store data for 1*imageSize pixels or
+      2*imageSize pixels, depending on if we need to keep or not the Y component
+    */
+    uchar *subData; 
+    if(keepY){
+        subData = (uchar*) malloc(2*imageSize*sizeof(uchar));
+    } else{
+        subData = (uchar*) malloc(imageSize*sizeof(uchar));
+    }
+    
+    printf("Subsampling 4:4:0... ");
+    int count = 0;
+    if(keepY){
+        //TODO: implement
+    } else{
+        for(int row = 0; row < image->height; row++){
+            //set pointer to the correct position in each row
+            uchar* ptr = (uchar*)(image->imageData + row * image->widthStep);
+            //copy values of Cb and Cr on even rows
+            if(row % 2 == 0){
+                for(int col = 0; col < image->width; col++){
+                    subData[count]                   = ptr[3*col+1]; //Cb
+                    subData[count+(imageSize/2)]     = ptr[3*col+2]; //Cr
+                    count++;
+                }
+            }
+            else{//return width positions on cit and calculate the average values including Cr and Cr of odd rows
+                count -= image->width;
+                for(int col = 0; col < image->width; col++){
+                    subData[count]                   = (subData[count]+ ptr[3*col+1])/2; //Cb
+                    subData[count+(imageSize/2)]     = (subData[count+(imageSize/2)] + ptr[3*col+2])/2; //Cr
+                    count++;
+                }
+            }
+        }
+    }
+    printf("OK\n");
+    
+    return subData;    
+}
+
+/*
+  Apply 4:2:2 subsampling on an image (TODO: needs to be tested)
+  Input: 
+        image - image source to be subsampled
+  Output: data subsampled
+*/
+//YCbCr conversion
+uchar *subsampling422(IplImage * image){
+    printf("Converting from RGB to YCbCr color space... ");
+    cvCvtColor(image, image, CV_BGR2YCrCb);
+    printf("OK!\n");
+    
+    //container for color index table data
+    int imageSize = image->width * image->height;
+    uchar *cit = (uchar*) malloc(imageSize*sizeof(uchar));    
+    
+    printf("Subsampling 4:2:2... ");
+    int count = 0;
+    for(int row = 0; row < image->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrAn = (uchar*)(image->imageData + row * image->widthStep);
+        //subsampling Cr and Cb
+        int k = 0; //will control the subsampling
+        for(int col = 0; col < (image->width)/2; col++){
+            cit[count]                   = (ptrAn[3*(col+k)+1] + ptrAn[3*(col+k+1)+1])/2; //Cb
+            cit[count+(imageSize/2)]     = (ptrAn[3*(col+k)+2] + ptrAn[3*(col+k+1)+2])/2; //Cr
+            count++;
+            k++;
+        }
+    }
+}
 
 /*
   Get an anaglyph image and create the stereo pair, using the color index table
@@ -245,73 +344,14 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     //debug anaglyphs RGB
     //cvSaveImage("green-magenta.bmp", anaglyph);
     //cvSaveImage("complementary.bmp", complement);
-        
-    //YCbCr conversion
-    printf("Converting from RGB to YCbCr color space... ");
-    cvCvtColor(complement, complement, CV_BGR2YCrCb);
-    cvCvtColor(anaglyph, anaglyph, CV_BGR2YCrCb);
-    printf("OK!\n");
-    
-    //debug anaglyphs YCbCr
-    //cvSaveImage("green-magenta-YUV.bmp", anaglyph);
-    //cvSaveImage("complementary-YUV.bmp", complement);
-    
-    //----- 4:4:0 SUBSAMPLING
     
     //--- Color Index Table
     int imageSize = frameL->width * frameL->height;
-    /* cit variable will hold data from the color index table. For a normal image,
-       we would have 3 matrices, each holding data from one of the components (one
-       for Y, one for Cb and one for Cr) and each with a lenght of width*height
-       pixels, thus needing to store 3*imageSize pixels. Since we don't need the Y
-       component, this reduces to storing 2*imageSize pixels. And since we're applying
-       a 4:4:0 subsampling, we're reducing data from Cb and Cr to a half, thus we
-       need to store 1/2*imageSize pixels for Cb and 1/2*imageSize pixels for Cr,
-       which means we only need to store data for 1*imageSize pixels.
-    */
-    uchar *cit = (uchar*) malloc(imageSize*sizeof(uchar));   
-    
-    //4:2:2 subsampling
-    /*printf("Subsampling 4:2:2... ");
-    int count = 0;
-    for(int row = 0; row < complement->height; row++){
-        //set pointer to the correct position in each row
-        uchar* ptrAn = (uchar*)(complement->imageData + row * complement->widthStep);
-        //subsampling Cr and Cb
-        int k = 0; //will control the subsampling
-        for(int col = 0; col < (complement->width)/2; col++){
-            cit[count]                   = (ptrAn[3*(col+k)+1] + ptrAn[3*(col+k+1)+1])/2; //Cb
-            cit[count+(imageSize/2)]     = (ptrAn[3*(col+k)+2] + ptrAn[3*(col+k+1)+2])/2; //Cr
-            count++;
-            k++;
-        }
-    }*/
+    uchar *cit = (uchar*) malloc(imageSize*sizeof(uchar)); 
     
     //4:4:0 subsampling
-    printf("Subsampling 4:4:0... ");
-    int count = 0;
-    for(int row = 0; row < complement->height; row++){
-        //set pointer to the correct position in each row
-        uchar* ptrAn = (uchar*)(complement->imageData + row * complement->widthStep);
-        //copy values of Cb and Cr on even rows
-        if(row % 2 == 0){
-            for(int col = 0; col < complement->width; col++){
-                cit[count]                   = ptrAn[3*col+1]; //Cb
-                cit[count+(imageSize/2)]     = ptrAn[3*col+2]; //Cr
-                count++;
-            }
-        }
-        else{//return width positions on cit and calculate the average values including Cr and Cr of odd rows
-            count -= complement->width;
-            for(int col = 0; col < complement->width; col++){
-                cit[count]                   = (cit[count]+ ptrAn[3*col+1])/2; //Cb
-                cit[count+(imageSize/2)]     = (cit[count+(imageSize/2)] + ptrAn[3*col+2])/2; //Cr
-                count++;
-            }
-        }
-    }
-    printf("OK\n");
-    
+    cit = (uchar*)subsampling440(complement, WITHOUT_Y);  
+              
     //Saving CIT file
     char* newFile = (char*) malloc(sizeof(char)*(strlen(file)+9));
     strcpy(newFile, file);
@@ -340,7 +380,8 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     cvReleaseImage(&complement);
     
     //TODO: 4:4:0 SUBSAMPLE ON MAIN ANAGLYPH
-    //save junctioned image
+    cvCvtColor(anaglyph, anaglyph, CV_BGR2YCrCb);
+    //save junctioned imag
     char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(file)+9));
     strcpy(fileAnaglyph, file);
     int i;
