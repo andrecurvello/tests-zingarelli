@@ -256,8 +256,8 @@ void reverseAnaglyph(char *file, char *imageType){
     cvCvtColor(anaglyph, anaglyph, CV_YCrCb2BGR);
     
     //debug anaglyphs RGB
-    cvSaveImage("complement-reversed.bmp", complement);
-    cvSaveImage("green-magenta-reversed.bmp", anaglyph);
+    //cvSaveImage("complement-reversed.bmp", complement);
+    //cvSaveImage("green-magenta-reversed.bmp", anaglyph);
     
     //Reverting..
     //TODO: above-below
@@ -371,8 +371,8 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     printf("OK!\n");
     
     //debug anaglyphs RGB
-    cvSaveImage("green-magenta.bmp", anaglyph);
-    cvSaveImage("complementary.bmp", complement);
+    //cvSaveImage("green-magenta.bmp", anaglyph);
+    //cvSaveImage("complementary.bmp", complement);
     
     //SUBSAMPLING COMPLEMENTARY ANAGLYPH AND CREATING COLOR INDEX TABLE
     printf("Complementary anaglyph subsampling\n");
@@ -382,7 +382,7 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
               
     //Saving CIT file
     char* fileNoExtension = strtok(file,".");
-    char* newFile = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+14));
+    char* newFile = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+18));
     strcpy(newFile, fileNoExtension);
     strcat(newFile,"-complementary.dat");
     FILE *fp = fopen(newFile,"wb");
@@ -401,7 +401,7 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     uchar *subsampleData = (uchar*)malloc(2*imageSize*sizeof(uchar));
     subsampleData = (uchar*)subsampling440(anaglyph,WITH_Y);
     //save junctioned imag
-    char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+5));
+    char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+9));
     strcpy(fileAnaglyph, fileNoExtension);
     strcat(fileAnaglyph,"-main.dat");
     fp = fopen(fileAnaglyph, "wb");
