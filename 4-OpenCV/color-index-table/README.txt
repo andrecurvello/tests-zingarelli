@@ -29,3 +29,8 @@ Início da estratégia utilizando o anáglifo complementar, isto é, cria-se o anágl
 		Fazendo 4:4:0 apenas no anaglífico complementar já mostrou melhorias no PSNR, porém, bem pequenas. Utilizando a imagem hei02.bmp, o PSNR na abordagem 2.2 foi de: (R)33,8311 (G)32,3433 (B)34,2682
 		O PSNR utilizando a abordagem 2.3.1 foi de: (R)34,0332 (G)32,5591 (B) 34,5182.
 		Com isso, conseguiu-se uma melhoria de (R)0,2021 (G)0,2158 (B)0,25
+		
+		========================================================================
+		2.3.2 Mudança para subamostragem 4:4:0 nos dois anáglifos
+		========================================================================
+		Obteve-se uma boa taxa de compressão. O arquivo original da imagem hei02.bmp possuía 3.110.456 bytes e após o processo de conversão anaglífica ficou com 768.901 bytes, cerca de 25% do tamanho original! O PSNR  foi de (R)33,3792 (G)32,3195 (B) 33,3792, um pouco abaixo do da abordagem 2.2
