@@ -1,0 +1,2 @@
+Tamanho de arquivos de uma pasta (arquivo por arquivo)
+for %I in (*.rar) do @echo %~zI
