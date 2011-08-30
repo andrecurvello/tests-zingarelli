@@ -252,10 +252,27 @@ void reverseAnaglyph(char *file, char *imageType){
     printf("Recreating anaglyphs to subsampling type 4:4:4... ");
     int countY = 0; //iterate through Y data   
     int countCbCr = 0; //iterate through Cb and Cr data
-    for(int row = 0; row < complement->height; row++){
-        //set pointer to the correct position in each row
-        uchar* ptrC = (uchar*)(complement->imageData + row * complement->widthStep); 
-        uchar* ptrM = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);              
+    char **YM =  NULL;
+    char **CbM = NULL;
+    char **CrM = NULL;
+    char **YA =  NULL;
+    char **CbA = NULL;
+    char **CrA = NULL;
+    YM =  (char**)malloc(complement->height*sizeof(char*));
+    CbM = (char**)malloc(complement->height*sizeof(char*));
+    CrM = (char**)malloc(complement->height*sizeof(char*));
+    YA =  (char**)malloc(complement->height*sizeof(char*));
+    CbA = (char**)malloc(complement->height*sizeof(char*));
+    CrA = (char**)malloc(complement->height*sizeof(char*));
+    for(int i = 0; i < complement->width; i++){
+        YM[i] =  (char*)malloc(complement->width*sizeof(char));
+        CbM[i] = (char*)malloc(complement->width*sizeof(char));
+        CrM[i] = (char*)malloc(complement->width*sizeof(char));
+        YA[i] =  (char*)malloc(complement->width*sizeof(char));
+        CbA[i] = (char*)malloc(complement->width*sizeof(char));
+        CrA[i] = (char*)malloc(complement->width*sizeof(char));
+    }
+    for(int row = 0; row < complement->height; row++){          
         //return to type 4:4:4
         //when in an odd row, we need to copy values from the last row due to 
         //4:4:0 subsampling. We achieve this by returning complement->width
@@ -265,13 +282,13 @@ void reverseAnaglyph(char *file, char *imageType){
         }     
         for(int col = 0; col < complement->width; col++){
             //complementary
-            ptrC[3*col]   = Y[countY]+128; //Y
-            ptrC[3*col+1] = cit[countCbCr]+128; //Cb
-            ptrC[3*col+2] = cit[countCbCr+(imageSize/2)]+128; //Cr
+            YA[row][col]  = Y[countY]+128; //Y
+            CbA[row][col] = cit[countCbCr]+128; //Cb
+            CrA[row][col] = cit[countCbCr+(imageSize/2)]+128; //Cr
             //main
-            ptrM[3*col]   = mainAnaglyphData[countY+imageSize]+128; //Y
-            ptrM[3*col+1] = mainAnaglyphData[countCbCr]+128; //Cb
-            ptrM[3*col+2] = mainAnaglyphData[countCbCr+(imageSize/2)]+128; //Cr
+            YM[row][col]  = mainAnaglyphData[countY+imageSize]+128; //Y
+            CbM[row][col] = mainAnaglyphData[countCbCr]+128; //Cb
+            CrM[row][col] = mainAnaglyphData[countCbCr+(imageSize/2)]+128; //Cr
             countY++;
             countCbCr++;
         }
@@ -282,6 +299,17 @@ void reverseAnaglyph(char *file, char *imageType){
     //TODO: converter na mão
     //cvCvtColor(complement, complement, CV_YCrCb2BGR);
     //cvCvtColor(anaglyph, anaglyph, CV_YCrCb2BGR);
+    /*for(int row = 0; row < complement->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptr = (uchar*)(complement->imageData + row * complement->widthStep);
+        for(int col = 0; col < image->width; col++){
+            float luminance = (0.299f * (ptr[3*col+2] - shift) + 0.587f * (ptr[3*col+1] - shift) + 0.114f * (ptr[3*col] - shift));
+            YComponent [row][col] = (char)luminance;
+            Cb[row][col] = (char)(0.565f * (ptr[3*col] - shift) - luminance);
+            Cr[row][col] = (char)(0.713f * (ptr[3*col+2] - shift) - luminance);            
+        }
+    }*/
+    
     
     //debug anaglyphs RGB
     //cvSaveImage("complement-reversed.bmp", complement);
@@ -290,20 +318,27 @@ void reverseAnaglyph(char *file, char *imageType){
     //Reverting..
     //TODO: above-below
     printf("Reverting anaglyph image to stereo pair... ");
+    int shift = 128;
     if(!strcmp(imageType, "-sbs")){    
         for(int row = 0; row < anaglyph->height; row++){
             //set pointer to the correct position in each row
-            uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
-            uchar* ptrAn = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);                
-            uchar* ptrAc = (uchar*)(complement->imageData + row * complement->widthStep);                
-            //return to type 4:4:4
+            uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);
             for(int col = 0; col < anaglyph->width; col++){
-                ptrStp[3*col] = ptrAn[3*col]; //B left
-                ptrStp[3*(col+anaglyph->width)] = ptrAc[3*col];; //B right
-                ptrStp[3*col+1] = ptrAc[3*col+1]; //G left
-                ptrStp[3*col+2] = ptrAn[3*col+2]; //R left
-                ptrStp[3*(col+anaglyph->width)+1] = ptrAn[3*col+1]; //G right
-                ptrStp[3*(col+anaglyph->width)+2] = ptrAc[3*col+2]; //R right
+                //revert from YCbCr to RGB
+                uchar RM, GM, BM, RA, GA, BA;
+                RM = (uchar)(YM[row][col] + 1.403f * CrM[row][col] + 128);
+                GM = (uchar)(YM[row][col] - 0.344f * CbM[row][col] - 0.714f * CrM[row][col] + 128);
+                BM = (uchar)(YM[row][col] + 1.77f * CbM[row][col] + 128);
+                RA = (uchar)(YA[row][col] + 1.403f * CrA[row][col] + 128);
+                GA = (uchar)(YA[row][col] - 0.344f * CbA[row][col] - 0.714f * CrA[row][col] + 128);
+                BA = (uchar)(YM[row][col] + 1.77f * CbM[row][col] + 128);
+                
+                ptrStp[3*col] = BM; //B left
+                ptrStp[3*(col+anaglyph->width)] = BA; //B right
+                ptrStp[3*col+1] = GA; //G left
+                ptrStp[3*col+2] = RM; //R left
+                ptrStp[3*(col+anaglyph->width)+1] = GM; //G right
+                ptrStp[3*(col+anaglyph->width)+2] = RA; //R right
             }
         }
     }
