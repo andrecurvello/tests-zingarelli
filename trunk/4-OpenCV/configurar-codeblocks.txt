@@ -1,0 +1,5 @@
+Configurar OpenCV no Codeblocks:
+
+Fazer a configuração usando o OpenCV-2.1.0-win32-vs2008.exe. Se usar outro, pode ser que tenha que alterar todos os arquivos já criados para mudar o path dos includes!!
+
+http://xcodelovers.wordpress.com/2011/02/03/tutorial-integrating-codeblocks-and-opencv-2-1-0/
