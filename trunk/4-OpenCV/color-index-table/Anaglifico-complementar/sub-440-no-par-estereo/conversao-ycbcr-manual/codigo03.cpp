@@ -29,20 +29,21 @@
         keepY - boolean variable to keep or not the luminance (Y) component
   Output: data subsampled
 */
-char *subsampling440(IplImage *image, int keepY){
+//char *subsampling440(IplImage *image, int keepY){
+float *subsampling440(IplImage *image, int keepY){    
     //YCbCr conversion
     printf("\tConverting from RGB to YCbCr color space... ");
     //cvCvtColor(image, image, CV_BGR2YCrCb);
-    char **Y =  NULL;
-    char **Cb = NULL;
-    char **Cr = NULL;
-    Y =  (char**)malloc(image->height*sizeof(char*));
-    Cb = (char**)malloc(image->height*sizeof(char*));
-    Cr = (char**)malloc(image->height*sizeof(char*));
-    for(int i = 0; i < image->width; i++){
-        Y[i] =  (char*)malloc(image->width*sizeof(char));
-        Cb[i] = (char*)malloc(image->width*sizeof(char));
-        Cr[i] = (char*)malloc(image->width*sizeof(char));
+    float **Y =  NULL;
+    float **Cb = NULL;
+    float **Cr = NULL;
+    Y =  (float**)malloc(image->height*sizeof(float*));
+    Cb = (float**)malloc(image->height*sizeof(float*));
+    Cr = (float**)malloc(image->height*sizeof(float*));
+    for(int i = 0; i < image->height; i++){
+        Y[i] =  (float*)malloc(image->width*sizeof(float));
+        Cb[i] = (float*)malloc(image->width*sizeof(float));
+        Cr[i] = (float*)malloc(image->width*sizeof(float));
     }
     int shift = 128;
     for(int row = 0; row < image->height; row++){
@@ -50,9 +51,9 @@ char *subsampling440(IplImage *image, int keepY){
         uchar* ptr = (uchar*)(image->imageData + row * image->widthStep);
         for(int col = 0; col < image->width; col++){
             float luminance = (0.299f * (ptr[3*col+2] - shift) + 0.587f * (ptr[3*col+1] - shift) + 0.114f * (ptr[3*col] - shift));
-            Y[row][col] = (char)luminance;
-            Cb[row][col] = (char)(0.565f * ((ptr[3*col] - shift) - luminance));
-            Cr[row][col] = (char)(0.713f * ((ptr[3*col+2] - shift) - luminance));
+            Y[row][col]  = (float)luminance;
+            Cb[row][col] = (float)(0.565f * ((ptr[3*col] - shift) - luminance));
+            Cr[row][col] = (float)(0.713f * ((ptr[3*col+2] - shift) - luminance));
         }
     }
     printf("OK!\n");
@@ -70,33 +71,41 @@ char *subsampling440(IplImage *image, int keepY){
       pixels for Cr, which means we only need to store data for 1*imageSize pixels or
       2*imageSize pixels, depending on if we need to keep or not the Y component
     */
-    char *subData = NULL;
+    //char *subData = NULL;
+    float *subData = NULL;    
     //subData iterators
     int countY = 0;
     int countCbCr = 0;
     
     printf("\tSubsampling 4:4:0... ");
     if(keepY){ //main anaglyph subsampling
-        subData = (char*) malloc(2*imageSize*sizeof(char));
+        //subData = (char*) malloc(2*imageSize*sizeof(char));
+        subData = (float*) malloc(2*imageSize*sizeof(float));
         for(int row = 0; row < image->height; row++){          
             if(row % 2 == 0){
                 //copy Y, Cb and Cr values of even rows
                 for(int col = 0; col < image->width; col++){
-                    subData[countCbCr] =                    Cb[row][col]; //Cb
-                    subData[countCbCr+imageSize/2] =        Cr[row][col]; //Cr
-                    subData[countY+imageSize] =             Y[row][col];   //Y
+                    /*subData[countCbCr]             = (char)round(Cb[row][col]); //Cb
+                    subData[countCbCr+imageSize/2] = (char)round(Cr[row][col]); //Cr
+                    subData[countY+imageSize]      = (char)round(Y[row][col]);   //Y*/
+                    subData[countCbCr]             = Cb[row][col]; //Cb
+                    subData[countCbCr+imageSize/2] = Cr[row][col]; //Cr
+                    subData[countY+imageSize]      = Y[row][col];   //Y
                     countY++;
                     countCbCr++;                    
-                }//column iteration
+                }//column iteration 
             }//if even rows
             else{
                 //copy Y, backtrack width positions on Cb and Cr portions of CIT and 
                 //calculate the average values including Cr and Cr of odd rows
                 countCbCr -= image->width;
                 for(int col = 0; col < image->width; col++){
-                    subData[countCbCr] =                    (subData[countCbCr]+Cb[row][col])/2; //Cb
-                    subData[countCbCr+imageSize/2] =        (subData[countCbCr+imageSize/2] + Cr[row][col])/2; //Cr
-                    subData[countY+imageSize] =             Y[row][col]; //Y
+                    /*subData[countCbCr]             = (char)round((subData[countCbCr]+Cb[row][col])/2); //Cb
+                    subData[countCbCr+imageSize/2] = (char)round((subData[countCbCr+imageSize/2] + Cr[row][col])/2); //Cr
+                    subData[countY+imageSize]      = (char)round(Y[row][col]); //Y*/
+                    subData[countCbCr]             = (subData[countCbCr]+Cb[row][col])/2; //Cb
+                    subData[countCbCr+imageSize/2] = (subData[countCbCr+imageSize/2] + Cr[row][col])/2; //Cr
+                    subData[countY+imageSize]      = Y[row][col]; //Y
                     countY++;
                     countCbCr++;
                 }//column iteration
@@ -104,10 +113,13 @@ char *subsampling440(IplImage *image, int keepY){
         }//row iteration
     }//if sampling Y
     else{ //complementary anaglyph subsampling
-        subData = (char*) malloc(imageSize*sizeof(char));
+        //subData = (char*) malloc(imageSize*sizeof(char));
+        subData = (float*) malloc(imageSize*sizeof(float));
         for(int row = 0; row < image->height; row++){
             if(row % 2 == 0){
                 for(int col = 0; col < image->width; col++){
+                    /*subData[countCbCr]                   = (char)round(Cb[row][col]); //Cb
+                    subData[countCbCr+(imageSize/2)]     = (char)round(Cr[row][col]); //Cr*/
                     subData[countCbCr]                   = Cb[row][col]; //Cb
                     subData[countCbCr+(imageSize/2)]     = Cr[row][col]; //Cr
                     countCbCr++;
@@ -118,6 +130,8 @@ char *subsampling440(IplImage *image, int keepY){
             else{
                 countCbCr -= image->width;
                 for(int col = 0; col < image->width; col++){
+                    /*subData[countCbCr]                   = (char)round((subData[countCbCr]+ Cb[row][col])/2); //Cb
+                    subData[countCbCr+(imageSize/2)]     = (char)round((subData[countCbCr+(imageSize/2)] + Cr[row][col])/2); //Cr*/
                     subData[countCbCr]                   = (subData[countCbCr]+ Cb[row][col])/2; //Cb
                     subData[countCbCr+(imageSize/2)]     = (subData[countCbCr+(imageSize/2)] + Cr[row][col])/2; //Cr
                     countCbCr++;
@@ -127,14 +141,14 @@ char *subsampling440(IplImage *image, int keepY){
     }//if not sampling Y
     printf("OK\nLiberando ponteiros... ");    
     //TODO: verificar por que o free não funfa...
-    /*for(int i = 0; i < image->width; i++){
+    for(int i = 0; i < image->height; i++){
         free(Y[i]);
-        //free(Cb[i]);
-        //free(Cr[i]);        
+        free(Cb[i]);
+        free(Cr[i]);        
     }
     free(Y);
     free(Cb);
-    free(Cr);    */
+    free(Cr);
     printf("OK\n");  
     return subData;    
 }
@@ -216,8 +230,10 @@ void reverseAnaglyph(char *file, char *imageType){
         printf(" ERROR!\nError opening main anaglyph file %s.\n", fileAnaglyph);
         exit(-1);
     }    
-    char *mainAnaglyphData = (char*) malloc(sizeof(char)*2*imageSize);
-    fread(mainAnaglyphData, sizeof(char),2*imageSize,fp);
+    /*char *mainAnaglyphData = (char*) malloc(sizeof(char)*2*imageSize);
+    fread(mainAnaglyphData, sizeof(char),2*imageSize,fp);*/
+    float *mainAnaglyphData = (float*) malloc(sizeof(float)*2*imageSize);
+    fread(mainAnaglyphData, sizeof(float),2*imageSize,fp);
     fclose(fp);
     free(fileAnaglyph);
     printf("OK!\n");
@@ -232,8 +248,10 @@ void reverseAnaglyph(char *file, char *imageType){
         printf(" ERROR!\nError opening CIT file %s.\n", newFile);
         exit(-1);
     }    
-    char *cit = (char*) malloc(imageSize*sizeof(char));
-    fread(cit, sizeof(char), imageSize, fp);
+    /*char *cit = (char*) malloc(imageSize*sizeof(char));
+    fread(cit, sizeof(char), imageSize, fp);*/
+    float *cit = (float*) malloc(imageSize*sizeof(float));
+    fread(cit, sizeof(float), imageSize, fp);
     fclose(fp);
     free(newFile);
     printf("OK!\n");
@@ -241,7 +259,8 @@ void reverseAnaglyph(char *file, char *imageType){
     //Copy Y from main anaglyph
     printf("Copying luminance data from main anaglyph... ");
     int count = 0;    
-    char *Y = (char*) malloc(sizeof(char)*imageSize);
+    //char *Y = (char*) malloc(sizeof(char)*imageSize);
+    float *Y = (float*) malloc(sizeof(float)*imageSize);
     for(int i = 0; i < imageSize; i++){
         Y[count] = mainAnaglyphData[count+imageSize];            
         count++;
@@ -254,26 +273,26 @@ void reverseAnaglyph(char *file, char *imageType){
     int countCbCr = 0; //iterate through Cb and Cr data
     int shift = 128; //apply level-shift
     //main anaglyph
-    char **YM  =  NULL;
-    char **CbM = NULL;
-    char **CrM = NULL;
+    float **YM  =  NULL;
+    float **CbM = NULL;
+    float **CrM = NULL;
     //complementary anaglyph
-    char **YC  =  NULL;
-    char **CbC = NULL;
-    char **CrC = NULL;
-    YM  = (char**)malloc(complement->height*sizeof(char*));
-    CbM = (char**)malloc(complement->height*sizeof(char*));
-    CrM = (char**)malloc(complement->height*sizeof(char*));
-    YC  = (char**)malloc(complement->height*sizeof(char*));
-    CbC = (char**)malloc(complement->height*sizeof(char*));
-    CrC = (char**)malloc(complement->height*sizeof(char*));
-    for(int i = 0; i < complement->width; i++){
-        YM[i] =  (char*)malloc(complement->width*sizeof(char));
-        CbM[i] = (char*)malloc(complement->width*sizeof(char));
-        CrM[i] = (char*)malloc(complement->width*sizeof(char));
-        YC[i] =  (char*)malloc(complement->width*sizeof(char));
-        CbC[i] = (char*)malloc(complement->width*sizeof(char));
-        CrC[i] = (char*)malloc(complement->width*sizeof(char));
+    float **YC  =  NULL;
+    float **CbC = NULL;
+    float **CrC = NULL;
+    YM  = (float**)malloc(complement->height*sizeof(float*));
+    CbM = (float**)malloc(complement->height*sizeof(float*));
+    CrM = (float**)malloc(complement->height*sizeof(float*));
+    YC  = (float**)malloc(complement->height*sizeof(float*));
+    CbC = (float**)malloc(complement->height*sizeof(float*));
+    CrC = (float**)malloc(complement->height*sizeof(float*));
+    for(int i = 0; i < complement->height; i++){
+        YM[i] =  (float*)malloc(complement->width*sizeof(float));
+        CbM[i] = (float*)malloc(complement->width*sizeof(float));
+        CrM[i] = (float*)malloc(complement->width*sizeof(float));
+        YC[i] =  (float*)malloc(complement->width*sizeof(float));
+        CbC[i] = (float*)malloc(complement->width*sizeof(float));
+        CrC[i] = (float*)malloc(complement->width*sizeof(float));
     }
     for(int row = 0; row < complement->height; row++){          
         //return to type 4:4:4
@@ -297,29 +316,8 @@ void reverseAnaglyph(char *file, char *imageType){
         }
     }
     printf("OK!\n");
-        
-    //convert from YCbCr to RGB color space
-    //TODO: converter na mão
-    //cvCvtColor(complement, complement, CV_YCrCb2BGR);
-    //cvCvtColor(anaglyph, anaglyph, CV_YCrCb2BGR);
-    /*for(int row = 0; row < complement->height; row++){
-        //set pointer to the correct position in each row
-        uchar* ptr = (uchar*)(complement->imageData + row * complement->widthStep);
-        for(int col = 0; col < image->width; col++){
-            float luminance = (0.299f * (ptr[3*col+2] - shift) + 0.587f * (ptr[3*col+1] - shift) + 0.114f * (ptr[3*col] - shift));
-            YComponent [row][col] = (char)luminance;
-            Cb[row][col] = (char)(0.565f * (ptr[3*col] - shift) - luminance);
-            Cr[row][col] = (char)(0.713f * (ptr[3*col+2] - shift) - luminance);            
-        }
-    }*/
-    
-    
-    //debug anaglyphs RGB
-    //cvSaveImage("complement-reversed.bmp", complement);
-    //cvSaveImage("green-magenta-reversed.bmp", anaglyph);
-    
-    //Reverting..
-    //TODO: above-below
+
+    //Reverting...
     printf("Reverting anaglyph image to stereo pair... ");
     if(!strcmp(imageType, "-sbs")){    
         for(int row = 0; row < anaglyph->height; row++){
@@ -348,47 +346,16 @@ void reverseAnaglyph(char *file, char *imageType){
                 if(B2 < 0) B2 = 0;
                 if(B2 > 255) B2 = 255;
                 
-                ptrStp[3*col] = (uchar)B2; //B left
-                ptrStp[3*col+1] = (uchar)G2; //G left
-                ptrStp[3*col+2] = (uchar)R2; //R left
-                ptrStp[3*(col+anaglyph->width)] = (uchar)B1; //B right
-                ptrStp[3*(col+anaglyph->width)+1] = (uchar)G1; //G right
-                ptrStp[3*(col+anaglyph->width)+2] = (uchar)R1; //R right
+                ptrStp[3*col]                     = (uchar)round(B2); //B left
+                ptrStp[3*col+1]                   = (uchar)round(G2); //G left
+                ptrStp[3*col+2]                   = (uchar)round(R2); //R left
+                ptrStp[3*(col+anaglyph->width)]   = (uchar)round(B1); //B right
+                ptrStp[3*(col+anaglyph->width)+1] = (uchar)round(G1); //G right
+                ptrStp[3*(col+anaglyph->width)+2] = (uchar)round(R1); //R right
             }
         }
     }
-    /* Above/Below
-    else if(!strcmp(imageType, "-ab")){
-        for(int row = 0; row < frame->height; row++){
-             //set pointer to the correct position in each row
-             uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
-             uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);                
-             for(int col = 0; col < frame->width; col++){
-                 // Copy values from frame (R and B channels) and vet (G 
-                 // channel) to stereoPair for the first half of image height 
-                 ptrStp[3*col] = ptrAn[3*col];
-                 ptrStp[3*col+1] = vet[count];
-                 ptrStp[3*col+2] = ptrAn[3*col+2];
-                 
-                 count++;
-             }
-        }
-        count = 0;
-        for(int row = 0; row < frame->height; row++){
-             //set pointer to the correct position in each row
-             uchar* ptrAn = (uchar*)(frame->imageData + row * frame->widthStep);
-             uchar* ptrStp = (uchar*)(stereoPair->imageData + (row + frame->height) * stereoPair->widthStep);
-             for(int col = 0; col < frame->width; col++){
-                 // Copy values from frame (G channel) and vet (R and B 
-                 // channels) to stereoPair for the rest of image height
-                 ptrStp[3*col] = vet[count+(2*imageSize)]; //blue
-                 ptrStp[3*col+2] = vet[count+imageSize]; //red
-                 ptrStp[3*col+1] = ptrAn[3*col+1];
-                 
-                 count++;
-             }
-        }
-    }*/
+    /* TODOAbove/Below */
     
     //save reversed image     
     char* reversed = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+13));
@@ -455,8 +422,10 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     //SUBSAMPLING COMPLEMENTARY ANAGLYPH AND CREATING COLOR INDEX TABLE
     printf("Complementary anaglyph subsampling\n");
     int imageSize = complement->width * complement->height;
-    char *cit = (char*) malloc(imageSize*sizeof(char));     
-    cit = (char*)subsampling440(complement, WITHOUT_Y);  
+    /*char *cit = (char*) malloc(imageSize*sizeof(char));     
+    cit = (char*)subsampling440(complement, WITHOUT_Y);  */
+    float *cit = (float*) malloc(imageSize*sizeof(float));     
+    cit = (float*)subsampling440(complement, WITHOUT_Y);  
               
     //Saving CIT file
     char* fileNoExtension = strtok(file,".");
@@ -468,7 +437,8 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
         printf(" ERROR!\nError creating CIT file %s.\n", newFile);
         exit(-1);
     }
-    fwrite(cit, sizeof(char),imageSize, fp);    
+    //fwrite(cit, sizeof(char),imageSize, fp);
+    fwrite(cit, sizeof(float),imageSize, fp);
     fclose(fp);
     free(cit);    
     free(newFile);
@@ -476,8 +446,10 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
     //TODO: PUT ALL DATA IN A SINGLE FILE
     //SUBSAMPLING MAIN ANAGLYPH
     printf("Main anaglyph subsampling\n");
-    char *subsampleData = (char*)malloc(2*imageSize*sizeof(char));
-    subsampleData = (char*)subsampling440(anaglyph,WITH_Y);
+    /*char *subsampleData = (char*)malloc(2*imageSize*sizeof(char));
+    subsampleData = (char*)subsampling440(anaglyph,WITH_Y);*/
+    float *subsampleData = (float*)malloc(2*imageSize*sizeof(float));
+    subsampleData = (float*)subsampling440(anaglyph,WITH_Y);
     //save junctioned image
     char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+9));
     strcpy(fileAnaglyph, fileNoExtension);
@@ -487,7 +459,8 @@ void createAnaglyph(char *file, IplImage *frameL, IplImage *frameR){
         printf(" ERROR!\nError creating green-magenta anaglyph file %s\n", fileAnaglyph);
         exit(-1);
     }
-    fwrite(subsampleData, sizeof(char),2*imageSize, fp);
+    //fwrite(subsampleData, sizeof(char),2*imageSize, fp);
+    fwrite(subsampleData, sizeof(float),2*imageSize, fp);
     fclose(fp);
     free(subsampleData);
     free(fileAnaglyph);
