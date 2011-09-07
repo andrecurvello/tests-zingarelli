@@ -47,8 +47,15 @@ int main(int argc, char* argv[]){
     if(!strcmp(argv[2],"-e")){
         printf("Conversao anaglifica\n");
         entrada = fopen(argv[1], "rb");
-        cit = fopen("cit.dat", "wb");
-        vm = fopen("verdemagenta.dat","wb");
+        char* fileNoExtension = strtok(argv[1],".");
+        char* newFile = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+18));
+        char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+9));
+        strcpy(newFile, fileNoExtension);
+        strcat(newFile,"-complementary.dat");
+        strcpy(fileAnaglyph, fileNoExtension);
+        strcat(fileAnaglyph,"-main.dat");
+        cit = fopen(newFile, "wb");
+        vm = fopen(fileAnaglyph,"wb");
 
         if (entrada == NULL) {
             fprintf(stderr, "Nao foi possivel abrir o arquivo %s\n ", argv[1]);
@@ -135,6 +142,8 @@ int main(int argc, char* argv[]){
                 }
             }
 
+
+
             //conversão RGB -> YCbCr do complementar (B2G1R2)
             int shift = 128;
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
@@ -175,7 +184,7 @@ int main(int argc, char* argv[]){
             //escrita no arquivo de saída
             fwrite(subDataCompl, sizeof(char),imageSize, cit);
             fclose(cit);
-            
+
             //conversão RGB -> YCbCr do verde-magenta (B1G2R1)
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
                 for (int j = 0; j < headerAnaglyph.biWidth; j++) {
@@ -256,7 +265,11 @@ int main(int argc, char* argv[]){
     if(!strcmp(argv[2],"-d")){
         printf("Reversao anaglifica\n");
         entrada = fopen(argv[1], "rb");
-        saida = fopen("revertido.bmp", "wb");
+        char* fileNoExtension = strtok(argv[1],".");
+        char* reversed = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+13));
+        strcpy(reversed, fileNoExtension);
+        strcat(reversed,"-reversed.bmp");
+        saida = fopen(reversed, "wb");
         if (entrada == NULL) {
             fprintf(stderr, "Nao foi possivel abrir o arquivo %s\n ", argv[1]);
             exit(EXIT_FAILURE);
@@ -309,7 +322,7 @@ int main(int argc, char* argv[]){
                 //par estéreo
                 R[i]  = (float*)malloc(header.biWidth*sizeof(float));
                 G[i]  = (float*)malloc(header.biWidth*sizeof(float));
-                B[i]  = (float*)malloc(header.biWidth*sizeof(float));                
+                B[i]  = (float*)malloc(header.biWidth*sizeof(float));
                 Y[i]  = (float*)malloc(header.biWidth*sizeof(float));
                 Cb[i] = (float*)malloc(header.biWidth*sizeof(float));
                 Cr[i] = (float*)malloc(header.biWidth*sizeof(float));
@@ -327,12 +340,18 @@ int main(int argc, char* argv[]){
             --------------*/
             int shift = 128;
             int imageSize = headerAnaglyph.biHeight*headerAnaglyph.biWidth;
+            char* newFile = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+18));
+            char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+9));
             //leitura da tabela de índice de cores
-            cit = fopen("cit.dat","rb");
+            strcpy(newFile, fileNoExtension);
+            strcat(newFile,"-complementary.dat");
+            cit = fopen(newFile,"rb");
             char *dataStreamCIT = (char*)malloc(imageSize*sizeof(char));
             fread(dataStreamCIT,sizeof(char),imageSize,cit);
             //leitura do anáglifo verde-magenta
-            vm = fopen("verdemagenta.dat","rb");
+            strcpy(fileAnaglyph, fileNoExtension);
+            strcat(fileAnaglyph,"-main.dat");
+            vm = fopen(fileAnaglyph,"rb");
             char *dataStreamVM = (char*)malloc(2*imageSize*sizeof(char));
             fread(dataStreamVM,sizeof(char),2*imageSize,vm);
 
@@ -344,7 +363,7 @@ int main(int argc, char* argv[]){
                     countY++;
                 }
             }
-            
+
             //reversão Cb e Cr para 4:4:4 do complementar
             int countCbCr = 0;
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
@@ -376,7 +395,7 @@ int main(int argc, char* argv[]){
                     B2[i][j] = round(f);
                 }
             }
-            
+
             //reversão do verde-magenta para 4:4:4
             countCbCr = 0;
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
