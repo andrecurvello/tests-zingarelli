@@ -1,7 +1,7 @@
 //Programa para testar o PSNR ao realizar a conversão na reversão anaglífica sem nenhuma função do opencv
 //lendo manualmente os dados das imagens, realizando a conversão, transformação anaglífica,
 //subamostragem 4:4:0 no anaglifo complementar
-//armazenando em arquivo com char (round e cast)
+//armazenando em arquivo com float
 //retornando novamente para RGB e escrevendo em arquivo (round e cast para unsigned char).
 
 #include <stdio.h>
@@ -168,29 +168,15 @@ int main(int argc, char* argv[]){
                 }
             }
 
-            //impressão de valores para verificar os resultados após conversão/subamostragem
-            /*printf("RGB Lido:\n");
-            for (int i = 0; i < header.biHeight; i++) {
-                for (int j = 0; j < header.biWidth; j++) {
-                    printf("%f %f %f\n", R[i][j],G[i][j],B[i][j]);
-                }
-            }
-            printf("YCbCr calculado - antes da subamostragem\n");
-            for (int i = 0; i < header.biHeight; i++) {
-                for (int j = 0; j < header.biWidth; j++) {
-                    printf("%f %f %f\n", Y[i][j],Cb[i][j],Cr[i][j]);
-                }
-            }*/
-
             //subamostragem 4:4:0 do Complementar, eliminando Y
             int imageSize = headerAnaglyph.biHeight*headerAnaglyph.biWidth;
             int countCbCr = 0;
-            char *subData = (char*) malloc(imageSize*sizeof(char));
+            float *subData = (float*) malloc(imageSize*sizeof(float));
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
                 if(i % 2 == 0){ //copia valores Y Cb e Cr das linhas pares
                     for (int j = 0; j < headerAnaglyph.biWidth; j++) {
-                        subData[countCbCr]              = (char)round(Cb[i][j]);
-                        subData[countCbCr+imageSize/2]  = (char)round(Cr[i][j]);
+                        subData[countCbCr]              = Cb[i][j];
+                        subData[countCbCr+imageSize/2]  = Cr[i][j];
                         countCbCr++;
                     }
                 }
@@ -200,15 +186,15 @@ int main(int argc, char* argv[]){
                     //com os valores de Cb e Cr desta linha
                     countCbCr -= headerAnaglyph.biWidth;
                     for(int j = 0; j < headerAnaglyph.biWidth; j++){
-                        subData[countCbCr]              = (char)round((subData[countCbCr]+Cb[i][j])/2);
-                        subData[countCbCr+imageSize/2]  = (char)round((subData[countCbCr+imageSize/2] + Cr[i][j])/2);
+                        subData[countCbCr]              = (subData[countCbCr]+Cb[i][j])/2;
+                        subData[countCbCr+imageSize/2]  = (subData[countCbCr+imageSize/2] + Cr[i][j])/2;
                         countCbCr++;
                     }
                 }
             }
 
             //escrita no arquivo de saída
-            fwrite(subData, sizeof(char),imageSize, aux);
+            fwrite(subData, sizeof(float),imageSize, aux);
             fclose(aux);
 
 
@@ -336,8 +322,8 @@ int main(int argc, char* argv[]){
             int shift = 128;
             int imageSize = headerAnaglyph.biHeight*headerAnaglyph.biWidth;
             aux = fopen("data.dat","rb");
-            char *dataStreamOut = (char*)malloc(imageSize*sizeof(char));
-            fread(dataStreamOut,sizeof(char),imageSize,aux);
+            float *dataStreamOut = (float*)malloc(imageSize*sizeof(float));
+            fread(dataStreamOut,sizeof(float),imageSize,aux);
 
             //RGB -> YCbCr do verdemagenta (R1G2B1) para extração de Y
             for (int i = 0; i < headerAnaglyph.biHeight; i++) {
