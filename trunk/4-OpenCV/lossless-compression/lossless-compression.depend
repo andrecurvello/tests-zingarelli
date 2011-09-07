@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1225722498 source:c:\users\zinga\desktop\codigo_leo\projeto-codeblocks\lossless-compression\easyzlib.c
+	"easyzlib.h"
+	<sys/types.h>
+	<unistd.h>
+	<unixio.h>
+	<stddef.h>
+	<string.h>
+	<stdlib.h>
+	<errno.h>
+	<alloc.h>
+	<malloc.h>
+	<malloc.h>
+	<unix.h>
+	<stdio.h>
+	<ctype.h>
+	<limits.h>
+
+1225722520 c:\users\zinga\desktop\codigo_leo\projeto-codeblocks\lossless-compression\easyzlib.h
+
