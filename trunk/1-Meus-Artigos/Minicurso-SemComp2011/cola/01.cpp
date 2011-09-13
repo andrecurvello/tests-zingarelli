@@ -12,6 +12,8 @@ Código adaptado do livro: Bradski, G; Kaehler, A. – Learning OpenCV: Computer Vi
 #include "highgui.h"
 int main( int argc, char** argv ) {
     //abertura da imagem
+    //1 - colorida
+    //2 - grayscale
     IplImage* img = cvLoadImage( argv[1], 1 );
 
     //criação de janela
