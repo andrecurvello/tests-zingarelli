@@ -2,10 +2,9 @@
 
 SEMCOMP 14 - Minicurso Criação de imagens e vídeos 3D com OpenCV
 Matheus Ricardo Uihara Zingarelli (zinga@icmc.usp.br)
+19/09/2011
 
-Programa que recebe um arquivo de imagem como parâmetro, cria uma nova imagem com apenas um canal de cor e aplica
-a transformação da primeira imagem em tons de cinza, armazenando o resultado na nova imagem criada. Salva então a nova imagem
-em disco.
+Programa que recebe um arquivo de imagem como parâmetro, divide ao meio e cria duas novas imagens
 
 */
 
