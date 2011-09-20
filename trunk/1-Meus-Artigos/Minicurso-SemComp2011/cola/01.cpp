@@ -2,6 +2,7 @@
 
 SEMCOMP 14 - Minicurso Criação de imagens e vídeos 3D com OpenCV
 Matheus Ricardo Uihara Zingarelli (zinga@icmc.usp.br)
+19/09/2011
 
 Programa que recebe um arquivo de imagem como parâmetro e o exibe na tela
 
