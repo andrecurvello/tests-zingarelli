@@ -1,7 +1,0 @@
-Contas teste do orkut
-
-Login:
-Zinga.Date.1
-
-Senha:
-FindADate
