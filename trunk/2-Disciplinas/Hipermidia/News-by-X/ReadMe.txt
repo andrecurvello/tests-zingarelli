@@ -1,1 +1,0 @@
-O site pode ser visto em http://www.icmc.usp.br/~zinga/News-by-X/
