@@ -35,80 +35,105 @@
 #include <cv.h>
 #include <highgui.h>
 
-void createAnaglyph(IplImage* left,IplImage* right, char* type);
+uchar* subsample444(IplImage* image);
+void createAnaglyph(IplImage* left, IplImage* right, IplImage* mainAnaglyph, IplImage* complAnaglyph, char* type);
 IplImage* loadAndVerify(char* image, char* type);
-void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right);
+void prepareImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right, IplImage** mainAnaglyph, IplImage** complAnaglyph);
 void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** right);
 void anaglyphConversion(char* parameters[]);
 void printHelp();
 void verifyParameters(int argc, char* argv[]);
 
 /*
-  Create an anaglyph, given two images. The anaglyph to be created can be green-magenta,
-  red-cyan or blue-yellow, according to the type entered
+  Apply 4:4:0 subsampling. subData variable may or may not hold data the luminance component. For a normal
+      image, we would have 3 matrices, each holding data from one of the components
+      (one for Y, one for Cb and one for Cr) and each with a lenght of width*height
+      pixels, thus needing to store 3*imageSize pixels. If the Y is not needed
+      (for the color index table), this reduces into storing 2*imageSize pixels.
+      And since we're applying a 4:4:0 subsampling, we're reducing data from Cb
+      and Cr to a half, thus needing to store 1/2*imageSize pixels for Cb and 1/2*imageSize
+      pixels for Cr, which means we only need to store data for 1*imageSize pixels or
+      2*imageSize pixels, depending on if we need to keep or not the Y component
+  Input: image - image to be subsampled
+  Output: uchar datastream, with data in the following order: (subsampled)Cb, (subsampled)Cr and Y
+*/
+uchar* subsample440(IplImage* image){
+    int imageSize = image->width * image->height;
+    uchar *dataStream = (uchar*) malloc(2*imageSize*sizeof(uchar));
+
+}
+
+/*
+  Create two anaglyphs, given two images. The anaglyph to be created can be green-magenta,
+  red-cyan or blue-yellow, according to the type entered. Another anaglyph, complementar to
+  the first one, is also created.
   Input: left - left image of the stereo pair
          right - right image of the stereo pair
+         mainAnaglyph - green-magenta, red-cyan or blue-yellow anaglyph
+         complAnaglyph - complementary anaglyph
          type - type of the anaglyph to be created (green-magenta, red-cyan or blue-yellow)
 */
-void createAnaglyph(IplImage* left,IplImage* right, char* type){
-    //create anaglyph container
-    CvSize size = cvGetSize(left);
-    IplImage* anaglyph = cvCreateImage(size, left->depth, left->nChannels);
-    cvZero(anaglyph);
-
+void createAnaglyph(IplImage* left, IplImage* right, IplImage* mainAnaglyph, IplImage* complAnaglyph, char* type){
     if(!strcmp(type,"-gm")){//green-magenta anaglyph
-        printf("Creating green-magenta anaglyph... ");
+        printf("Creating green-magenta and complementary anaglyphs... ");
         for(int row = 0; row < left->height; row++){
             uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
             uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
-            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            uchar* ptrA = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
+            uchar* ptrC = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
             for(int col = 0; col < left->width; col++){
-                //copy green channel from the right image and red and blue channel from the left image
-                ptrA[3*col+1] = ptrR[3*col+1]; //G
+                //Main anaglyph: green channel from the right image and red and blue channel from the left image
                 ptrA[3*col] = ptrL[3*col]; //B
+                ptrA[3*col+1] = ptrR[3*col+1]; //G
                 ptrA[3*col+2] = ptrL[3*col+2]; //R
+                //Complementary anaglyph: green channel from the left image and red and blue channel from the right image
+                ptrC[3*col] = ptrR[3*col]; //B
+                ptrC[3*col+1] = ptrL[3*col+1]; //G
+                ptrC[3*col+2] = ptrR[3*col+2]; //R
             }
         }
         printf("OK!\n");
     }
     else if(!strcmp(type,"-rc")){//red-cyan anaglyph
-        printf("Creating red-cyan anaglyph... ");
+        printf("Creating red-cyan and complementary anaglyphs... ");
         for(int row = 0; row < left->height; row++){
             uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
             uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
-            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            uchar* ptrA = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
+            uchar* ptrC = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
             for(int col = 0; col < left->width; col++){
-                //copy red channel from the right image and green and blue channel from the left image
-                ptrA[3*col+2] = ptrR[3*col+2]; //R
+                //Main anaglyph: red channel from the right image and green and blue channel from the left image
                 ptrA[3*col] = ptrL[3*col]; //B
                 ptrA[3*col+1] = ptrL[3*col+1]; //G
+                ptrA[3*col+2] = ptrR[3*col+2]; //R
+                //Complementary Anaglyph: copy red channel from the left image and green and blue channel from the right image
+                ptrC[3*col] = ptrR[3*col]; //B
+                ptrC[3*col+1] = ptrR[3*col+1]; //G
+                ptrC[3*col+2] = ptrL[3*col+2]; //R
             }
         }
         printf("OK!\n");
     }
     else if(!strcmp(type,"-by")){//blue-yellow anaglyph
-        printf("Creating blue-yellow anaglyph... ");
+        printf("Creating blue-yellow and complementary anaglyphs... ");
         for(int row = 0; row < left->height; row++){
             uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
             uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
-            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            uchar* ptrA = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
+            uchar* ptrC = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
             for(int col = 0; col < left->width; col++){
-                //copy blue channel from the right image and red and green channel from the left image
+                //Main anaglyph: blue channel from the right image and red and green channel from the left image
                 ptrA[3*col] = ptrR[3*col]; //B
                 ptrA[3*col+1] = ptrL[3*col+1]; //G
                 ptrA[3*col+2] = ptrL[3*col+2]; //R
+                //Complementary anaglyph: blue channel from the left image and red and green channel from the right image
+                ptrC[3*col] = ptrL[3*col]; //B
+                ptrC[3*col+1] = ptrR[3*col+1]; //G
+                ptrC[3*col+2] = ptrR[3*col+2]; //R
             }
         }
         printf("OK!\n");
     }
-
-    //compression
-
-
-//---- UNIT TEST
-    //cvSaveImage("anaglyph.bmp", anaglyph);
-
-    cvReleaseImage(&anaglyph);
 }
 
 /*
@@ -141,13 +166,16 @@ IplImage* loadAndVerify(char* image, char* type){
 }
 
 /*
-  Given an stereo pair, copy and adapt its properties to the two images
+  Given an stereo pair, copy and adapt its properties to the two images that composes it.
+  Also copy properties to the two anaglyphs that will be created
   Input: stereoPair - original image
          type - side-by-side or above-below
          left - left image container
          right - right image container
+         mainAnaglyph - main anaglyph
+         complAnaglyph - complementary anaglyph
 */
-void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right){
+void prepareImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right, IplImage** mainAnaglyph, IplImage** complAnaglyph){
     //get size of the stereo pair, based on its type
     CvSize size;
     if(!strcmp(type, "-sbs")){
@@ -160,8 +188,12 @@ void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplIm
     //copy image properties
     *left = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
     *right = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
+    *mainAnaglyph = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
+    *complAnaglyph = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
     cvZero(*left);
     cvZero(*right);
+    cvZero(*mainAnaglyph);
+    cvZero(*complAnaglyph);
 }
 
 /*
@@ -209,66 +241,42 @@ void anaglyphConversion(char* parameters[]){
     IplImage *stereopair = NULL;
     IplImage *left = NULL;
     IplImage *right = NULL;
+    IplImage *mainAnaglyph = NULL;
+    IplImage *complAnaglyph = NULL;
 
-    //load de stereo pair
+    //load the stereo pair
     stereopair = loadAndVerify(parameters[2],parameters[3]);
 
-    //prepare stereo images with properties from the original image
-    prepareStereoImages(stereopair, parameters[3], &left, &right);
+    //prepare images with properties from the original stereo image
+    prepareImages(stereopair, parameters[3], &left, &right, &mainAnaglyph, &complAnaglyph);
 
     //split the stereo pair
     splitImage(stereopair, parameters[3], &left, &right);
 
-    //create the anaglyph
-    createAnaglyph(left, right, parameters[4]);
+    //create the anaglyphs
+    createAnaglyph(left, right, mainAnaglyph, complAnaglyph, parameters[4]);
 
-    //create the color index table
+    //subsampling anaglyphs
+    uchar* anaglyph = subsample440(mainAnaglyph);
+    uchar* c_anaglyph = subsample440(complAnaglyph);
+
+
 
 //------UNIT TEST
 //cvSaveImage("left.bmp", left);
 //cvSaveImage("right.bmp", right);
+//cvSaveImage("main-anaglyph.bmp", mainAnaglyph);
+//cvSaveImage("complementary-anaglyph.bmp", complAnaglyph);
 
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);
-    /*//green-magenta anaglyph
-    CvSize size = cvGetSize(frameL);
-    anaglyph = cvCreateImage(size, frameL->depth, frameL->nChannels);
-    cvZero(anaglyph);
+    cvReleaseImage(&mainAnaglyph);
+    cvReleaseImage(&complAnaglyph);
 
-    //complementary anaglyph
-    complement = cvCreateImage(size, frameL->depth, frameL->nChannels);
-    cvZero(complement);
-
-    //anaglyph transformation
-    printf("Creating green magenta and complementary anaglyphs... ");
-    for(int row = 0; row < frameL->height; row++){
-        //set pointer to the correct position in each row
-        uchar* ptrR = (uchar*)(frameR->imageData + row * frameR->widthStep);
-        uchar* ptrL = (uchar*)(frameL->imageData + row * frameL->widthStep);
-        uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
-        uchar* ptrC = (uchar*)(complement->imageData + row * complement->widthStep);
-        for(int col = 0; col < frameL->width; col++){
-            //green-magenta
-            //copy green channel from the right image and red and blue channel from the left image
-            ptrA[3*col+1] = ptrR[3*col+1]; //G
-            ptrA[3*col] = ptrL[3*col]; //B
-            ptrA[3*col+2] = ptrL[3*col+2]; //R
-            //complement
-            //copy red and blue channel from the right image and green channel from the left image
-            ptrC[3*col+1] = ptrL[3*col+1]; //G
-            ptrC[3*col] = ptrR[3*col]; //B
-            ptrC[3*col+2] = ptrR[3*col+2]; //R
-        }
-    }
-    printf("OK!\n");
-
-    //debug anaglyphs RGB
-    //cvSaveImage("green-magenta.bmp", anaglyph);
-    //cvSaveImage("complementary.bmp", complement);
 
     //SUBSAMPLING COMPLEMENTARY ANAGLYPH AND CREATING COLOR INDEX TABLE
-    printf("Complementary anaglyph subsampling\n");
+    /*printf("Complementary anaglyph subsampling\n");
     int imageSize = complement->width * complement->height;
     uchar *cit = (uchar*) malloc(imageSize*sizeof(uchar));
     cit = (uchar*)subsampling422(complement, WITHOUT_Y);
@@ -366,7 +374,7 @@ int main(int argc, char* argv[]){
 
     if(argc == 6){//anaglyph conversion
         printf("--- ANAGLYPH CONVERSION  ---\n");
-         anaglyphConversion(argv);
+        anaglyphConversion(argv);
         printf("--- ANAGLYPH CONVERSION SUCCESSFULLY COMPLETED! ---\n");
     }
     else if (argc == 4){//anaglyph reversion
