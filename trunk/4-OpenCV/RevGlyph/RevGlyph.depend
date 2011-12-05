@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1322489818 source:e:\versionados\4-opencv\revglyph\main.cpp
+1322753686 source:e:\versionados\4-opencv\revglyph\main.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>

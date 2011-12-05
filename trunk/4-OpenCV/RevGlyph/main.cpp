@@ -35,46 +35,90 @@
 #include <cv.h>
 #include <highgui.h>
 
-void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage**right);
-void splitImage(char* image, char* type, IplImage** left, IplImage** right);
+void createAnaglyph(IplImage* left,IplImage* right, char* type);
+IplImage* loadAndVerify(char* image, char* type);
+void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right);
+void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** right);
 void anaglyphConversion(char* parameters[]);
 void printHelp();
 void verifyParameters(int argc, char* argv[]);
 
 /*
-  Given an stereo pair, copy and adapt its properties to the two images
-  Input: stereoPair - original image
-         left - left image container
-         right - right image container
-         type -
+  Create an anaglyph, given two images. The anaglyph to be created can be green-magenta,
+  red-cyan or blue-yellow, according to the type entered
+  Input: left - left image of the stereo pair
+         right - right image of the stereo pair
+         type - type of the anaglyph to be created (green-magenta, red-cyan or blue-yellow)
 */
-void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right){
-    //get size of the stereo pair, based on its type
-    CvSize size;
-    if(!strcmp(type, "-sbs")){
-        size = cvSize( stereoPair->width/2, stereoPair->height);
+void createAnaglyph(IplImage* left,IplImage* right, char* type){
+    //create anaglyph container
+    CvSize size = cvGetSize(left);
+    IplImage* anaglyph = cvCreateImage(size, left->depth, left->nChannels);
+    cvZero(anaglyph);
+
+    if(!strcmp(type,"-gm")){//green-magenta anaglyph
+        printf("Creating green-magenta anaglyph... ");
+        for(int row = 0; row < left->height; row++){
+            uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
+            uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
+            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            for(int col = 0; col < left->width; col++){
+                //copy green channel from the right image and red and blue channel from the left image
+                ptrA[3*col+1] = ptrR[3*col+1]; //G
+                ptrA[3*col] = ptrL[3*col]; //B
+                ptrA[3*col+2] = ptrL[3*col+2]; //R
+            }
+        }
+        printf("OK!\n");
     }
-    else if(!strcmp(type, "-ab")){
-        size = cvSize( stereoPair->width, stereoPair->height/2);
+    else if(!strcmp(type,"-rc")){//red-cyan anaglyph
+        printf("Creating red-cyan anaglyph... ");
+        for(int row = 0; row < left->height; row++){
+            uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
+            uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
+            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            for(int col = 0; col < left->width; col++){
+                //copy red channel from the right image and green and blue channel from the left image
+                ptrA[3*col+2] = ptrR[3*col+2]; //R
+                ptrA[3*col] = ptrL[3*col]; //B
+                ptrA[3*col+1] = ptrL[3*col+1]; //G
+            }
+        }
+        printf("OK!\n");
+    }
+    else if(!strcmp(type,"-by")){//blue-yellow anaglyph
+        printf("Creating blue-yellow anaglyph... ");
+        for(int row = 0; row < left->height; row++){
+            uchar* ptrR = (uchar*)(right->imageData + row * right->widthStep);
+            uchar* ptrL = (uchar*)(left->imageData + row * left->widthStep);
+            uchar* ptrA = (uchar*)(anaglyph->imageData + row * anaglyph->widthStep);
+            for(int col = 0; col < left->width; col++){
+                //copy blue channel from the right image and red and green channel from the left image
+                ptrA[3*col] = ptrR[3*col]; //B
+                ptrA[3*col+1] = ptrL[3*col+1]; //G
+                ptrA[3*col+2] = ptrL[3*col+2]; //R
+            }
+        }
+        printf("OK!\n");
     }
 
-    //copy image properties
-    *left = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
-    *right = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
-    cvZero(left);
-    cvZero(right);
+    //compression
+
+
+//---- UNIT TEST
+    //cvSaveImage("anaglyph.bmp", anaglyph);
+
+    cvReleaseImage(&anaglyph);
 }
 
 /*
-  Separates a stereo pair image into two images. The original image can be either
-  side-by-side or above-below. If it is side-by-side, splits image by its width.
-  If its above-below, splits image by its height.
-  Input: image - original image
+  Open a stereo pair file and verify its dimensions, based on its type. If it is
+  side-by-side, the image must be divisible by 2 on its width. If it is above-below,
+  the image must be divisible by 2 on its heigth.
+  Input: image - stereo pair
          type - side-by-side or above-below
-         left - left image container
-         right - right image container
 */
-void splitImage(char* image, char* type, IplImage** left, IplImage** right){
+IplImage* loadAndVerify(char* image, char* type){
     //load image file
     printf("Loading original image... ");
     IplImage* stereoPair = cvLoadImage(image, 1);
@@ -93,11 +137,43 @@ void splitImage(char* image, char* type, IplImage** left, IplImage** right){
           exit(-1);
     }
     printf("OK!\n");
+    return(stereoPair);
+}
 
-    //prepare stereo images with properties from the original image
-    prepareStereoImages(stereoPair, type, &*left, &*right);
+/*
+  Given an stereo pair, copy and adapt its properties to the two images
+  Input: stereoPair - original image
+         type - side-by-side or above-below
+         left - left image container
+         right - right image container
+*/
+void prepareStereoImages(IplImage* stereoPair, char* type, IplImage** left,IplImage** right){
+    //get size of the stereo pair, based on its type
+    CvSize size;
+    if(!strcmp(type, "-sbs")){
+        size = cvSize( stereoPair->width/2, stereoPair->height);
+    }
+    else if(!strcmp(type, "-ab")){
+        size = cvSize( stereoPair->width, stereoPair->height/2);
+    }
 
-    //split images
+    //copy image properties
+    *left = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
+    *right = cvCreateImage(size, stereoPair->depth, stereoPair->nChannels);
+    cvZero(*left);
+    cvZero(*right);
+}
+
+/*
+  Separates a stereo pair image into two images. The original image can be either
+  side-by-side or above-below. If it is side-by-side, splits image by its width.
+  If its above-below, splits image by its height.
+  Input: stereoPair - original image
+         type - side-by-side or above-below
+         left - left image container
+         right - right image container
+*/
+void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** right){
     printf("Dividing the stereo pair into two images... ");
     if(!strcmp(type,"-sbs")){
         //set ROI to copy the first half of the image width (left image)
@@ -122,7 +198,6 @@ void splitImage(char* image, char* type, IplImage** left, IplImage** right){
         cvResetImageROI(stereoPair);
     }
     printf("OK!\n");
-    cvReleaseImage(&stereoPair);
 }
 
 /*
@@ -131,14 +206,32 @@ void splitImage(char* image, char* type, IplImage** left, IplImage** right){
   Input: parameters - the parameters entered by user via command line
 */
 void anaglyphConversion(char* parameters[]){
-    IplImage *left, *right;
+    IplImage *stereopair = NULL;
+    IplImage *left = NULL;
+    IplImage *right = NULL;
+
+    //load de stereo pair
+    stereopair = loadAndVerify(parameters[2],parameters[3]);
+
+    //prepare stereo images with properties from the original image
+    prepareStereoImages(stereopair, parameters[3], &left, &right);
 
     //split the stereo pair
-    splitImage(parameters[2], parameters[3], &left, &right);
+    splitImage(stereopair, parameters[3], &left, &right);
 
-    /*cvReleaseImage(&left);
+    //create the anaglyph
+    createAnaglyph(left, right, parameters[4]);
+
+    //create the color index table
+
+//------UNIT TEST
+//cvSaveImage("left.bmp", left);
+//cvSaveImage("right.bmp", right);
+
+    cvReleaseImage(&stereopair);
+    cvReleaseImage(&left);
     cvReleaseImage(&right);
-    //green-magenta anaglyph
+    /*//green-magenta anaglyph
     CvSize size = cvGetSize(frameL);
     anaglyph = cvCreateImage(size, frameL->depth, frameL->nChannels);
     cvZero(anaglyph);
@@ -225,7 +318,8 @@ void printHelp(){
 
 /*
   Verifies if the parameters inputted by user are correct and valid.
-  Input: parameters - the parameters entered by user via command line
+  Input: argc - the number of parameteres entered by user via command line
+         argv[] - the parameters entered by user via command line
 */
 void verifyParameters(int argc, char* argv[]){
     //verify number of parameters
