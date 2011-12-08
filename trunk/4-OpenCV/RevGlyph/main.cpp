@@ -45,22 +45,60 @@ void printHelp();
 void verifyParameters(int argc, char* argv[]);
 
 /*
-  Apply 4:4:0 subsampling. subData variable may or may not hold data the luminance component. For a normal
-      image, we would have 3 matrices, each holding data from one of the components
-      (one for Y, one for Cb and one for Cr) and each with a lenght of width*height
-      pixels, thus needing to store 3*imageSize pixels. If the Y is not needed
-      (for the color index table), this reduces into storing 2*imageSize pixels.
-      And since we're applying a 4:4:0 subsampling, we're reducing data from Cb
-      and Cr to a half, thus needing to store 1/2*imageSize pixels for Cb and 1/2*imageSize
-      pixels for Cr, which means we only need to store data for 1*imageSize pixels or
-      2*imageSize pixels, depending on if we need to keep or not the Y component
+  Converts an RGB image to YCbCr and then apply 4:4:0 subsampling. An image is represented by three matrices,
+  each holding data from one of the components (one for Y, one for Cb and one for Cr) and each with a lenght
+  of width*height pixels, thus needing to store 3*imageSize pixels for a 4:4:4 image. Since we're applying
+  4:4:0 subsampling, we're reducing data from Cb and Cr to a half, thus needing to store 1/2*imageSize pixels
+  for Cb and 1/2*imageSize pixels for Cr, which means we only need to store data for 2*imageSize pixels.
   Input: image - image to be subsampled
   Output: uchar datastream, with data in the following order: (subsampled)Cb, (subsampled)Cr and Y
+   ---------------------------------------------------------------------------------------------
+  |         Cb          |           Cr          |                       Y                       |
+   ---------------------------------------------------------------------------------------------
+  /-----imageSize/2-----/-----imageSize/2-------/---------------imageSize-----------------------/
 */
 uchar* subsample440(IplImage* image){
+    //YCbCr conversion
+    printf("\tConverting from RGB to YCbCr color space... ");
+    cvCvtColor(image, image, CV_BGR2YCrCb);
+    printf("OK!\n");
+
+    //placeholder for subsampled data
     int imageSize = image->width * image->height;
     uchar *dataStream = (uchar*) malloc(2*imageSize*sizeof(uchar));
 
+    //4:4:0 works through copying the average color values from even and odd rows
+    //this way, it is a horizontal spatial reduction
+    printf("\tApplying 4:4:0 subsampling... ");
+    int countCbCr = 0;
+    int countY = 0;
+    for(int row = 0; row < image->height; row++){
+        uchar* ptr = (uchar*)(image->imageData + row * image->widthStep);
+        if(row % 2 == 0){
+            //copy Y, Cb and Cr values of even rows
+            for(int col = 0; col < image->width; col++){
+                dataStream[countCbCr] =             ptr[3*col+1]; //Cb
+                dataStream[countCbCr+imageSize/2] = ptr[3*col+2]; //Cr
+                dataStream[countY+imageSize] =      ptr[3*col];   //Y
+                countY++;
+                countCbCr++;
+            }//column iteration
+        }//if even rows
+        else{
+            //copy Y, backtrack width positions on dataStream (that holds Cb and Cr data)
+            //and calculate the average values
+            countCbCr -= image->width;
+            for(int col = 0; col < image->width; col++){
+                dataStream[countCbCr] =             (dataStream[countCbCr]+ptr[3*col+1])/2; //Cb
+                dataStream[countCbCr+imageSize/2] = (dataStream[countCbCr+imageSize/2] + ptr[3*col+2])/2; //Cr
+                dataStream[countY+imageSize] =      ptr[3*col]; //Y
+                countY++;
+                countCbCr++;
+            }//column iteration
+        }//if odd rows
+    }//row iteration
+    printf("OK!\n");
+    return dataStream;
 }
 
 /*
@@ -256,17 +294,29 @@ void anaglyphConversion(char* parameters[]){
     //create the anaglyphs
     createAnaglyph(left, right, mainAnaglyph, complAnaglyph, parameters[4]);
 
-    //subsampling anaglyphs
+    //spacial compression
+    printf("Compressing main anaglyph...\n");
     uchar* anaglyph = subsample440(mainAnaglyph);
+    printf("OK!\n");
+    printf("Compressing complementary anaglyph...\n");
     uchar* c_anaglyph = subsample440(complAnaglyph);
+    printf("OK!\n");
 
 
+free(anaglyph);
 
 //------UNIT TEST
 //cvSaveImage("left.bmp", left);
 //cvSaveImage("right.bmp", right);
 //cvSaveImage("main-anaglyph.bmp", mainAnaglyph);
 //cvSaveImage("complementary-anaglyph.bmp", complAnaglyph);
+//FILE *fp = fopen("saida.dat", "wb");
+//if(!fp){
+//    printf(" ERROR!\nError creating green-magenta anaglyph file\n");
+//    exit(-1);
+//}
+//fwrite(anaglyph, sizeof(uchar),2*left->width*left->height, fp);
+//fclose(fp);
 
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
