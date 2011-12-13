@@ -35,6 +35,10 @@
 #include <cv.h>
 #include <highgui.h>
 
+/* --- ANAGLYPH CONVERSION FUNCTIONS --- */
+uchar createControParameters(char* parameters[]);
+void saveData(uchar* anaglyph,uchar* cit, char* parameters[]);
+uchar* createCIT(uchar* data, int imageSize);
 uchar* subsample444(IplImage* image);
 void createAnaglyph(IplImage* left, IplImage* right, IplImage* mainAnaglyph, IplImage* complAnaglyph, char* type);
 IplImage* loadAndVerify(char* image, char* type);
@@ -43,6 +47,108 @@ void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** ri
 void anaglyphConversion(char* parameters[]);
 void printHelp();
 void verifyParameters(int argc, char* argv[]);
+/* --- ANAGLYPH CONVERSION FUNCTIONS --- */
+
+/* --- ANAGLYPH REVERSION FUNCTIONS --- */
+
+/* --- ANAGLYPH REVERSION FUNCTIONS --- */
+
+
+/*
+  Creates a uchar value (1byte) based on the parameters to be recorded in the compressed file,
+  observing the following requirements:
+  - first two bits to describe which anaglyph was created:
+    00 - green-magenta
+    01 - red-cyan
+    10 - blue-yellow
+  - next bit to describe if the original image was either side-by-side or above-below
+    0 - side-by-side
+    1 - above-below
+  - next bit to describe which subsampling was used:
+    0 - 4:4:0
+    1 - 4:2:2
+  - The remainig 4 bits are reserved to future enhacements (more anaglyph or subsampling types to be added).
+  Input: parameters: the parameters entered by user via command line
+  Output: uchar value
+
+*/
+uchar createControParameters(char* parameters[]){
+    uchar control = 0;
+    //verify anaglyph type. Nothing needs to be done to green-magenta (00 bits)
+    if(!strcmp(parameters[4],"-rc")){//01000000 = 64
+        control = control | 64;
+    } else if(!strcmp(parameters[4],"-by")){//10000000 = 128
+        control |= 128;
+    }
+    //verify stereopair orientation. Nothing needs to be done to side-by-side (0 bit)
+    if(!strcmp(parameters[3],"-ab")){//00100000 = 32
+        control |= 32;
+    }
+    //verify subsampling type. Nothing needs to be done to 4:4:0 (0 bit)
+    if(!strcmp(parameters[5],"-422")){//00010000 = 16
+        control |= 16;
+    }
+    return control;
+}
+
+/*
+  Stores data from the compressed anaglyph and the color index table in a single file. First byte of this file
+  contains control parameters for the reversion process:
+  - first two bits to describe which anaglyph was created:
+    00 - green-magenta
+    01 - red-cyan
+    10 - blue-yellow
+  - next bit to describe if the original image was either side-by-side or above-below
+    0 - side-by-side
+    1 - above-below
+  - next bit to describe which subsampling was used:
+    0 - 4:4:0
+    1 - 4:2:2
+  - The remainig 4 bits are reserved to future enhacements (more anaglyph or subsampling types to be added).
+  Input: anaglyph - data regarding the main anaglyph (subsampled)
+         cit - data regarding the color index table
+         parameters - the parameters entered by user via command line
+         imageSize - width*height of one of the images from the stereopair
+*/
+void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int imageSize){
+    printf("Saving data... ");
+    char* imageName = strtok(parameters[2],".");
+    char filename[] = "";
+    strcpy(filename, imageName);
+    strcat(filename,"compressed.dat");
+    FILE *fp;
+    fp = fopen(filename,"wb");
+    //control data
+    uchar control = createControParameters(parameters);
+    fputc((int)control, fp);
+    //anaglyph data (2*imageSize bytes)
+    fwrite(anaglyph, sizeof(uchar), 2*imageSize, fp);
+    //color index table data (imageSize bytes)
+    fwrite(cit, sizeof(uchar), imageSize, fp);
+    printf("OK!\n");
+    fclose(fp);
+
+//-------UNIT TEST
+//printf("\n\n\tControl %d\n\n", control);
+}
+
+/*
+  Creates the Color Index Table. The color index table is formed by crominance data (Cb and Cr) from the
+  complementary anaglyph. This way, it is removed the Y component, returning only data from Cb and Cr.
+  By removing the Y component, we are discarding "imageSize" bytes from the compressed data, requiring
+  only "imageSize" bytes to store crominance data.
+  Input: data - data from the subsampled complementary anaglyph
+         imageSize - width*height of one of the images from the stereopair
+  Output: uchar datastream, with data from Y removed
+*/
+uchar* createCIT(uchar* data, int imageSize){
+    printf("Creating the Color Index Table... ");
+    uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
+    //copy Cb and Cr data
+    for(int i=0; i<imageSize;i++){cit[i]=data[i];}
+    printf("OK!\n");
+    return cit;
+}
 
 /*
   Converts an RGB image to YCbCr and then apply 4:4:0 subsampling. An image is represented by three matrices,
@@ -302,8 +408,12 @@ void anaglyphConversion(char* parameters[]){
     uchar* c_anaglyph = subsample440(complAnaglyph);
     printf("OK!\n");
 
+    //Color Index Table
+    uchar* cit = createCIT(c_anaglyph, complAnaglyph->width*complAnaglyph->height);
 
-free(anaglyph);
+    //store data in a single file
+    saveData(anaglyph, cit, parameters, complAnaglyph->width*complAnaglyph->height);
+
 
 //------UNIT TEST
 //cvSaveImage("left.bmp", left);
@@ -317,53 +427,23 @@ free(anaglyph);
 //}
 //fwrite(anaglyph, sizeof(uchar),2*left->width*left->height, fp);
 //fclose(fp);
+//FILE *fp = fopen("color-index-table.dat", "wb");
+//if(!fp){
+//    printf(" ERROR!\nError creating green-magenta anaglyph file\n");
+//    exit(-1);
+//}
+//fwrite(cit, sizeof(uchar),left->width*left->height, fp);
+//fclose(fp);
 
+
+    free(anaglyph);
+    free(c_anaglyph);
+    free(cit);
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);
     cvReleaseImage(&mainAnaglyph);
     cvReleaseImage(&complAnaglyph);
-
-
-    //SUBSAMPLING COMPLEMENTARY ANAGLYPH AND CREATING COLOR INDEX TABLE
-    /*printf("Complementary anaglyph subsampling\n");
-    int imageSize = complement->width * complement->height;
-    uchar *cit = (uchar*) malloc(imageSize*sizeof(uchar));
-    cit = (uchar*)subsampling422(complement, WITHOUT_Y);
-
-    //Saving CIT file
-    char* fileNoExtension = strtok(file,".");
-    char* newFile = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+18));
-    strcpy(newFile, fileNoExtension);
-    strcat(newFile,"-complementary.dat");
-    FILE *fp = fopen(newFile,"wb");
-    if(!fp){
-        printf(" ERROR!\nError creating CIT file %s.\n", newFile);
-        exit(-1);
-    }
-    fwrite(cit, sizeof(uchar),imageSize, fp);
-    fclose(fp);
-    free(cit);
-    free(newFile);
-    cvReleaseImage(&complement);
-    //SUBSAMPLING MAIN ANAGLYPH
-    printf("Main anaglyph subsampling\n");
-    uchar *subsampleData = (uchar*)malloc(2*imageSize*sizeof(uchar));
-    subsampleData = (uchar*)subsampling422(anaglyph,WITH_Y);
-    //save junctioned images
-    char* fileAnaglyph = (char*) malloc(sizeof(char)*(strlen(fileNoExtension)+9));
-    strcpy(fileAnaglyph, fileNoExtension);
-    strcat(fileAnaglyph,"-main.dat");
-    fp = fopen(fileAnaglyph, "wb");
-    if(!fp){
-        printf(" ERROR!\nError creating green-magenta anaglyph file %s\n", fileAnaglyph);
-        exit(-1);
-    }
-    fwrite(subsampleData, sizeof(uchar),2*imageSize, fp);
-    fclose(fp);
-    free(subsampleData);
-    free(fileAnaglyph);
-    cvReleaseImage(&anaglyph);*/
 }
 
 /* Prints usage method */
