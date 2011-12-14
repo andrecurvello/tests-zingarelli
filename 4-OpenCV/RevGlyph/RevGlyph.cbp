@@ -33,7 +33,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="conversion.cpp" />
+		<Unit filename="conversion.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="reversion.cpp" />
+		<Unit filename="reversion.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
