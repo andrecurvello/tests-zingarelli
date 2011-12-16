@@ -63,8 +63,77 @@ void anaglyphReversion(char* filename);
 /*
   Reads a compressed file and separates data inside it. The compressed file is formed
   by metadata (1 byte with control parameters and 4 bytes with the size of the anaglyph),
-  followed by the main anaglyph data, followed by the Color Index Table data.
+  followed by the main anaglyph data (2*imageSize bytes), followed by the Color Index Table
+  data (imageSize bytes).
+  Input: filename - name of the compressed file
+         anaglyph - container for the main anaglyph data
+         cit - container for the color index table data
+         metadata - control data with the type of anaglyph, stereopair representation and subsampling type
+         imageSize - information regarding the size of the anaglyph image
 */
+void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int* imageSize);
+
+/*
+  Rebuild the complementary anaglyph, by extracting the Y component from the main anaglyph.
+*/
+void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata,int imageSize);
+
+/*
+  Extracts the Y component from the main anaglyph. The Y data is in the second half of the
+  anaglyph data (after imageSize bytes), as exemplified below:
+   ---------------------------------------------------------------
+  |       Cb       |       Cr       |              Y              |
+   ---------------------------------------------------------------
+  /--imageSize/2---/--imageSize/2---/---------imageSize-----------/
+  Input: anaglyph - main anaglyph data
+         imageSize - size of the anaglyph image
+  Output: uchar elements containing data from the Y component
+*/
+uchar* extractY(uchar* anaglyph,int imageSize);
+
+/*
+  Creates the complementary anaglyph using the Y component from the main anaglyph
+  Input: cit - data from the color index table
+         Y - luminance data from the main anaglyph
+         imageSize - size of the anaglyph image
+  Output: uchar elements containg the rebuilt complementary anaglyph
+*/
+uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y,int imageSize);
+
+uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y,int imageSize){
+    printf("Rebuilding the complementary anaglyph... ");
+    uchar* data = (uchar*) malloc(sizeof(uchar)*2*imageSize);
+    for(int i=0; i<imageSize; i++){
+        data[i] = cit[i];
+        data[1+imageSize] = Y[i];
+    }
+    printf("OK!\n");
+    return data;
+}
+
+uchar* extractY(uchar* anaglyph,int imageSize){
+    printf("Extracting Y data from main anaglyph... ");
+    uchar* data = (uchar*) malloc(sizeof(uchar)*imageSize);
+    for(int i=0; i<imageSize; i++){
+        data[i] = anaglyph[i+imageSize];
+    }
+    printf("OK!\n");
+    return data;
+}
+
+void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata,int imageSize){
+    //extract Y from main anaglyph
+    uchar* Y = extractY(anaglyph, imageSize);
+
+    //build complementary anaglyph
+    uchar* complementary = buildComplementaryAnaglyph(cit, Y, imageSize);
+
+    //revert chrominance subsampling to 4:4:4
+
+    free(Y);
+    free(complementary);
+}
+
 void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int* imageSize){
     printf("Reading compressed file... ");
     //open file
@@ -81,9 +150,16 @@ void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* me
     int imgSize[1] = {0};
     fread(imgSize, sizeof(int), 1, fp);
     *imageSize = imgSize[0];
+
     //read main anaglyph data
+    uchar* mainData = (uchar*)malloc(2*imgSize[0]*sizeof(uchar));
+    fread(mainData, sizeof(uchar), 2*imgSize[0], fp);
+    *anaglyph = mainData;
 
     //read Color Index Table data
+    uchar* citData = (uchar*)malloc(imgSize[0]*sizeof(uchar));
+    fread(citData, sizeof(uchar), imgSize[0], fp);
+    *cit = citData;
 
     printf("OK!\n");
     fclose(fp);
@@ -97,13 +173,25 @@ void anaglyphReversion(char* filename){
     int imageSize = 0;
     readCompressedFile(filename, &anaglyph, &cit, &metadata, &imageSize);
 
-    //rebuild the complementary anaglyph
+    //rebuild the complementary and main anaglyphs
+    IplImage* mainAnaglyph = NULL;
+    IplImage* complAnaglyph = NULL;
+    rebuildAnaglyph(mainAnaglyph, complAnaglyph, anaglyph, cit, metadata, imageSize);
 
     //rearrange color channels
 
+    cvReleaseImage(&mainAnaglyph);
+    cvReleaseImage(&complAnaglyph);
+
 //---- UNIT TEST
-printf("\nCONTROL DATA: %d\n\n", metadata);
-printf("\nIMAGE SIZE: %d\n\n", imageSize);
+//printf("\nCONTROL DATA: %d\n\n", metadata);
+//printf("\nIMAGE SIZE: %d\n\n", imageSize);
+//FILE* fileA = fopen("Anaglyph.dat", "wb");
+//fwrite(anaglyph, sizeof(uchar), 2*imageSize, fileA);
+//fclose(fileA);
+//fileA = fopen("cit.dat", "wb");
+//fwrite(cit, sizeof(uchar), imageSize, fileA);
+//fclose(fileA);
 }
 /* --- ANAGLYPH REVERSION FUNCTIONS --- */
 
