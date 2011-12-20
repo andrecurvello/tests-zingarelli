@@ -33,7 +33,7 @@ uchar createMetadata(char* parameters[]){
 }
 
 
-void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int imageSize){
+void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int width, int height, int depth){
     printf("Saving data... ");
     char* imageName = strtok(parameters[2],".");
     char filename[] = "";
@@ -48,17 +48,20 @@ void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int imageSize){
     //metadata
     uchar control = createMetadata(parameters);
     fputc((int)control, fp);
-    int imgSize[1] = {imageSize};
-    fwrite(imgSize, sizeof(int), 1, fp);
+    int imgSize[3] = {width, height, depth};
+    fwrite(imgSize, sizeof(int), 3, fp);
+
     //anaglyph data (2*imageSize bytes)
-    fwrite(anaglyph, sizeof(uchar), 2*imageSize, fp);
+    fwrite(anaglyph, sizeof(uchar), 2*width*height, fp);
+
     //color index table data (imageSize bytes)
-    fwrite(cit, sizeof(uchar), imageSize, fp);
+    fwrite(cit, sizeof(uchar), width*height, fp);
     printf("OK!\n");
     fclose(fp);
 
 //-------UNIT TEST
 //printf("\n\n\tControl %d\n\n", control);
+//printf("\nIMAGE SIZE: width - %d | height - %d | pixel depth - %d\n\n", imgSize[0], imgSize[1], imgSize[2]);
 }
 
 
@@ -285,7 +288,7 @@ void anaglyphConversion(char* parameters[]){
     uchar* cit = createCIT(c_anaglyph, complAnaglyph->width*complAnaglyph->height);
 
     //store data in a single file
-    saveData(anaglyph, cit, parameters, complAnaglyph->width*complAnaglyph->height);
+    saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth);
 
 
 //------UNIT TEST

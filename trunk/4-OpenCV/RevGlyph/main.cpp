@@ -68,15 +68,21 @@ void anaglyphReversion(char* filename);
   Input: filename - name of the compressed file
          anaglyph - container for the main anaglyph data
          cit - container for the color index table data
-         metadata - control data with the type of anaglyph, stereopair representation and subsampling type
-         imageSize - information regarding the size of the anaglyph image
+         metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
+         imageSize - width[0], height[1] and pixel depth[2] of the anaglyph image
 */
-void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int* imageSize);
+void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int** imageSize);
 
 /*
   Rebuild the complementary anaglyph, by extracting the Y component from the main anaglyph.
+  Input: mainAnaglyph - container for the main anaglyph image
+         complAnaglyph - container for the complementary anaglyph image
+         anaglyph - data from the main anaglyph
+         cit - data from the color index table
+         metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
+         imageSize - width[0], height[1] and pixel depth[2] of the anaglyph image
 */
-void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata,int imageSize);
+void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize);
 
 /*
   Extracts the Y component from the main anaglyph. The Y data is in the second half of the
@@ -89,7 +95,7 @@ void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* ana
          imageSize - size of the anaglyph image
   Output: uchar elements containing data from the Y component
 */
-uchar* extractY(uchar* anaglyph,int imageSize);
+uchar* extractY(uchar* anaglyph, int imageSize);
 
 /*
   Creates the complementary anaglyph using the Y component from the main anaglyph
@@ -98,7 +104,93 @@ uchar* extractY(uchar* anaglyph,int imageSize);
          imageSize - size of the anaglyph image
   Output: uchar elements containg the rebuilt complementary anaglyph
 */
-uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y,int imageSize);
+uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y, int imageSize);
+
+/*
+  Converts an image from YCbCr to RGB. Image was previously subsampled, so it also has to
+  be reverted to 4:4:4 prior to RGB conversion. It is possible to know which kind of chrominance
+  subsampling was applied by using the metadata.
+  Input: image - container for the image
+         imageData - pixel data
+         metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
+         imageSize - width[0], height[1] and pixel depth[2] of the anaglyph image
+*/
+void convert2RGB(IplImage* image, uchar* imageData, uchar metadata, int* imageSize);
+
+/*
+  Given metadata on the compressed image, performs 3 left shift to find out which chrominance
+  subsampling was used. Informations regarding chrominance subsampling is in the third bit of
+  metadata.
+  Input: metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
+  Output: integer number (returns 128 for 4:2:2 subsampling and 0 for 4:4:0 subsampling)
+*/
+int extractSubsampling(uchar metadata);
+
+/*
+  Reverts chrominance subsampling from 4:4:0 to the original 4:4:4. 4:4:0 was based by calculating the
+  average values of two consecutive rows. For the reversion, we will simply copy the same value for two
+  consecutive rows. Image data is organized as below:
+   ---------------------------------------------------------------------------------------------
+  |         Cb          |           Cr          |                       Y                       |
+   ---------------------------------------------------------------------------------------------
+  /-----imageSize/2-----/-----imageSize/2-------/---------------imageSize-----------------------/
+  Input: image - container for the image
+         imageData - pixel Data
+         imageSize - width[0], height[1] and pixel depth[2] of the anaglyph image
+*/
+void revertSubsampling440(IplImage* image, uchar* imageData, int* imageSize){
+    //set properties to image container
+    image = cvCreateImage(cvSize(imageSize[0], imageSize[1]), imageSize[2], 3);//assuming it will always be a 3-channel image
+
+    int countY = 0; //iterate through Y data
+    int countCbCr = 0; //iterate through Cb and Cr data
+    /*for(int row = 0; row < image->width; row++){
+        uchar* ptr = (uchar*)(image->imageData + row * image->widthStep);
+        //in an odd row, we need to copy values from the last row
+        //We achieve this by returning image->width positions in imageData.
+        if(row % 2 != 0){
+            countCbCr -= image->width;
+        }
+        for(int col = 0; col < image->width; col++){
+            ptr[3*col]   = imageData[countY+image->imageSize]; //Y
+            ptr[3*col+1] = imageData[countCbCr]; //Cb
+            ptr[3*col+2] = imageData[countCbCr+(image->imageSize/2)]; //Cr
+            countY++;
+            countCbCr++;
+        }
+    }*/
+}
+
+int extractSubsampling(uchar metadata){
+    int result = metadata << 3;
+    return (result & 128);
+}
+
+void convert2RGB(IplImage* image, uchar* imageData, uchar metadata, int* imageSize){
+    //find out which chrominance subsampling was used
+    int subsampling = extractSubsampling(metadata);
+
+    //revert chrominance subsampling
+    printf("Reverting image to 4:4:4... ");
+    switch(subsampling){
+        case 0://4:4:0
+            revertSubsampling440(image, imageData, imageSize);
+            //TODO: imageSize is not holding the correct values!!!
+            break;
+        case 128://4:2:2
+            printf("\n\nRevert subsampling 4:2:2... TBD\n\n");
+        break;
+    }
+    printf("OK!\n");
+
+    //YCbCr to RGB conversion
+    printf("Converting from YCbCr to RGB color space... ");
+
+    printf("OK!\n");
+
+//---- UNIT TEST
+//printf("\n\nSubsampling type: %d\n\n", subsampling);
+}
 
 uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y,int imageSize){
     printf("Rebuilding the complementary anaglyph... ");
@@ -121,20 +213,24 @@ uchar* extractY(uchar* anaglyph,int imageSize){
     return data;
 }
 
-void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata,int imageSize){
+void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
+    int size = imageSize[0]*imageSize[1]; //width*height
+
     //extract Y from main anaglyph
-    uchar* Y = extractY(anaglyph, imageSize);
+    uchar* Y = extractY(anaglyph, size);
 
     //build complementary anaglyph
-    uchar* complementary = buildComplementaryAnaglyph(cit, Y, imageSize);
+    uchar* complementary = buildComplementaryAnaglyph(cit, Y, size);
 
-    //revert chrominance subsampling to 4:4:4
+    //revert to 4:4:4 RGB
+    convert2RGB(mainAnaglyph, anaglyph, metadata, imageSize);
+    convert2RGB(complAnaglyph, complementary, metadata, imageSize);
 
     free(Y);
     free(complementary);
 }
 
-void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int* imageSize){
+void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* metadata, int** imageSize){
     printf("Reading compressed file... ");
     //open file
     FILE *fp = fopen(filename,"rb");
@@ -146,19 +242,19 @@ void readCompressedFile(char* filename, uchar** anaglyph, uchar** cit, uchar* me
     //read data regarding anaglyph type, stereo pair disposition and subsampling type
     *metadata = fgetc(fp);
 
-    //read the size of anaglyph
-    int imgSize[1] = {0};
-    fread(imgSize, sizeof(int), 1, fp);
-    *imageSize = imgSize[0];
+    //read the size of anaglyph (width, height and pixel depth)
+    int imgSize[3] = {0};
+    fread(imgSize, sizeof(int), 3, fp);
+    *imageSize = imgSize;
 
     //read main anaglyph data
-    uchar* mainData = (uchar*)malloc(2*imgSize[0]*sizeof(uchar));
-    fread(mainData, sizeof(uchar), 2*imgSize[0], fp);
+    uchar* mainData = (uchar*)malloc(2*imgSize[0]*imgSize[1]*sizeof(uchar));
+    fread(mainData, sizeof(uchar), 2*imgSize[0]*imgSize[1], fp);
     *anaglyph = mainData;
 
     //read Color Index Table data
-    uchar* citData = (uchar*)malloc(imgSize[0]*sizeof(uchar));
-    fread(citData, sizeof(uchar), imgSize[0], fp);
+    uchar* citData = (uchar*)malloc(imgSize[0]*imgSize[1]*sizeof(uchar));
+    fread(citData, sizeof(uchar), imgSize[0]*imgSize[1], fp);
     *cit = citData;
 
     printf("OK!\n");
@@ -170,7 +266,7 @@ void anaglyphReversion(char* filename){
     uchar* anaglyph = NULL;
     uchar* cit = NULL;
     uchar metadata = NULL;
-    int imageSize = 0;
+    int *imageSize = NULL;
     readCompressedFile(filename, &anaglyph, &cit, &metadata, &imageSize);
 
     //rebuild the complementary and main anaglyphs
@@ -185,7 +281,7 @@ void anaglyphReversion(char* filename){
 
 //---- UNIT TEST
 //printf("\nCONTROL DATA: %d\n\n", metadata);
-//printf("\nIMAGE SIZE: %d\n\n", imageSize);
+//printf("\nIMAGE SIZE: width - %d | height - %d | pixel depth - %d\n\n", imageSize[0], imageSize[1], imageSize[2]);
 //FILE* fileA = fopen("Anaglyph.dat", "wb");
 //fwrite(anaglyph, sizeof(uchar), 2*imageSize, fileA);
 //fclose(fileA);
