@@ -2,13 +2,13 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="conversion.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="0" topLine="45" />
+		<Cursor position="2082" topLine="39" />
 	</File>
 	<File name="conversion.h" open="1" top="0" tabpos="2">
-		<Cursor position="3589" topLine="57" />
+		<Cursor position="3801" topLine="66" />
 	</File>
 	<File name="main.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="4569" topLine="100" />
+		<Cursor position="7946" topLine="123" />
 	</File>
 	<File name="reversion.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="135" topLine="0" />

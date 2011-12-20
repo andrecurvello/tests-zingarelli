@@ -45,14 +45,16 @@ uchar createMetadata(char* parameters[]);
     0 - 4:4:0
     1 - 4:2:2
   - The remainig 4 bits are reserved to future enhacements (more anaglyph or subsampling types to be added).
-  Next 4 bytes contain an int with the size of the anaglyph (imageSize). After that comes data from the main
-  anaglyph, followed by data from the Color Index Table
+  Next 12 bytes contain two int with the size of the anaglyph (width and height), followed by another int with
+  pixel depth. After that comes data from the main anaglyph, followed by data from the Color Index Table
   Input: anaglyph - data regarding the main anaglyph (subsampled)
          cit - data regarding the color index table
          parameters - the parameters entered by user via command line
-         imageSize - width*height of one of the images from the stereopair
+         width - width of one of the images from the stereopair
+         height - height of one of the images from the stereopair
+         depth - pixel depth of one of the images from the stereopair
 */
-void saveData(uchar* anaglyph,uchar* cit, char* parameters[]);
+void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int width, int height, int depth);
 
 /*
   Creates the Color Index Table. The color index table is formed by crominance data (Cb and Cr) from the
