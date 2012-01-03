@@ -170,6 +170,8 @@ int extractRepresentation(char metadata);
   Input: mainAnaglyph - main anaglyph
          complAnaglyph - complementary anaglyph
 */
+void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename);
+
 void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
     printf("Creating the stereo pair... ");
     IplImage* stereoPair = cvCreateImage(cvSize((mainAnaglyph->width) * 2, mainAnaglyph->height), mainAnaglyph->depth, mainAnaglyph->nChannels);
