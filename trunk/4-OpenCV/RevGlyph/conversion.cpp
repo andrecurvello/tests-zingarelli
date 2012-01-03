@@ -33,7 +33,7 @@ uchar createMetadata(char* parameters[]){
 }
 
 
-void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int width, int height, int depth){
+void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int height, int depth){
     printf("Saving data... ");
     char* imageName = strtok(parameters[2],".");
     char filename[] = "";
@@ -278,14 +278,17 @@ void anaglyphConversion(char* parameters[]){
 
     //spacial compression
     printf("Compressing main anaglyph...\n");
-    uchar* anaglyph = subsample440(mainAnaglyph);
+    uchar* anaglyph = (uchar*) malloc(2*mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
+    anaglyph = subsample440(mainAnaglyph);
     printf("OK!\n");
     printf("Compressing complementary anaglyph...\n");
-    uchar* c_anaglyph = subsample440(complAnaglyph);
+    uchar* c_anaglyph = (uchar*) malloc(2*mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
+    c_anaglyph = subsample440(complAnaglyph);
     printf("OK!\n");
 
     //Color Index Table
-    uchar* cit = createCIT(c_anaglyph, complAnaglyph->width*complAnaglyph->height);
+    uchar* cit = (uchar*)malloc(mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
+    cit = createCIT(c_anaglyph, complAnaglyph->width*complAnaglyph->height);
 
     //store data in a single file
     saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth);
