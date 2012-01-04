@@ -1,7 +1,7 @@
 /*
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: December, 14th 2011
-  Last modification: December, 14th 2011
+  Last modification: January, 4th 2012
 
   This library contains procedures for anaglyph conversion of stereoscopic images.
   The conversion is implemented in a way that enables posterior reversion of the process,
@@ -38,7 +38,7 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
     char* imageName = strtok(parameters[2],".");
     char filename[] = "";
     strcpy(filename, imageName);
-    strcat(filename,"compressed.dat");
+    strcat(filename,"-compressed.dat");
     FILE *fp;
     fp = fopen(filename,"wb");
     if(fp == NULL){
