@@ -1,7 +1,7 @@
 /*
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: November, 28th 2011
-  Last modification: January, 4th 2012
+  Last modification: January, 24th 2012
 
   RevGlyph Technique
   Anaglyph conversion & reversion of stereo images.
@@ -110,3 +110,36 @@ int main(int argc, char* argv[]){
     }
     return 0;
 }
+
+//Uncomment this if you only want to get only the anaglyphs - Diario-Mestrado.docx (Seção 8)
+/*int main(int argc, char* argv[]){
+    IplImage *stereopair = NULL;
+    IplImage *left = NULL;
+    IplImage *right = NULL;
+    IplImage *mainAnaglyph = NULL;
+    IplImage *complAnaglyph = NULL;
+
+    //load the stereo pair
+    stereopair = loadAndVerify(argv[2],argv[3]);
+
+    //prepare images with properties from the original stereo image
+    prepareImages(stereopair, argv[3], &left, &right, &mainAnaglyph, &complAnaglyph);
+
+    //split the stereo pair
+    splitImage(stereopair, argv[3], &left, &right);
+
+    //create the anaglyphs
+    createAnaglyph(left, right, mainAnaglyph, complAnaglyph, argv[4]);
+
+    //save anaglyphs
+    cvSaveImage("main-anaglyph.bmp", mainAnaglyph);
+    cvSaveImage("complementary-anaglyph.bmp", complAnaglyph);
+    cvSaveImage("left.bmp", left);
+    cvSaveImage("right.bmp", right);
+
+    cvReleaseImage(&stereopair);
+    cvReleaseImage(&left);
+    cvReleaseImage(&right);
+    cvReleaseImage(&mainAnaglyph);
+    cvReleaseImage(&complAnaglyph);
+}*/
