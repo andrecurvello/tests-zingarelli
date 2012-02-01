@@ -1,10 +1,18 @@
 /*
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: January, 4th 2012
-  Last modification: January, 4th 2012
+  Last modification: February, 1st 2012
 
   This library contains procedures for anaglyph reversion of stereoscopic images.
   The reversion is enabled due to proper conversion using the Color Index Table.
+
+  Modifications (dd/mm/aaaa):
+  (01/02/2012)
+  Creation of the luminanceDiff vector, to test the hypothesis of storing the differences
+  from both luminance components, and use this difference to recreate Y from the complementary
+  anaglyph (Yc). Our hypothesis is that this difference will have a large amount of values
+  near zero, so we could stablish a threshold to obtain string of zeroes and the compress it
+  with run-length, obtaining great compression.
 */
 
 #include <stdio.h>
@@ -136,11 +144,48 @@ uchar* extractY(uchar* anaglyph,int imageSize){
     return data;
 }
 
+/*
+  The luminance from the complementary anaglyph is rebuilt by using the luminance
+  from the main anaglyph and the luminance differences calculated during conversion
+  Input: analyph - main anaglyph data
+         imageSize - size of the anaglyph image
+  Output: datastream with the luminance from the complementary anaglyph
+*/
+uchar* recoverComplY(uchar* anaglyph,int imageSize){
+    //luminance from main anaglyph
+    uchar* Ym = extractY(anaglyph, imageSize);
+
+    //luminance from complementary anaglyph
+    uchar* Yc = (uchar*)malloc(imageSize*sizeof(uchar));
+
+    //luminance difference
+    char* Yd = (char*)malloc(imageSize*sizeof(char));
+
+
+    FILE *fp;
+    fp = fopen("diffData.dat","rb");
+    if(fp == NULL){
+        printf("ERROR!\n\tError opening file diffData.dat");
+        exit(-1);
+    }
+    fread(Yd,sizeof(char),imageSize, fp);
+    fclose(fp);
+
+    for(int i=0; i<imageSize; i++){
+        Yc[i] = Ym[i] - Yd[i];
+    }
+    return Yc;
+}
+
+
 void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
     int size = imageSize[0]*imageSize[1]; //width*height
 
-    //extract Y from main anaglyph
-    uchar* Y = extractY(anaglyph, size);
+    //extract Y from main anaglyph (modified to use the luminance difference approach
+    //uchar* Y = extractY(anaglyph, size);
+
+    //luminance difference approach
+    uchar* Y = recoverComplY(anaglyph, size);
 
     //build complementary anaglyph
     uchar* complementary = buildComplementaryAnaglyph(cit, Y, size);
