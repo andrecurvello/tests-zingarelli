@@ -57,6 +57,15 @@ uchar createMetadata(char* parameters[]);
 void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int width, int height, int depth);
 
 /*
+  Calculates pixel differences between luminance components of main and complementary anaglyphs
+  Input: mainData - main anaglyph subsampled data
+         complData - complementary anaglyph subsampled data
+         imageSize - width*height of one of the images from the stereopair
+  Output: uchar datastream with the differences
+*/
+char* diffY(uchar* mainData, uchar* complData, int imageSize);
+
+/*
   Creates the Color Index Table. The color index table is formed by crominance data (Cb and Cr) from the
   complementary anaglyph. This way, it is removed the Y component, returning only data from Cb and Cr.
   By removing the Y component, we are discarding "imageSize" bytes from the compressed data, requiring

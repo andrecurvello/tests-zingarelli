@@ -1,11 +1,19 @@
 /*
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: December, 14th 2011
-  Last modification: January, 4th 2012
+  Last modification: February, 1st 2012
 
   This library contains procedures for anaglyph conversion of stereoscopic images.
   The conversion is implemented in a way that enables posterior reversion of the process,
   with the creation of what we called "Color Index Table".
+
+  Modifications (dd/mm/aaaa):
+  (01/02/2012)
+  Creation of the luminanceDiff vector, to test the hypothesis of storing the differences
+  from both luminance components, and use this difference to recreate Y from the complementary
+  anaglyph (Yc). Our hypothesis is that this difference will have a large amount of values
+  near zero, so we could stablish a threshold to obtain string of zeroes and the compress it
+  with run-length, obtaining great compression.
 */
 
 #include <stdio.h>
@@ -62,6 +70,30 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
 //-------UNIT TEST
 //printf("\n\n\tControl %d\n\n", control);
 //printf("\nIMAGE SIZE: width - %d | height - %d | pixel depth - %d\n\n", imgSize[0], imgSize[1], imgSize[2]);
+}
+
+char* diffY(uchar* mainData, uchar* complData, int imageSize){
+    printf("Calculating luminance differences... ");
+    char* diffData = (char*)malloc(imageSize*sizeof(char));
+
+    //luminance data starts after imageSize positions in the array
+    for(int i=0; i<imageSize; i++){
+        diffData[i] = mainData[i+imageSize] - complData[i+imageSize];
+    }
+
+    printf("OK!\n");
+
+//UNIT TEST
+FILE *fp;
+fp = fopen("diffData.dat","wb");
+if(fp == NULL){
+    printf("ERROR!\n\tError opening file diffData.dat");
+    exit(-1);
+}
+fwrite(diffData,sizeof(char),imageSize, fp);
+fclose(fp);
+
+    return diffData;
 }
 
 
@@ -277,18 +309,23 @@ void anaglyphConversion(char* parameters[]){
     createAnaglyph(left, right, mainAnaglyph, complAnaglyph, parameters[4]);
 
     //spacial compression
+    int imageSize = mainAnaglyph->width*mainAnaglyph->height;
     printf("Compressing main anaglyph...\n");
-    uchar* anaglyph = (uchar*) malloc(2*mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
+    uchar* anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
     anaglyph = subsample440(mainAnaglyph);
     printf("OK!\n");
     printf("Compressing complementary anaglyph...\n");
-    uchar* c_anaglyph = (uchar*) malloc(2*mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
+    uchar* c_anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
     c_anaglyph = subsample440(complAnaglyph);
     printf("OK!\n");
 
     //Color Index Table
-    uchar* cit = (uchar*)malloc(mainAnaglyph->width*mainAnaglyph->height*sizeof(uchar));
-    cit = createCIT(c_anaglyph, complAnaglyph->width*complAnaglyph->height);
+    uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
+    cit = createCIT(c_anaglyph, imageSize);
+
+    //Vector of luminance differences
+    char* luminanceDiff = (char*)malloc(imageSize*sizeof(char));
+    luminanceDiff = diffY(anaglyph, c_anaglyph, imageSize);
 
     //store data in a single file
     saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth);
@@ -318,6 +355,7 @@ void anaglyphConversion(char* parameters[]){
     free(anaglyph);
     free(c_anaglyph);
     free(cit);
+    free(luminanceDiff);
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);
