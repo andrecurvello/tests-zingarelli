@@ -1,7 +1,7 @@
 /*
   Developed by: Matheus Ricardo Uihara Zingarelli
   Creation date: December, 14th 2011
-  Last modification: February, 1st 2012
+  Last modification: February, 2nd 2012
 
   This library contains procedures for anaglyph conversion of stereoscopic images.
   The conversion is implemented in a way that enables posterior reversion of the process,
@@ -14,12 +14,26 @@
   anaglyph (Yc). Our hypothesis is that this difference will have a large amount of values
   near zero, so we could stablish a threshold to obtain string of zeroes and the compress it
   with run-length, obtaining great compression.
+
+  (01/02/2012)
+  Created structure to apply RLE in the luminanceDiff datastream, in order to obtain greater
+  compression. Also implemented RLE algorithm
 */
 
 #include <stdio.h>
 #include <cv.h>
 #include <highgui.h>
 #include "conversion.h"
+
+//constant for RLE, consider a number x "similar" to another number, if the latter is only
+// THRESHOLD values from the former
+#define THRESHOLD 10
+
+//RLE struct
+struct rle_struct{
+    char value; //value of the difference between pixels of Ym and Yc
+    uchar qty;  //number of times the value is repeated in a sequence
+};
 
 uchar createMetadata(char* parameters[]){
     uchar control = 0;
@@ -72,6 +86,59 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
 //printf("\nIMAGE SIZE: width - %d | height - %d | pixel depth - %d\n\n", imgSize[0], imgSize[1], imgSize[2]);
 }
 
+/*
+  Performs run-length encoding.
+  Uses an array of structs with values and number of times the value is repeated.
+  The array's size is the same as the imageSize (for the worst case scenario of RLE).
+  Input: data - data to be encoded
+*/
+void RLE(char* data, int imageSize){
+    printf("Applying run-length encoding... ");
+    struct rle_struct rle_elements[imageSize];
+    int currPosition = 0; //current position in the array
+    rle_elements[0].value = data[0];
+    rle_elements[0].qty = 1;
+
+    //loop through data, couting the number of times each element repeats in a sequence
+    for(int i = 1; i < imageSize; i++){
+        if(rle_elements[currPosition].value <= (data[i] + THRESHOLD) &&
+           rle_elements[currPosition].value >= (data[i] - THRESHOLD)){
+        /*if(rle_elements[currPosition].value == data[i]){*/
+            //maximum repeated elements supported in the array is 255 (uchar variable)
+            if(rle_elements[currPosition].qty < 255){
+                rle_elements[currPosition].qty++;
+            }
+            else{
+                //more than 255 ocurrence, create a new element in the array
+                currPosition++;
+                rle_elements[currPosition].value = data[i];
+                rle_elements[currPosition].qty = 1;
+            }
+        }
+        else{
+            //new value, new entry in the array
+            currPosition++;
+            rle_elements[currPosition].value = data[i];
+            rle_elements[currPosition].qty = 1;
+        }
+    }
+    printf("OK!\n");
+
+//UNIT TEST
+for(int i = 0; i < currPosition; i++){
+    printf("Element %d\t Value: %d\t Quantity: %d\n", i, rle_elements[i].value, rle_elements[i].qty);
+}
+printf("\n\n---- End Debug RLE ----\n\n");
+FILE *fp;
+fp = fopen("diffData-RLE.dat","wb");
+if(fp == NULL){
+    printf("ERROR!\n\tError opening file diffData.dat");
+    exit(-1);
+}
+fwrite(rle_elements,sizeof(struct rle_struct),currPosition, fp);
+fclose(fp);
+}
+
 char* diffY(uchar* mainData, uchar* complData, int imageSize){
     printf("Calculating luminance differences... ");
     char* diffData = (char*)malloc(imageSize*sizeof(char));
@@ -81,9 +148,13 @@ char* diffY(uchar* mainData, uchar* complData, int imageSize){
         diffData[i] = mainData[i+imageSize] - complData[i+imageSize];
     }
 
+    //apply RLE (run-length encoding)
+    RLE(diffData, imageSize);
+
     printf("OK!\n");
 
 //UNIT TEST
+//TODO: add this as another overhead at the end of the single compressed file
 FILE *fp;
 fp = fopen("diffData.dat","wb");
 if(fp == NULL){
@@ -326,6 +397,10 @@ void anaglyphConversion(char* parameters[]){
     //Vector of luminance differences
     char* luminanceDiff = (char*)malloc(imageSize*sizeof(char));
     luminanceDiff = diffY(anaglyph, c_anaglyph, imageSize);
+
+    //TODO: apply RLE to luminanceDiff
+
+    //TODO: save luminanceDiff in the single compressed file
 
     //store data in a single file
     saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth);
