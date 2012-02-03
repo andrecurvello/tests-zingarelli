@@ -13,12 +13,21 @@
   anaglyph (Yc). Our hypothesis is that this difference will have a large amount of values
   near zero, so we could stablish a threshold to obtain string of zeroes and the compress it
   with run-length, obtaining great compression.
+
+  (01/02/2012)
+  Implemented Run-length Decoding algorithm (RLD)
 */
 
 #include <stdio.h>
 #include <cv.h>
 #include <highgui.h>
 #include "reversion.h"
+
+//RLE struct
+struct rle_struct{
+    char value; //value of the difference between pixels of Ym and Yc
+    uchar qty;  //number of times the value is repeated in a sequence
+};
 
 void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
     printf("Creating the stereo pair... ");
@@ -134,7 +143,7 @@ uchar* buildComplementaryAnaglyph(uchar* cit, uchar* Y, int imageSize){
     return data;
 }
 
-uchar* extractY(uchar* anaglyph,int imageSize){
+uchar* extractY(uchar* anaglyph, int imageSize){
     printf("Extracting Y data from main anaglyph... ");
     uchar* data = (uchar*) malloc(sizeof(uchar)*imageSize);
     for(int i=0; i<imageSize; i++){
@@ -144,14 +153,7 @@ uchar* extractY(uchar* anaglyph,int imageSize){
     return data;
 }
 
-/*
-  The luminance from the complementary anaglyph is rebuilt by using the luminance
-  from the main anaglyph and the luminance differences calculated during conversion
-  Input: analyph - main anaglyph data
-         imageSize - size of the anaglyph image
-  Output: datastream with the luminance from the complementary anaglyph
-*/
-uchar* recoverComplY(uchar* anaglyph,int imageSize){
+uchar* recoverComplY(uchar* anaglyph, int imageSize){
     //luminance from main anaglyph
     uchar* Ym = extractY(anaglyph, imageSize);
 
@@ -161,22 +163,33 @@ uchar* recoverComplY(uchar* anaglyph,int imageSize){
     //luminance difference
     char* Yd = (char*)malloc(imageSize*sizeof(char));
 
-
+    //TODO: to be changed to read from a single file containing all data. TDB
     FILE *fp;
-    fp = fopen("diffData.dat","rb");
+    //fp = fopen("diffData.dat","rb");
+    fp = fopen("diffData-RLE.dat","rb");
+    //run-length decoding
+    struct rle_struct rle_elements[imageSize];
     if(fp == NULL){
         printf("ERROR!\n\tError opening file diffData.dat");
         exit(-1);
     }
-    fread(Yd,sizeof(char),imageSize, fp);
+    //TODO: read number of elements from file
+    fread(rle_elements,sizeof(rle_struct),32359, fp);
     fclose(fp);
+
+    int i = 0;
+    for(int j = 0; j < 32359; j++){
+        while(rle_elements[j].qty > 0){
+            Yd[i++] = rle_elements[j].value;
+            rle_elements[j].qty--;
+        }
+    }
 
     for(int i=0; i<imageSize; i++){
         Yc[i] = Ym[i] - Yd[i];
     }
     return Yc;
 }
-
 
 void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
     int size = imageSize[0]*imageSize[1]; //width*height

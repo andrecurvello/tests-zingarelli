@@ -66,6 +66,15 @@ void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* ana
 uchar* extractY(uchar* anaglyph, int imageSize);
 
 /*
+  The luminance from the complementary anaglyph is rebuilt by using the luminance
+  from the main anaglyph and the luminance differences calculated during conversion
+  Input: analyph - main anaglyph data
+         imageSize - size of the anaglyph image
+  Output: datastream with the luminance from the complementary anaglyph
+*/
+uchar* recoverComplY(uchar* anaglyph,int imageSize);
+
+/*
   Creates the complementary anaglyph using the Y component from the main anaglyph
   Input: cit - data from the color index table
          Y - luminance data from the main anaglyph
