@@ -1,0 +1,81 @@
+/*
+  Given two images, img_A (modified) and img_B (original),
+  calculates the PSNR between them
+
+  Developed by: Matheus Ricardo Uihara Zingarelli
+  Adapted from: Rodolfo Ribeiro Silva
+  Creation date: February, 16th 2011
+  Last modification: February, 16th 2011
+
+  Usage:
+        psnr <img_A.bmp> <img_B.bmp> -TYPE
+
+        TYPE: rgb or ycbcr
+*/
+
+#include <stdio.h>
+#include <cv.h>
+#include <highgui.h>
+#include <math.h>
+#include "psnr.h"
+
+double MSE(IplImage* original, IplImage* processed){
+    double diff = 0;
+    for(int row = 0; row < original->height; row++){
+            uchar* ptrOri = (uchar*)(original->imageData + row * original->widthStep);
+            uchar* ptrProc = (uchar*)(processed->imageData + row * processed->widthStep);
+            for(int col=0; col<original->width; col++){
+                diff += (ptrOri[col] - ptrProc[col]) * (ptrOri[col] - ptrProc[col]);
+            }
+    }
+    double result = diff / (original->width * original->height);
+    return result;
+}
+
+double getPSNR(IplImage* original, IplImage* processed, int maxError){
+    double result = 10 * log10(maxError*maxError / MSE(original, processed));
+    return result;
+}
+
+void PSNR(IplImage* original, IplImage* processed, int maxError, double *res1, double *res2, double *res3, char* type){
+    printf("Computing PSNR... ");
+    //verify image size
+    if((original->width != processed->width) || (original->height != processed->height) ||
+       (original->nChannels != processed->nChannels) || (original->depth != processed->depth)){
+        printf("ERROR!\n\tImages have different sizes and/or properties");
+        exit(-1);
+    }
+
+    //verify if it is either RGB or YCbCr measurement
+    //todo: print help if arguments are invalid
+    if(!strcmp(type,"-ycbcr")){
+        cvCvtColor(original,original,CV_BGR2YCrCb);
+        cvCvtColor(processed,processed,CV_BGR2YCrCb);
+    }
+
+    //split image channels
+    CvSize size = cvSize(original->width, original->height);
+    IplImage* ori_R = cvCreateImage(size, original->depth, 1);
+    IplImage* ori_G = cvCreateImage(size, original->depth, 1);
+    IplImage* ori_B= cvCreateImage(size, original->depth, 1);
+    IplImage* proc_R = cvCreateImage(size, original->depth, 1);
+    IplImage* proc_G = cvCreateImage(size, original->depth, 1);
+    IplImage* proc_B = cvCreateImage(size, original->depth, 1);
+
+    cvSplit(original, ori_B, ori_G, ori_R, NULL);
+    cvSplit(processed, proc_B, proc_G, proc_R, NULL);
+
+    //calculate PSNR for each channel
+    //note: for YCbCr, res3 will hold the Y value and res1 will hold the Cr value
+    *res1 = getPSNR(ori_R, proc_R, maxError);
+    *res2 = getPSNR(ori_G, proc_G, maxError);
+    *res3 = getPSNR(ori_B, proc_B, maxError);
+
+    cvReleaseImage(&ori_R);
+    cvReleaseImage(&ori_G);
+    cvReleaseImage(&ori_B);
+    cvReleaseImage(&proc_R);
+    cvReleaseImage(&proc_G);
+    cvReleaseImage(&proc_B);
+    printf("OK!\n");
+}
