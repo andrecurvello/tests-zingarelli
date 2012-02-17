@@ -5,7 +5,7 @@
   Developed by: Matheus Ricardo Uihara Zingarelli
   Adapted from: Rodolfo Ribeiro Silva
   Creation date: February, 16th 2011
-  Last modification: February, 16th 2011
+  Last modification: February, 17th 2011
 
   Usage:
         psnr <img_A.bmp> <img_B.bmp> -TYPE
@@ -35,9 +35,25 @@ int main(int argc, char* argv[]){
 
     PSNR(original, processed, 255, &res1, &res2, &res3, argv[3]);
 
-    printf("\t%lf\n", res1);
-    printf("\t%lf\n", res2);
-    printf("\t%lf\n", res3);
+    if(!strcmp(argv[3],"-rgb")){
+        printf("\tPNSR - RGB\n");
+        printf("\tR: %lf\n", res1);
+        printf("\tG: %lf\n", res2);
+        printf("\tB: %lf\n", res3);
+
+    }
+    else if(!strcmp(argv[3],"-ycbcr")){
+        printf("\tPSNR - YCbCr");
+        printf("\tY: %lf\n", res1);
+        printf("\tCb: %lf\n", res2);
+        printf("\tCr: %lf\n", res3);
+    }
+    else if(!strcmp(argv[3],"-yuv")){
+        printf("\tPNSR - YUV\n");
+        printf("\tY: %lf\n", res1);
+        printf("\tU: %lf\n", res2);
+        printf("\tV: %lf\n", res3);
+    }
 
     cvReleaseImage(&original);
     cvReleaseImage(&processed);
