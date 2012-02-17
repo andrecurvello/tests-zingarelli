@@ -5,12 +5,17 @@
   Developed by: Matheus Ricardo Uihara Zingarelli
   Adapted from: Rodolfo Ribeiro Silva
   Creation date: February, 16th 2011
-  Last modification: February, 16th 2011
+  Last modification: February, 17th 2011
 
   Usage:
         psnr <img_A.bmp> <img_B.bmp> -TYPE
 
         TYPE: rgb or ycbcr
+
+  Updates:
+  Feb. 17h 2012:
+    created RGB to YUV conversion.
+    corrected order from results of the PSNR for YCbCr.
 */
 
 #include <stdio.h>
@@ -18,6 +23,35 @@
 #include <highgui.h>
 #include <math.h>
 #include "psnr.h"
+
+/*
+  Converts an imagem from RGB to YUV.
+  Based on conversion table REC.601 described by VQMT on
+  http://compression.ru/video/quality_measure/info_en.html
+  Input:
+  Output
+*/
+void BGR2YUV(IplImage* src, IplImage* dst){
+    for(int row = 0; row < src->height; row++){
+            uchar* ptrSrc = (uchar*)(src->imageData + row * src->widthStep);
+            uchar* ptrDst = (uchar*)(dst->imageData + row * dst->widthStep);
+            for(int col=0; col < src->width; col++){
+                //REC.601
+                /*double Y = 0.257*ptrSrc[3*col+2] + 0.504*ptrSrc[3*col+1] + 0.098*ptrSrc[3*col] + 16;
+                double U = -(0.148*ptrSrc[3*col+2]) - (0.291*ptrSrc[3*col+1]) + 0.439*ptrSrc[3*col] + 128;
+                double V = 0.439*ptrSrc[3*col+2] - (0.368*ptrSrc[3*col+1]) - (0.071*ptrSrc[3*col]) + 128;*/
+
+                //PC.601 with level shift
+                double Y = 0.299*ptrSrc[3*col+2] + 0.587*ptrSrc[3*col+1] + 0.114*ptrSrc[3*col];
+                double U = -(0.147*ptrSrc[3*col+2]) - (0.289*ptrSrc[3*col+1]) + 0.436*ptrSrc[3*col] + 128;
+                double V = 0.615*ptrSrc[3*col+2] - (0.515*ptrSrc[3*col+1]) - (0.100*ptrSrc[3*col]) + 128;
+
+                ptrDst[3*col] = (uchar)round(Y);
+                ptrDst[3*col+1] = (uchar)round(U);
+                ptrDst[3*col+2] = (uchar)round(V);
+            }
+    }
+}
 
 double MSE(IplImage* original, IplImage* processed){
     double diff = 0;
@@ -52,12 +86,19 @@ void PSNR(IplImage* original, IplImage* processed, int maxError, double *res1, d
         cvCvtColor(original,original,CV_BGR2YCrCb);
         cvCvtColor(processed,processed,CV_BGR2YCrCb);
     }
+    else if(!strcmp(type,"-yuv")){
+        BGR2YUV(original,original);
+        BGR2YUV(processed,processed);
+            //debug
+            /*cvSaveImage("teste-YUV-1.bmp",original);
+            cvSaveImage("teste-YUV-2.bmp",processed);*/
+    }
 
     //split image channels
     CvSize size = cvSize(original->width, original->height);
     IplImage* ori_R = cvCreateImage(size, original->depth, 1);
     IplImage* ori_G = cvCreateImage(size, original->depth, 1);
-    IplImage* ori_B= cvCreateImage(size, original->depth, 1);
+    IplImage* ori_B = cvCreateImage(size, original->depth, 1);
     IplImage* proc_R = cvCreateImage(size, original->depth, 1);
     IplImage* proc_G = cvCreateImage(size, original->depth, 1);
     IplImage* proc_B = cvCreateImage(size, original->depth, 1);
@@ -66,10 +107,23 @@ void PSNR(IplImage* original, IplImage* processed, int maxError, double *res1, d
     cvSplit(processed, proc_B, proc_G, proc_R, NULL);
 
     //calculate PSNR for each channel
-    //note: for YCbCr, res3 will hold the Y value and res1 will hold the Cr value
-    *res1 = getPSNR(ori_R, proc_R, maxError);
-    *res2 = getPSNR(ori_G, proc_G, maxError);
-    *res3 = getPSNR(ori_B, proc_B, maxError);
+    //for YCbCr, ori_B will be Y, ori_R will be Cb and ori_G will be Cr
+    //for YUV, ori_B will be Y, ori_G will be U and ori_R will be V
+    if(!strcmp(type,"-rgb")){
+        *res1 = getPSNR(ori_R, proc_R, maxError);
+        *res2 = getPSNR(ori_G, proc_G, maxError);
+        *res3 = getPSNR(ori_B, proc_B, maxError);
+    }
+    else if(!strcmp(type,"-ycbcr")){
+        *res1 = getPSNR(ori_B, proc_B, maxError);
+        *res2 = getPSNR(ori_R, proc_R, maxError);
+        *res3 = getPSNR(ori_G, proc_G, maxError);
+    }
+    else if(!strcmp(type,"-yuv")){
+        *res1 = getPSNR(ori_B, proc_B, maxError);
+        *res2 = getPSNR(ori_G, proc_G, maxError);
+        *res3 = getPSNR(ori_R, proc_R, maxError);
+    }
 
     cvReleaseImage(&ori_R);
     cvReleaseImage(&ori_G);
