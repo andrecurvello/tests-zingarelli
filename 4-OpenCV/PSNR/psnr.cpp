@@ -33,14 +33,14 @@ void BGR2YUV(IplImage* src, IplImage* dst){
             uchar* ptrDst = (uchar*)(dst->imageData + row * dst->widthStep);
             for(int col=0; col < src->width; col++){
                 //REC.601
-                /*double Y = 0.257*ptrSrc[3*col+2] + 0.504*ptrSrc[3*col+1] + 0.098*ptrSrc[3*col] + 16;
+                double Y = 0.257*ptrSrc[3*col+2] + 0.504*ptrSrc[3*col+1] + 0.098*ptrSrc[3*col] + 16;
                 double U = -(0.148*ptrSrc[3*col+2]) - (0.291*ptrSrc[3*col+1]) + 0.439*ptrSrc[3*col] + 128;
-                double V = 0.439*ptrSrc[3*col+2] - (0.368*ptrSrc[3*col+1]) - (0.071*ptrSrc[3*col]) + 128;*/
+                double V = 0.439*ptrSrc[3*col+2] - (0.368*ptrSrc[3*col+1]) - (0.071*ptrSrc[3*col]) + 128;
 
                 //PC.601 with level shift
-                double Y = 0.299*ptrSrc[3*col+2] + 0.587*ptrSrc[3*col+1] + 0.114*ptrSrc[3*col];
+                /*double Y = 0.299*ptrSrc[3*col+2] + 0.587*ptrSrc[3*col+1] + 0.114*ptrSrc[3*col];
                 double U = -(0.147*ptrSrc[3*col+2]) - (0.289*ptrSrc[3*col+1]) + 0.436*ptrSrc[3*col] + 128;
-                double V = 0.615*ptrSrc[3*col+2] - (0.515*ptrSrc[3*col+1]) - (0.100*ptrSrc[3*col]) + 128;
+                double V = 0.615*ptrSrc[3*col+2] - (0.515*ptrSrc[3*col+1]) - (0.100*ptrSrc[3*col]) + 128;*/
 
                 ptrDst[3*col] = (uchar)round(Y);
                 ptrDst[3*col+1] = (uchar)round(U);
