@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1330021744 source:e:\versionados\4-opencv\subsampling\main.cpp
+	<stdio.h>
+	<dirent.h>
+	<cv.h>
+	<highgui.h>
+	"psnr.h"
+
+1330015810 e:\versionados\4-opencv\subsampling\psnr.h
+	<cv.h>
+	<highgui.h>
+	<math.h>
+
+1330021282 source:e:\versionados\4-opencv\subsampling\psnr.cpp
+	<stdio.h>
+	<cv.h>
+	<highgui.h>
+	<math.h>
+	"psnr.h"
+
