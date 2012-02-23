@@ -18,6 +18,14 @@
 #include <math.h>
 
 /*
+  Converts an imagem from RGB to YUV.
+  Based on conversion table REC.601 described by VQMT on
+  http://compression.ru/video/quality_measure/info_en.html
+  Input: src, dst - original image and destined image, respectively
+*/
+void BGR2YUV(IplImage* src, IplImage* dst);
+
+/*
   Calculates de Mean Square Error between two images. Both images must be
   1-channel, and have the same dimensions and pixel depth
   input:  original - original image

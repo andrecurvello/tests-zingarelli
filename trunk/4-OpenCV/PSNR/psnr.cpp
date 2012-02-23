@@ -10,7 +10,10 @@
   Usage:
         psnr <img_A.bmp> <img_B.bmp> -TYPE
 
-        TYPE: rgb or ycbcr
+        TYPE: rgb or ycbcr or yuv
+
+  ycbcr uses RGB -> YCbCr conversion from OpenCV Library
+  yuv implements REC.601 RGB->YUV conversion obtained from (http://compression.ru/video/quality_measure/info_en.html)
 
   Updates:
   Feb. 17h 2012:
@@ -24,13 +27,6 @@
 #include <math.h>
 #include "psnr.h"
 
-/*
-  Converts an imagem from RGB to YUV.
-  Based on conversion table REC.601 described by VQMT on
-  http://compression.ru/video/quality_measure/info_en.html
-  Input:
-  Output
-*/
 void BGR2YUV(IplImage* src, IplImage* dst){
     for(int row = 0; row < src->height; row++){
             uchar* ptrSrc = (uchar*)(src->imageData + row * src->widthStep);
