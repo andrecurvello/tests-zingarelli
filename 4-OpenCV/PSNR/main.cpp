@@ -10,7 +10,7 @@
   Usage:
         psnr <img_A.bmp> <img_B.bmp> -TYPE
 
-        TYPE: rgb or ycbcr
+        TYPE: rgb or ycbcr or yuv
 */
 
 #include <stdio.h>
