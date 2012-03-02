@@ -1,7 +1,7 @@
 /*
     Developed by: Matheus Ricardo Uihara Zingarelli
     Creation date: Feb 23rd 2012
-    Last modification: Feb 23rd 2012
+    Last modification: Mar 3rd 2012
 
     Code created to evaluate how much objective quality is lost when applying
     chrominance sampling to an image. The first chrominance sampling to be tested
@@ -14,6 +14,10 @@
 
     Usage:
         subsampling.exe <directory_of_images>
+
+    Changelog:
+    (03/03/12) - modified function subsampling440() to solve a memory leak problem
+    Nothing is allocated inside the function now, everything is passed as a parameter
 
 */
 
@@ -91,13 +95,12 @@ void PSNRLog(char message[]){
   Input: image - image to be subsampled
   Output: uchar datastream, with data in the following order: (subsampled)Cb, (subsampled)Cr and Y
 */
-uchar* subsampling440(IplImage* image){
+void subsampling440(IplImage* image, uchar* dataStream){
     //YCbCr conversion
     cvCvtColor(image, image, CV_BGR2YCrCb);
 
     //placeholder for subsampled data
     int imageSize = image->width * image->height;
-    uchar *dataStream = (uchar*) malloc(2*imageSize*sizeof(uchar));
 
     //4:4:0 works through copying the average color values from even and odd rows
     //this way, it is a horizontal spatial reduction
@@ -128,7 +131,6 @@ uchar* subsampling440(IplImage* image){
             }//column iteration
         }//if odd rows
     }//row iteration
-    return dataStream;
 }
 
 /*
@@ -187,10 +189,18 @@ void processSubsampling(char* filename, char* path){
         return;
     }
 
+    //use this code if you only want a RGB->YCbCr conversion without subsampling
+    //comment "apply subsampling" and "revert to 4:4:4" and free(subdata)
+    /*cvCvtColor(original, original, CV_BGR2YCrCb);
+    IplImage *processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
+    cvZero(processed);
+    cvCvtColor(original, processed, CV_YCrCb2BGR);*/
+
+
     //apply subsampling
     subsampleLog("\tAplicando subamostragem 4:4:0...\n");
     uchar* subData = (uchar*) malloc(2*original->width*original->height*sizeof(uchar));
-    subData = subsampling440(original);
+    subsampling440(original, subData);
 
     //revert to 4:4:4
     subsampleLog("\tRevertendo para 4:4:4...\n");
