@@ -19,6 +19,8 @@
   Feb. 17h 2012:
     created RGB to YUV conversion.
     corrected order from results of the PSNR for YCbCr.
+  Mar. 07th. 2012:
+    added case when both images are equal (MSE return zero and the PSNR should return 100), avoiding division by zero.
 */
 
 #include <stdio.h>
@@ -63,7 +65,10 @@ double MSE(IplImage* original, IplImage* processed){
 }
 
 double getPSNR(IplImage* original, IplImage* processed, int maxError){
-    double result = 10 * log10(maxError*maxError / MSE(original, processed));
+    double mse = MSE(original, processed);
+    //when both images are equal, MSE return zero and PSNR should be 100
+    if(mse==0){return 100;}
+    double result = 10 * log10(maxError*maxError / mse);
     return result;
 }
 
