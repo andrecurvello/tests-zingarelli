@@ -19,6 +19,9 @@
   Feb. 17h 2012:
     created RGB to YUV conversion.
     corrected order from results of the PSNR for YCbCr.
+
+  Mar. 07th. 2012:
+    added case when both images are equal (MSE return zero and the PSNR should return 100), avoiding division by zero.
 */
 
 #include <stdio.h>
@@ -42,6 +45,12 @@ void BGR2YUV(IplImage* src, IplImage* dst){
                 double U = -(0.147*ptrSrc[3*col+2]) - (0.289*ptrSrc[3*col+1]) + 0.436*ptrSrc[3*col] + 128;
                 double V = 0.615*ptrSrc[3*col+2] - (0.515*ptrSrc[3*col+1]) - (0.100*ptrSrc[3*col]) + 128;*/
 
+                //OpenCV formula with level shift
+                /*double shift = 128.0f;
+                double Y = (0.299f * (ptrSrc[3*col+2] - shift) + 0.587f * (ptrSrc[3*col+1] - shift) + 0.114f * (ptrSrc[3*col] - shift));
+                double U = (0.565f * ((ptrSrc[3*col] - shift) - Y));
+                double V = (0.713f * ((ptrSrc[3*col+2] - shift) - Y));*/
+
                 ptrDst[3*col] = (uchar)round(Y);
                 ptrDst[3*col+1] = (uchar)round(U);
                 ptrDst[3*col+2] = (uchar)round(V);
@@ -63,7 +72,10 @@ double MSE(IplImage* original, IplImage* processed){
 }
 
 double getPSNR(IplImage* original, IplImage* processed, int maxError){
-    double result = 10 * log10(maxError*maxError / MSE(original, processed));
+    double mse = MSE(original, processed);
+    //when both images are equal, MSE return zero and PSNR should be 100
+    if(mse==0){return 100;}
+    double result = 10 * log10(maxError*maxError / mse);
     return result;
 }
 
