@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1330718264 source:e:\versionados\4-opencv\subsampling\main.cpp
+1331326141 source:e:\versionados\4-opencv\subsampling\main.cpp
 	<stdio.h>
 	<dirent.h>
 	<cv.h>
@@ -11,7 +11,7 @@
 	<highgui.h>
 	<math.h>
 
-1330017682 source:e:\versionados\4-opencv\subsampling\psnr.cpp
+1331326201 source:e:\versionados\4-opencv\subsampling\psnr.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>

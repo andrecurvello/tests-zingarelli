@@ -182,23 +182,135 @@ void processSubsampling(char* filename, char* path){
 
     //load image
     subsampleLog("\tCarregando imagem do disco...\n");
-    IplImage *original = cvLoadImage(image, 1);
+    IplImage *original = NULL;
+    original = cvLoadImage(image, 1);
     if(!original){
         char message[MESSAGELENGTH] = "\t***Ocorreu um erro ao abrir a imagem.\n";
         subsampleLog(message);
         return;
     }
 
-    //use this code if you only want a RGB->YCbCr conversion without subsampling
+    //use these codes if you only want a RGB->YCbCr conversion without subsampling
     //comment "apply subsampling" and "revert to 4:4:4" and free(subdata)
-    /*cvCvtColor(original, original, CV_BGR2YCrCb);
+
+    //uncomment here if you want to use the OpenCV formula
+    cvCvtColor(original, original, CV_BGR2YCrCb);
+    IplImage *processed = NULL;
+    processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
+    cvZero(processed);
+    cvCvtColor(original, processed, CV_YCrCb2BGR);
+
+    //RGB->YCbCR->RGB using REC.601
+    /*BGR2YUV(original,original);
     IplImage *processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
     cvZero(processed);
-    cvCvtColor(original, processed, CV_YCrCb2BGR);*/
+    for(int row = 0; row < original->height; row++){
+            uchar* ptrSrc = (uchar*)(original->imageData + row * original->widthStep);
+            uchar* ptrDst = (uchar*)(processed->imageData + row * processed->widthStep);
+            for(int col=0; col < original->width; col++){
+                //REC.601
+                double R = 1.164 * (ptrSrc[3*col] - 16) + 1.596 * (ptrSrc[3*col+2] - 128);
+                double G = 1.164 * (ptrSrc[3*col] - 16) - 0.391 * (ptrSrc[3*col+1] - 128) - 0.813 * (ptrSrc[3*col+2] - 128);
+                double B = 1.164 * (ptrSrc[3*col] - 16) + 2.018 * (ptrSrc[3*col+1] - 128);
+
+                //eliminando dados fora do range 0-255
+                if(R < 0) R = 0;
+                if(R > 255) R = 255;
+                if(G < 0) G = 0;
+                if(G > 255) G = 255;
+                if(B < 0) B = 0;
+                if(B > 255) B = 255;
+
+                ptrDst[3*col] = (uchar)round(B);
+                ptrDst[3*col+1] = (uchar)round(G);
+                ptrDst[3*col+2] = (uchar)round(R);
+            }
+    }*/
+
+    //uncomment here if you want the manual and laborous way to test convertion with float
+    /*int shift = 128;
+    double **R =  NULL;
+    double **G = NULL;
+    double **B = NULL;
+    double **Y =  NULL;
+    double **Cb = NULL;
+    double **Cr = NULL;
+    R = (double**)malloc(original->height*sizeof(double*));
+    G = (double**)malloc(original->height*sizeof(double*));
+    B = (double**)malloc(original->height*sizeof(double*));
+    Y = (double**)malloc(original->height*sizeof(double*));
+    Cb = (double**)malloc(original->height*sizeof(double*));
+    Cr = (double**)malloc(original->height*sizeof(double*));
+    for(int i = 0; i < original->height; i++){
+        R[i] = (double*)malloc(original->width*sizeof(double));
+        G[i] = (double*)malloc(original->width*sizeof(double));
+        B[i] = (double*)malloc(original->width*sizeof(double));
+        Y[i] = (double*)malloc(original->width*sizeof(double));
+        Cb[i] = (double*)malloc(original->width*sizeof(double));
+        Cr[i] = (double*)malloc(original->width*sizeof(double));
+    }
+    //rgb->ycbcr com double
+    for(int row = 0; row < original->height; row++){
+        uchar* ptr = (uchar*)(original->imageData + row * original->widthStep);
+        for(int col = 0; col < original->width; col++){
+            //conversao para YCbCr c/ level shift
+            double a,b,c;
+            a = (0.299f * (ptr[3*col+2] - shift) + 0.587f * (ptr[3*col+1] - shift) + 0.114f * (ptr[3*col] - shift));
+            b = (0.565f * ((ptr[3*col] - shift) - a));
+            c = (0.713f * ((ptr[3*col+2] - shift) - a));
+
+            Y[row][col] = a;
+            Cb[row][col] = b;
+            Cr[row][col] = c;
+        }
+    }
+    //ycbcr->rgb com double
+    IplImage *processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
+    cvZero(processed);
+    for(int row = 0; row < original->height; row++){
+        uchar* ptr = (uchar*)(original->imageData + row * original->widthStep);
+        uchar* ptrP = (uchar*)(processed->imageData + row * processed->widthStep);
+        for(int col = 0; col < original->width; col++){
+            double d, e, f;
+            d = Y[row][col] + 1.403f * Cr[row][col] + shift;
+            e = Y[row][col] - 0.344f * Cb[row][col] - 0.714f * Cr[row][col] + shift;
+            f = Y[row][col] + 1.77f * Cb[row][col] + shift;
+
+            //eliminando dados fora do range 0-255
+            if(d < 0) d = 0;
+            if(d > 255) d = 255;
+            if(e < 0) e = 0;
+            if(e > 255) e = 255;
+            if(f < 0) f = 0;
+            if(f > 255) f = 255;
+
+            R[row][col] = round(d);
+            G[row][col] = round(e);
+            B[row][col] = round(f);
+
+            ptrP[3*col] = (uchar)B[row][col] ;//B
+            ptrP[3*col+1] = (uchar)G[row][col] ;//G
+            ptrP[3*col+2] = (uchar)R[row][col] ;//R
+        }
+    }
+    for(int i = 0; i < original->height; i++){
+        free(R[i]);
+        free(G[i]);
+        free(B[i]);
+        free(Y[i]);
+        free(Cb[i]);
+        free(Cr[i]);
+    }
+    free(R);
+    free(G);
+    free(B);
+    free(Y);
+    free(Cb);
+    free(Cr);*/
 
 
     //apply subsampling
-    subsampleLog("\tAplicando subamostragem 4:4:0...\n");
+    /*subsampleLog("\tAplicando subamostragem 4:4:0...\n");
     uchar* subData = (uchar*) malloc(2*original->width*original->height*sizeof(uchar));
     subsampling440(original, subData);
 
@@ -206,7 +318,7 @@ void processSubsampling(char* filename, char* path){
     subsampleLog("\tRevertendo para 4:4:4...\n");
     IplImage *processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
     cvZero(processed);
-    revertSubsampling440(processed,subData);
+    revertSubsampling440(processed,subData);*/
 
     //save processed image
     subsampleLog("\tSalvando imagem revertida...\n");
@@ -218,7 +330,7 @@ void processSubsampling(char* filename, char* path){
     strcat(message," criada com sucesso!\n------------\n");
     subsampleLog(message);
 
-    free(subData);
+    //free(subData);
     cvReleaseImage(&original);
     cvReleaseImage(&processed);
 }
@@ -242,8 +354,10 @@ void processPSNR(char* filename, char* path){
 
     //printf("\nOriginal %s\nProcessada %s\n",image,newImage);exit(0);
 
-    IplImage *original = cvLoadImage(image, 1);
-    IplImage *processed = cvLoadImage(newImage,1);
+    IplImage *original = NULL;
+    IplImage *processed = NULL;
+    original = cvLoadImage(image, 1);
+    processed = cvLoadImage(newImage,1);
     if(!original || !processed){
         char message[MESSAGELENGTH] = "\t***Ocorreu um erro ao abrir as imagens.\n";
         PSNRLog(message);
@@ -254,7 +368,7 @@ void processPSNR(char* filename, char* path){
     double Cb = 0.0;
     double Cr = 0.0;
     PSNRLog("\tCalculando o PSNR...\n");
-    PSNR(original, processed, 255, &Y, &Cb, &Cr, "-yuv");
+    PSNR(original, processed, 255, &Y, &Cb, &Cr, "-ycbcr");
     double avg = (Y+Cb+Cr)/3.0;
 
     //save PSNR values in a CSV file
