@@ -1,7 +1,7 @@
 /*
     Developed by: Matheus Ricardo Uihara Zingarelli
     Creation date: Feb 23rd 2012
-    Last modification: Mar 3rd 2012
+    Last modification: Mar 13th 2012
 
     Code created to evaluate how much objective quality is lost when applying
     chrominance sampling to an image. The first chrominance sampling to be tested
@@ -18,6 +18,11 @@
     Changelog:
     (03/03/12) - modified function subsampling440() to solve a memory leak problem
     Nothing is allocated inside the function now, everything is passed as a parameter
+    (12/03/12)
+      - added recursion to process subdirectories.
+      - modified so PNG files can also be loaded and saved as bmp
+    (13/03/12)
+      - removed functionality to converts PNG to BMP. It was created another program for it.
 
 */
 
@@ -40,16 +45,19 @@ void printHelp(){
 }
 
 /*
-  Verifies if a file is a valid image. It must be BMP images
+  Verifies if a file is a valid image. It must be BMP or PNG images
   It is just verified if the file has a .bmp extension
   Input:  filename - name of the file
-  Output: 1 if it is a valid image, 0 otherwise.
+  Output: 1 if it is a BMP, 2 if it is a PNG, 0 otherwise.
 */
 int verifyFile(char* filename){
     char* verifier = strtok(filename,".");
     while(verifier!=NULL){
         if(!strcmp(verifier,"bmp")){
             return 1;
+        }
+        else if(!strcmp(verifier,"png")){
+            return 2;
         }
         else{
             verifier = strtok(NULL,".");
@@ -168,6 +176,7 @@ void revertSubsampling440(IplImage* image, uchar* imageData){
   a new subsampled image.
   Input: filename - name of the image to be processed
          path - physical path of the directory
+         type - 1 means it is a BMP file, 2 means it is a PNG file
 */
 void processSubsampling(char* filename, char* path){
     //copy full file name path
@@ -194,11 +203,11 @@ void processSubsampling(char* filename, char* path){
     //comment "apply subsampling" and "revert to 4:4:4" and free(subdata)
 
     //uncomment here if you want to use the OpenCV formula
-    cvCvtColor(original, original, CV_BGR2YCrCb);
+    /*cvCvtColor(original, original, CV_BGR2YCrCb);
     IplImage *processed = NULL;
     processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
     cvZero(processed);
-    cvCvtColor(original, processed, CV_YCrCb2BGR);
+    cvCvtColor(original, processed, CV_YCrCb2BGR);*/
 
     //RGB->YCbCR->RGB using REC.601
     /*BGR2YUV(original,original);
@@ -310,7 +319,7 @@ void processSubsampling(char* filename, char* path){
 
 
     //apply subsampling
-    /*subsampleLog("\tAplicando subamostragem 4:4:0...\n");
+    subsampleLog("\tAplicando subamostragem 4:4:0...\n");
     uchar* subData = (uchar*) malloc(2*original->width*original->height*sizeof(uchar));
     subsampling440(original, subData);
 
@@ -318,7 +327,7 @@ void processSubsampling(char* filename, char* path){
     subsampleLog("\tRevertendo para 4:4:4...\n");
     IplImage *processed = cvCreateImage(cvSize(original->width,original->height),original->depth,original->nChannels);
     cvZero(processed);
-    revertSubsampling440(processed,subData);*/
+    revertSubsampling440(processed,subData);
 
     //save processed image
     subsampleLog("\tSalvando imagem revertida...\n");
@@ -330,7 +339,7 @@ void processSubsampling(char* filename, char* path){
     strcat(message," criada com sucesso!\n------------\n");
     subsampleLog(message);
 
-    //free(subData);
+    free(subData);
     cvReleaseImage(&original);
     cvReleaseImage(&processed);
 }
@@ -339,6 +348,7 @@ void processSubsampling(char* filename, char* path){
   Calculates the YCbCr PSNR. Values are logged in a CSV file.
   Input: filename - name of the original image. The processed image filename is <original_image>-subsampled
          path - physical path of the directory
+         type - 1 means it is a BMP file, 2 means it is a PNG file
 */
 void processPSNR(char* filename, char* path){
     //load images
@@ -382,6 +392,58 @@ void processPSNR(char* filename, char* path){
     cvReleaseImage(&processed);
 }
 
+/*
+  Given a directory name, verify if it is valid and then process all the valid images
+  inside it. Recursively process any other directory inside it
+  Input: dirname - directory name to be processed.
+*/
+void processDir(char* dirname){
+    //open directory
+    DIR *dir;
+    struct dirent *file;
+    dir = opendir(dirname);
+    if(dir != NULL){
+        //process each file inside dir
+        while((file = readdir(dir))){
+            //verify if the file is a BMP image
+            int verifier = verifyFile(file->d_name);
+            if(verifier){
+                char message[MESSAGELENGTH] = "------------\nProcessando imagem: ";
+                strcat(message,file->d_name);
+                strcat(message,"\n");
+                subsampleLog(message);
+                processSubsampling(file->d_name, dirname);
+
+                strcpy(message, "++++++++++++\nCalculando PSNR da imagem: ");
+                strcat(message,file->d_name);
+                strcat(message,"\n");
+                PSNRLog(message);
+                processPSNR(file->d_name, dirname);
+            }
+            else if((!strcmp(file->d_name, ".")) || (!strcmp(file->d_name, ".."))){
+                //do nothing
+            }
+            else{
+                //it may be a directory or an file with different file type, try to open it
+                //attach current path
+                char currentFile[FILENAMELENGTH] = ".\\";
+                strcat(currentFile,dirname);
+                strcat(currentFile,"\\");
+                strcat(currentFile,file->d_name);
+                processDir(currentFile);
+            }
+        }
+        (void)closedir(dir);
+    }
+    else{
+        //log error
+        char message[MESSAGELENGTH] = "***Arquivo invalido: ";
+        strcat(message,dirname);
+        strcat(message,"\n");
+        subsampleLog(message);
+    }
+}
+
 int main(int argc, char* argv[]){
     //simple parameter number verification
     if(argc != 2){
@@ -389,40 +451,7 @@ int main(int argc, char* argv[]){
         exit(-1);
     }
 
-    //open directory
-    DIR *dir;
-    struct dirent *file;
-
-    dir = opendir(argv[1]);
-    if(dir != NULL){
-        while((file = readdir(dir))){
-            //verify if the file is an image
-            if(verifyFile(file->d_name)){
-                char message[MESSAGELENGTH] = "------------\nProcessando imagem: ";
-                strcat(message,file->d_name);
-                strcat(message,"\n");
-                subsampleLog(message);
-                processSubsampling(file->d_name, argv[1]);
-
-                strcpy(message, "++++++++++++\nCalculando PSNR da imagem: ");
-                strcat(message,file->d_name);
-                strcat(message,"\n");
-                PSNRLog(message);
-                processPSNR(file->d_name, argv[1]);
-            }
-            else{
-                //log error
-                char message[MESSAGELENGTH] = "***Arquivo de imagem inválido: ";
-                strcat(message,file->d_name);
-                strcat(message,"\n");
-                subsampleLog(message);
-            }
-        }
-        (void)closedir(dir);
-    }
-    else{
-        printf("Directory not found. Please give the full address of an existing directory.\n\n");
-        printHelp();
-    }
+    //process images from a given directory
+    processDir(argv[1]);
 
 }
