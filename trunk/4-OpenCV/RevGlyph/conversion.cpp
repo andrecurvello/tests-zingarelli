@@ -27,7 +27,7 @@
 
 //constant for RLE, consider a number x "similar" to another number, if the latter is only
 // THRESHOLD values from the former
-#define THRESHOLD 10
+#define THRESHOLD 5
 
 //RLE struct
 struct rle_struct{
@@ -125,10 +125,11 @@ void RLE(char* data, int imageSize){
     printf("OK!\n");
 
 //UNIT TEST
-for(int i = 0; i < currPosition; i++){
+/*for(int i = 0; i < currPosition; i++){
     printf("Element %d\t Value: %d\t Quantity: %d\n", i, rle_elements[i].value, rle_elements[i].qty);
 }
-printf("\n\n---- End Debug RLE ----\n\n");
+printf("\n\n---- End Debug RLE ----\n\n");*/
+printf("\n\n---- Number of elements: %d ----\n\n", currPosition);
 FILE *fp;
 fp = fopen("diffData-RLE.dat","wb");
 if(fp == NULL){
