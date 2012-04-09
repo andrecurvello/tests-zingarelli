@@ -16,6 +16,9 @@
 
   (01/02/2012)
   Implemented Run-length Decoding algorithm (RLD)
+
+  (09/04/2012)
+  Created function to create an above-below stereopair
 */
 
 #include <stdio.h>
@@ -28,6 +31,46 @@ struct rle_struct{
     char value; //value of the difference between pixels of Ym and Yc
     uchar qty;  //number of times the value is repeated in a sequence
 };
+
+void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
+    printf("Creating the stereo pair... ");
+    IplImage* stereoPair = cvCreateImage(cvSize((mainAnaglyph->width), mainAnaglyph->height * 2), mainAnaglyph->depth, mainAnaglyph->nChannels);
+    cvZero(stereoPair);
+    for(int row = 0; row < mainAnaglyph->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);
+        uchar* ptrAn = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
+        uchar* ptrAc = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
+        for(int col = 0; col < mainAnaglyph->width; col++){
+            ptrStp[3*col] = ptrAn[3*col];                           //B left
+            ptrStp[3*col+1] = ptrAc[3*col+1];                       //G left
+            ptrStp[3*col+2] = ptrAn[3*col+2];                       //R left
+        }
+    }
+    int rowStp = mainAnaglyph->height; //pointer to the second image of the stereopair
+    for(int row = 0; row < mainAnaglyph->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrAn = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
+        uchar* ptrAc = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
+        //the second image of the stereopair is height rows below, so we need to set the pointer accordingly
+        uchar* ptrStp = (uchar*)(stereoPair->imageData + rowStp * stereoPair->widthStep);
+        for(int col = 0; col < mainAnaglyph->width; col++){
+            ptrStp[3*col] = ptrAc[3*col];     //B right
+            ptrStp[3*col+1] = ptrAn[3*col+1]; //G right
+            ptrStp[3*col+2] = ptrAc[3*col+2]; //R right
+        }
+        rowStp++;
+    }
+
+    //save image
+    char* imageName = strtok(filename,"-");
+    strcat(imageName,"reversed.bmp");
+    //printf("\n\n%s\n\n", imageName);
+    cvSaveImage(imageName, stereoPair);
+    printf("OK!\n");
+
+    cvReleaseImage(&stereoPair);
+}
 
 void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
     printf("Creating the stereo pair... ");
@@ -73,8 +116,8 @@ void rebuildStereoPair(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar me
             createSBSImage(mainAnaglyph, complAnaglyph, filename);
             break;
         case 128:
-            //TODO
-            printf("\n\nCreate an above-below image... TBD\n\n");
+            createABImage(mainAnaglyph, complAnaglyph, filename);
+            break;
     }
 
 //----- UNIT TEST
@@ -175,11 +218,11 @@ uchar* recoverComplY(uchar* anaglyph, int imageSize){
     }
     //TODO: read number of elements from file
     //currently change it by the number of elements outputted by currPosition in conversion.cpp
-    fread(rle_elements,sizeof(rle_struct),99366, fp);
+    fread(rle_elements,sizeof(rle_struct),54768, fp);
     fclose(fp);
 
     int i = 0;
-    for(int j = 0; j < 99366; j++){
+    for(int j = 0; j < 54768; j++){
         while(rle_elements[j].qty > 0){
             Yd[i++] = rle_elements[j].value;
             rle_elements[j].qty--;

@@ -141,3 +141,11 @@ int extractRepresentation(char metadata);
          complAnaglyph - complementary anaglyph
 */
 void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename);
+
+/*
+  Creates a stereo pair with images displaced above and below. The stereo pair will
+  have the double of image height compared to the anaglyphs.
+  Input: mainAnaglyph - main anaglyph
+         complAnaglyph - complementary anaglyph
+*/
+void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename);
