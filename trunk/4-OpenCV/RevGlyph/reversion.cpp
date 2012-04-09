@@ -218,11 +218,11 @@ uchar* recoverComplY(uchar* anaglyph, int imageSize){
     }
     //TODO: read number of elements from file
     //currently change it by the number of elements outputted by currPosition in conversion.cpp
-    fread(rle_elements,sizeof(rle_struct),78498, fp);
+    fread(rle_elements,sizeof(rle_struct),32578, fp);
     fclose(fp);
 
     int i = 0;
-    for(int j = 0; j < 78498; j++){
+    for(int j = 0; j < 32578; j++){
         while(rle_elements[j].qty > 0){
             Yd[i++] = rle_elements[j].value;
             rle_elements[j].qty--;
