@@ -10,19 +10,19 @@
 	<cv.h>
 	<highgui.h>
 
-1333658635 source:e:\versionados\4-opencv\revglyph\reversion.cpp
+1333989974 source:e:\versionados\4-opencv\revglyph\reversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
 	"reversion.h"
 
-1333658650 source:e:\versionados\4-opencv\revglyph\conversion.cpp
+1333989991 source:e:\versionados\4-opencv\revglyph\conversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
 	"conversion.h"
 
-1328195187 e:\versionados\4-opencv\revglyph\reversion.h
+1333977786 e:\versionados\4-opencv\revglyph\reversion.h
 	<cv.h>
 	<highgui.h>
 
