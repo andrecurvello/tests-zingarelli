@@ -37,6 +37,9 @@
 #include "conversion.h"
 #include "reversion.h"
 
+#define NUMPARAM_ENC 7
+#define NUMPARAM_DEC 3
+
 /* --- GENERAL PURPOSE FUNCTIONS --- */
 /* Prints usage method */
 void printHelp();
@@ -51,19 +54,19 @@ void verifyParameters(int argc, char* argv[]);
 void printHelp(){
     printf("Usage:\n\n");
     printf("Encode:\n\tRevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440}\n\n");
-    printf("Decode:\n\tRevGlyph -d <anaglyph.dat> <cit.dat>\n\n");
+    printf("Decode:\n\tRevGlyph -d <anaglyph.dat>\n\n");
     printf("Parameters:\n -e: encode\n -d: decode\n -sbs: side-by-side\n -ab: above-below\n -gm: green-magenta\n -rc: red-cyan\n -by: blue-yellow");
 }
 
 void verifyParameters(int argc, char* argv[]){
     //verify number of parameters
-    if(argc != 6 && argc != 3){
+    if(argc != NUMPARAM_ENC && argc != NUMPARAM_DEC){
         printf("ERROR!\n\tInvalid number of parameters.\n");
         printHelp();
         exit(-1);
     }
     //verify parameters for encoding
-    if(argc == 6){
+    if(argc == NUMPARAM_ENC){
         if(strcmp(argv[1],"-e")){
             printf("ERROR!\nInvalid parameter for codification '%s'.\n", argv[1]);
             printHelp();
@@ -98,12 +101,12 @@ int main(int argc, char* argv[]){
     //verify parameters
     verifyParameters(argc, argv);
 
-    if(argc == 6){//anaglyph conversion
+    if(argc == NUMPARAM_ENC){//anaglyph conversion
         printf("--- ANAGLYPH CONVERSION  ---\n");
         anaglyphConversion(argv);
         printf("--- ANAGLYPH CONVERSION SUCCESSFULLY COMPLETED! ---\n");
     }
-    else if (argc == 3){//anaglyph reversion
+    else if (argc == NUMPARAM_DEC){//anaglyph reversion
         printf("--- ANAGLYPH REVERSION  ---\n");
         anaglyphReversion(argv[2]);
         printf("--- ANAGLYPH REVERSION SUCCESSFULLY COMPLETED! ---\n");

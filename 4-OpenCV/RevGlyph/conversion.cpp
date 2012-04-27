@@ -25,16 +25,6 @@
 #include <highgui.h>
 #include "conversion.h"
 
-//constant for RLE, consider a number x "similar" to another number, if the latter is only
-// THRESHOLD values from the former
-#define THRESHOLD 5
-
-//RLE struct
-struct rle_struct{
-    char value; //value of the difference between pixels of Ym and Yc
-    uchar qty;  //number of times the value is repeated in a sequence
-};
-
 uchar createMetadata(char* parameters[]){
     uchar control = 0;
     //verify anaglyph type. Nothing needs to be done to green-magenta (00 bits)
@@ -55,7 +45,7 @@ uchar createMetadata(char* parameters[]){
 }
 
 
-void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int height, int depth){
+void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int height, int depth, rle_struct* rle_elements, int rle_size){
     printf("Saving data... ");
     char* imageName = strtok(parameters[2],".");
     char filename[] = "";
@@ -70,8 +60,8 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
     //metadata
     uchar control = createMetadata(parameters);
     fputc((int)control, fp);
-    int imgSize[3] = {width, height, depth};
-    fwrite(imgSize, sizeof(int), 3, fp);
+    int buffer[3] = {width, height, depth};
+    fwrite(buffer, sizeof(int), 3, fp);
 
     //anaglyph data (2*imageSize bytes)
     fwrite(anaglyph, sizeof(uchar), 2*width*height, fp);
@@ -79,6 +69,13 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
     //color index table data (imageSize bytes)
     fwrite(cit, sizeof(uchar), width*height, fp);
     printf("OK!\n");
+
+    //LumDiff data (variable size)
+    buffer[0] = rle_size;
+
+    //store the number of elements of the rle array so the decode phase knows how many elements needs to be extracted
+    fwrite(buffer, sizeof(int), 1, fp);
+    fwrite(rle_elements,sizeof(struct rle_struct),rle_size, fp);
     fclose(fp);
 
 //-------UNIT TEST
@@ -87,57 +84,52 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
 }
 
 /*
-  Performs run-length encoding.
+  Performs the adapted run-length encoding.
+  The adapted one consider neighboring pixels to be the same even if they are different by a certain
+  amount. This certain amount is defined by the threshold value, given by the user.
   Uses an array of structs with values and number of times the value is repeated.
   The array's size is the same as the imageSize (for the worst case scenario of RLE).
   Input: data - data to be encoded
+         imageSize - size of the anaglyph image
+         threshold - the amount of difference between two pixels to be considered similar
+  Output: number of elements of the RLE array
 */
-void RLE(char* data, int imageSize){
+int RLE(char* data, int imageSize, rle_struct* elements, int threshold){
     printf("Applying run-length encoding... ");
-    struct rle_struct rle_elements[imageSize];
     int currPosition = 0; //current position in the array
-    rle_elements[0].value = data[0];
-    rle_elements[0].qty = 1;
-
+    elements[0].value = data[0];
+    elements[0].qty = 1;
     //loop through data, couting the number of times each element repeats in a sequence
     for(int i = 1; i < imageSize; i++){
-        if(rle_elements[currPosition].value <= (data[i] + THRESHOLD) &&
-           rle_elements[currPosition].value >= (data[i] - THRESHOLD)){
-        /*if(rle_elements[currPosition].value == data[i]){*/
-            //maximum repeated elements supported in the array is 255 (uchar variable)
-            if(rle_elements[currPosition].qty < 255){
-                rle_elements[currPosition].qty++;
-            }
-            else{
-                //more than 255 ocurrence, create a new element in the array
-                currPosition++;
-                rle_elements[currPosition].value = data[i];
-                rle_elements[currPosition].qty = 1;
-            }
+        if(elements[currPosition].value <= (data[i] + threshold) &&
+           elements[currPosition].value >= (data[i] - threshold)){
+                //maximum repeated elements supported in the array is 255 (uchar variable)
+                if(elements[currPosition].qty < 255){
+                    elements[currPosition].qty++;
+                }
+                else{
+                    //more than 255 ocurrences, create a new element in the array
+                    currPosition++;
+                    elements[currPosition].value = data[i];
+                    elements[currPosition].qty = 1;
+                }
         }
         else{
             //new value, new entry in the array
             currPosition++;
-            rle_elements[currPosition].value = data[i];
-            rle_elements[currPosition].qty = 1;
+            elements[currPosition].value = data[i];
+            elements[currPosition].qty = 1;
         }
     }
     printf("OK!\n");
 
 //UNIT TEST
 /*for(int i = 0; i < currPosition; i++){
-    printf("Element %d\t Value: %d\t Quantity: %d\n", i, rle_elements[i].value, rle_elements[i].qty);
+    printf("Element %d\t Value: %d\t Quantity: %d\n", i, elements[i].value, elements[i].qty);
 }
 printf("\n\n---- End Debug RLE ----\n\n");*/
-printf("\n\n---- Number of elements: %d ----\n\n", currPosition);
-FILE *fp;
-fp = fopen("diffData-RLE.dat","wb");
-if(fp == NULL){
-    printf("ERROR!\n\tError opening file diffData.dat");
-    exit(-1);
-}
-fwrite(rle_elements,sizeof(struct rle_struct),currPosition, fp);
-fclose(fp);
+
+    return currPosition; //the current position in the array is the array length
 }
 
 char* diffY(uchar* mainData, uchar* complData, int imageSize){
@@ -148,14 +140,10 @@ char* diffY(uchar* mainData, uchar* complData, int imageSize){
     for(int i=0; i<imageSize; i++){
         diffData[i] = mainData[i+imageSize] - complData[i+imageSize];
     }
-
-    //apply RLE (run-length encoding)
-    RLE(diffData, imageSize);
-
     printf("OK!\n");
 
-//UNIT TEST
-//TODO: add this as another overhead at the end of the single compressed file
+//UNIT TEST - luminance differences without RLE
+/*
 FILE *fp;
 fp = fopen("diffData.dat","wb");
 if(fp == NULL){
@@ -164,7 +152,7 @@ if(fp == NULL){
 }
 fwrite(diffData,sizeof(char),imageSize, fp);
 fclose(fp);
-
+*/
     return diffData;
 }
 
@@ -380,7 +368,7 @@ void anaglyphConversion(char* parameters[]){
     //create the anaglyphs
     createAnaglyph(left, right, mainAnaglyph, complAnaglyph, parameters[4]);
 
-    //spacial compression
+    //subsampling compression
     int imageSize = mainAnaglyph->width*mainAnaglyph->height;
     printf("Compressing main anaglyph...\n");
     uchar* anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
@@ -391,20 +379,21 @@ void anaglyphConversion(char* parameters[]){
     c_anaglyph = subsample440(complAnaglyph);
     printf("OK!\n");
 
-    //Color Index Table
+    //Color Index Table (CIT)
     uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
     cit = createCIT(c_anaglyph, imageSize);
 
-    //Vector of luminance differences
-    char* luminanceDiff = (char*)malloc(imageSize*sizeof(char));
-    luminanceDiff = diffY(anaglyph, c_anaglyph, imageSize);
+    //Luminance Differences (LumDiff)
+    char* lumDiff = (char*)malloc(imageSize*sizeof(char));
+    lumDiff = diffY(anaglyph, c_anaglyph, imageSize);
 
-    //TODO: apply RLE to luminanceDiff
-
-    //TODO: save luminanceDiff in the single compressed file
+    //RLE (run-length encoding)
+    struct rle_struct rle_elements[imageSize];
+    int nelements = 0; //holds the number of elements from the RLE vector
+    nelements = RLE(lumDiff, imageSize, rle_elements, atoi(parameters[6]));
 
     //store data in a single file
-    saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth);
+    saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, rle_elements, nelements);
 
 
 //------UNIT TEST
@@ -412,26 +401,22 @@ void anaglyphConversion(char* parameters[]){
 //cvSaveImage("right.bmp", right);
 //cvSaveImage("main-anaglyph.bmp", mainAnaglyph);
 //cvSaveImage("complementary-anaglyph.bmp", complAnaglyph);
-//FILE *fp = fopen("saida.dat", "wb");
-//if(!fp){
-//    printf(" ERROR!\nError creating green-magenta anaglyph file\n");
-//    exit(-1);
-//}
-//fwrite(anaglyph, sizeof(uchar),2*left->width*left->height, fp);
-//fclose(fp);
-//FILE *fp = fopen("color-index-table.dat", "wb");
-//if(!fp){
-//    printf(" ERROR!\nError creating green-magenta anaglyph file\n");
-//    exit(-1);
-//}
-//fwrite(cit, sizeof(uchar),left->width*left->height, fp);
-//fclose(fp);
+/*Uncomment below if you want a single file with data from the rle of lumdiff*/
+/*printf("\n\n---- Number of elements: %d ----\n\n", nelements);
+FILE *fp;
+fp = fopen("diffData-RLE.dat","wb");
+if(fp == NULL){
+    printf("ERROR!\n\tError opening file diffData.dat");
+    exit(-1);
+}
+fwrite(rle_elements,sizeof(struct rle_struct),nelements, fp);
+fclose(fp);*/
 
 
     free(anaglyph);
     free(c_anaglyph);
     free(cit);
-    free(luminanceDiff);
+    free(lumDiff);
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);

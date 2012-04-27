@@ -26,6 +26,8 @@
 #include <highgui.h>
 #include "reversion.h"
 
+#define PIXELDATA_OFFSET 13 //position where pixel data starts in the compressed file (1 byte from metadata + 4 bytes for width + 4 bytes for height + 4 bytes for pixel depth)
+
 //RLE struct
 struct rle_struct{
     char value; //value of the difference between pixels of Ym and Yc
@@ -196,33 +198,43 @@ uchar* extractY(uchar* anaglyph, int imageSize){
     return data;
 }
 
-uchar* recoverComplY(uchar* anaglyph, int imageSize){
+uchar* recoverComplY(char* filename, uchar* anaglyph, int imageSize){
     //luminance from main anaglyph
     uchar* Ym = extractY(anaglyph, imageSize);
 
+    printf("Reading luminance differences data... ");
     //luminance from complementary anaglyph
     uchar* Yc = (uchar*)malloc(imageSize*sizeof(uchar));
 
-    //luminance difference
+    //luminance differences
     char* Yd = (char*)malloc(imageSize*sizeof(char));
 
-    //TODO: to be changed to read from a single file containing all data. TDB
-    FILE *fp;
-    //fp = fopen("diffData.dat","rb");
-    fp = fopen("diffData-RLE.dat","rb");
-    //run-length decoding
-    struct rle_struct rle_elements[imageSize];
+    //open compressed file
+    FILE *fp = fopen(filename,"rb");
     if(fp == NULL){
-        printf("ERROR!\n\tError opening file diffData.dat");
+        printf("ERROR!\n\tError opening file %s", filename);
         exit(-1);
     }
-    //TODO: read number of elements from file
-    //currently change it by the number of elements outputted by currPosition in conversion.cpp
-    fread(rle_elements,sizeof(rle_struct),32578, fp);
+
+    //ensure that it is pointing to the beginning of the file
+    rewind(fp);
+
+    //lumDiff data starts after PIXELDATA_OFFSET + 2*imageSize (main anaglyph) + imageSize (CIT) bytes
+    int lumDiffOffset = PIXELDATA_OFFSET + (3*imageSize*sizeof(uchar));
+    fseek(fp, lumDiffOffset, SEEK_SET);
+
+    //read number of elements of the rle array
+    int nelements[1];
+    fread(nelements,sizeof(int),1,fp);
+
+    //read lumDiff data
+    struct rle_struct rle_elements[imageSize];
+    fread(rle_elements,sizeof(rle_struct),nelements[0], fp);
     fclose(fp);
 
-    int i = 0;
-    for(int j = 0; j < 32578; j++){
+    //run-length decoding
+    int i =0;
+    for(int j = 0; j < nelements[0]; j++){
         while(rle_elements[j].qty > 0){
             Yd[i++] = rle_elements[j].value;
             rle_elements[j].qty--;
@@ -232,17 +244,19 @@ uchar* recoverComplY(uchar* anaglyph, int imageSize){
     for(int i=0; i<imageSize; i++){
         Yc[i] = Ym[i] - Yd[i];
     }
+
+    printf("OK!\n");
     return Yc;
 }
 
-void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
+void rebuildAnaglyph(char* filename, IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
     int size = imageSize[0]*imageSize[1]; //width*height
 
     //extract Y from main anaglyph (modified to use the luminance difference approach
     //uchar* Y = extractY(anaglyph, size);
 
     //luminance difference approach
-    uchar* Y = recoverComplY(anaglyph, size);
+    uchar* Y = recoverComplY(filename, anaglyph, size);
 
     //build complementary anaglyph
     uchar* complementary = buildComplementaryAnaglyph(cit, Y, size);
@@ -268,7 +282,7 @@ void readPixelData(char* filename, uchar** anaglyph, uchar** cit, int* imageSize
     }
 
     //set pointer to the position where pixel data starts (13th byte of the file)
-    fseek(fp, 13, SEEK_SET);
+    fseek(fp, PIXELDATA_OFFSET, SEEK_SET);
 
     //read main anaglyph data
     int size = imageSize[0]*imageSize[1];
@@ -280,7 +294,6 @@ void readPixelData(char* filename, uchar** anaglyph, uchar** cit, int* imageSize
     uchar* citData = (uchar*)malloc(size*sizeof(uchar));
     fread(citData, sizeof(uchar), size, fp);
     *cit = citData;
-
     fclose(fp);
 }
 
@@ -324,7 +337,7 @@ void anaglyphReversion(char* filename){
     IplImage* complAnaglyph = cvCreateImage(cvSize(imageSize[0], imageSize[1]), imageSize[2], 3);
     cvZero(mainAnaglyph);
     cvZero(complAnaglyph);
-    rebuildAnaglyph(mainAnaglyph, complAnaglyph, anaglyph, cit, metadata, imageSize);
+    rebuildAnaglyph(filename, mainAnaglyph, complAnaglyph, anaglyph, cit, metadata, imageSize);
 
     //recreate the stereo pair
     rebuildStereoPair(mainAnaglyph, complAnaglyph, metadata, filename);

@@ -43,14 +43,15 @@ void readPixelData(char* filename, uchar** anaglyph, uchar** cit, int* imageSize
 
 /*
   Rebuild the complementary anaglyph, by extracting the Y component from the main anaglyph.
-  Input: mainAnaglyph - container for the main anaglyph image
+  Input: filename - name of the compressed file
+         mainAnaglyph - container for the main anaglyph image
          complAnaglyph - container for the complementary anaglyph image
          anaglyph - data from the main anaglyph
          cit - data from the color index table
          metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
          imageSize - width[0], height[1] and pixel depth[2] of the anaglyph image
 */
-void rebuildAnaglyph(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize);
+void rebuildAnaglyph(char* filename, IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize);
 
 /*
   Extracts the Y component from the main anaglyph. The Y data is in the second half of the
@@ -68,11 +69,12 @@ uchar* extractY(uchar* anaglyph, int imageSize);
 /*
   The luminance from the complementary anaglyph is rebuilt by using the luminance
   from the main anaglyph and the luminance differences calculated during conversion
-  Input: analyph - main anaglyph data
+  Input: filename - name of the compressed file
+         analyph - main anaglyph data
          imageSize - size of the anaglyph image
   Output: datastream with the luminance from the complementary anaglyph
 */
-uchar* recoverComplY(uchar* anaglyph,int imageSize);
+uchar* recoverComplY(char* filename, uchar* anaglyph, int imageSize);
 
 /*
   Creates the complementary anaglyph using the Y component from the main anaglyph
