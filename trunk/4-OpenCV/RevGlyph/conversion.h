@@ -11,6 +11,12 @@
 #include <cv.h>
 #include <highgui.h>
 
+//RLE struct for luminance differences
+struct rle_struct{
+    char value; //value of the difference between pixels of Ym and Yc
+    uchar qty;  //number of times the value is repeated in a sequence
+};
+
 /*
   Creates a uchar value (1byte) based on the parameters to be recorded in the compressed file,
   observing the following requirements:
@@ -53,8 +59,10 @@ uchar createMetadata(char* parameters[]);
          width - width of one of the images from the stereopair
          height - height of one of the images from the stereopair
          depth - pixel depth of one of the images from the stereopair
+         rle_elements - array with the lumdiff elements created by applying rle to it
+         rle_size - number of elements of rle_elements
 */
-void saveData(uchar* anaglyph,uchar* cit, char* parameters[], int width, int height, int depth);
+void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int height, int depth, rle_struct* rle_elements, int rle_size);
 
 /*
   Calculates pixel differences between luminance components of main and complementary anaglyphs
