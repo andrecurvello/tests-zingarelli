@@ -34,19 +34,36 @@ struct rle_struct{
     uchar qty;  //number of times the value is repeated in a sequence
 };
 
-void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
+int extractAnaglyphType(char metadata){
+    int result = metadata >> 6;
+    return result;
+}
+
+void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename, uchar metadata){
     printf("Creating the stereo pair... ");
     IplImage* stereoPair = cvCreateImage(cvSize((mainAnaglyph->width), mainAnaglyph->height * 2), mainAnaglyph->depth, mainAnaglyph->nChannels);
     cvZero(stereoPair);
+
+    //verify the anaglyph type
+    int anaglyphType = extractAnaglyphType(metadata);
+
     for(int row = 0; row < mainAnaglyph->height; row++){
         //set pointer to the correct position in each row
         uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);
         uchar* ptrAn = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
         uchar* ptrAc = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
         for(int col = 0; col < mainAnaglyph->width; col++){
-            ptrStp[3*col] = ptrAn[3*col];                           //B left
-            ptrStp[3*col+1] = ptrAc[3*col+1];                       //G left
-            ptrStp[3*col+2] = ptrAn[3*col+2];                       //R left
+            if(anaglyphType==0){//green-magenta
+                ptrStp[3*col] = ptrAn[3*col];                           //B left
+                ptrStp[3*col+1] = ptrAc[3*col+1];                       //G left
+                ptrStp[3*col+2] = ptrAn[3*col+2];                       //R left
+            }
+            else if(anaglyphType==1){//red-cyan
+                ptrStp[3*col] = ptrAn[3*col];                           //B left
+                ptrStp[3*col+1] = ptrAn[3*col+1];                       //G left
+                ptrStp[3*col+2] = ptrAc[3*col+2];                       //R left
+            }
+            //TODO: blue-yellow
         }
     }
     int rowStp = mainAnaglyph->height; //pointer to the second image of the stereopair
@@ -57,9 +74,16 @@ void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filena
         //the second image of the stereopair is height rows below, so we need to set the pointer accordingly
         uchar* ptrStp = (uchar*)(stereoPair->imageData + rowStp * stereoPair->widthStep);
         for(int col = 0; col < mainAnaglyph->width; col++){
-            ptrStp[3*col] = ptrAc[3*col];     //B right
-            ptrStp[3*col+1] = ptrAn[3*col+1]; //G right
-            ptrStp[3*col+2] = ptrAc[3*col+2]; //R right
+            if(anaglyphType==0){
+                ptrStp[3*col] = ptrAc[3*col];     //B right
+                ptrStp[3*col+1] = ptrAn[3*col+1]; //G right
+                ptrStp[3*col+2] = ptrAc[3*col+2]; //R right
+            }
+            else if(anaglyphType==1){
+                ptrStp[3*col] = ptrAc[3*col];     //B right
+                ptrStp[3*col+1] = ptrAc[3*col+1]; //G right
+                ptrStp[3*col+2] = ptrAn[3*col+2]; //R right
+            }
         }
         rowStp++;
     }
@@ -74,22 +98,37 @@ void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filena
     cvReleaseImage(&stereoPair);
 }
 
-void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename){
+void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename, uchar metadata){
     printf("Creating the stereo pair... ");
     IplImage* stereoPair = cvCreateImage(cvSize((mainAnaglyph->width) * 2, mainAnaglyph->height), mainAnaglyph->depth, mainAnaglyph->nChannels);
     cvZero(stereoPair);
+
+    //verify the anaglyph type
+    int anaglyphType = extractAnaglyphType(metadata);
+
     for(int row = 0; row < mainAnaglyph->height; row++){
         //set pointer to the correct position in each row
         uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);
         uchar* ptrAn = (uchar*)(mainAnaglyph->imageData + row * mainAnaglyph->widthStep);
         uchar* ptrAc = (uchar*)(complAnaglyph->imageData + row * complAnaglyph->widthStep);
         for(int col = 0; col < mainAnaglyph->width; col++){
-            ptrStp[3*col] = ptrAn[3*col];                           //B left
-            ptrStp[3*(col+mainAnaglyph->width)] = ptrAc[3*col];     //B right
-            ptrStp[3*col+1] = ptrAc[3*col+1];                       //G left
-            ptrStp[3*col+2] = ptrAn[3*col+2];                       //R left
-            ptrStp[3*(col+mainAnaglyph->width)+1] = ptrAn[3*col+1]; //G right
-            ptrStp[3*(col+mainAnaglyph->width)+2] = ptrAc[3*col+2]; //R right
+            if(anaglyphType == 0){//green-magenta
+                ptrStp[3*col] = ptrAn[3*col];                           //B left
+                ptrStp[3*(col+mainAnaglyph->width)] = ptrAc[3*col];     //B right
+                ptrStp[3*col+1] = ptrAc[3*col+1];                       //G left
+                ptrStp[3*col+2] = ptrAn[3*col+2];                       //R left
+                ptrStp[3*(col+mainAnaglyph->width)+1] = ptrAn[3*col+1]; //G right
+                ptrStp[3*(col+mainAnaglyph->width)+2] = ptrAc[3*col+2]; //R right
+            }
+            else if(anaglyphType==1){//red-cyan
+                ptrStp[3*col] = ptrAn[3*col];                           //B left
+                ptrStp[3*(col+mainAnaglyph->width)] = ptrAc[3*col];     //B right
+                ptrStp[3*col+1] = ptrAn[3*col+1];                       //G left
+                ptrStp[3*col+2] = ptrAc[3*col+2];                       //R right
+                ptrStp[3*(col+mainAnaglyph->width)+1] = ptrAc[3*col+1]; //G right
+                ptrStp[3*(col+mainAnaglyph->width)+2] = ptrAn[3*col+2]; //R left
+            }
+            //TODO: create to blue-yellow
         }
     }
 
@@ -115,10 +154,10 @@ void rebuildStereoPair(IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar me
     //reorder color components
     switch(representation){
         case 0:
-            createSBSImage(mainAnaglyph, complAnaglyph, filename);
+            createSBSImage(mainAnaglyph, complAnaglyph, filename, metadata);
             break;
         case 128:
-            createABImage(mainAnaglyph, complAnaglyph, filename);
+            createABImage(mainAnaglyph, complAnaglyph, filename, metadata);
             break;
     }
 

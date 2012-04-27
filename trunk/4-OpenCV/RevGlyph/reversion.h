@@ -142,7 +142,7 @@ int extractRepresentation(char metadata);
   Input: mainAnaglyph - main anaglyph
          complAnaglyph - complementary anaglyph
 */
-void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename);
+void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename, uchar metadata);
 
 /*
   Creates a stereo pair with images displaced above and below. The stereo pair will
@@ -150,4 +150,12 @@ void createSBSImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filen
   Input: mainAnaglyph - main anaglyph
          complAnaglyph - complementary anaglyph
 */
-void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename);
+void createABImage(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* filename, uchar metadata);
+
+/*
+  Given metadata on the compressed image, performs 6 right shifts to find out which anaglyph
+  type was created. Information regarding anaglyph type is in the first and second bits of metadata
+  Input: metadata - information regarding the type of anaglyph, stereopair representation and subsampling type used
+  Output: integer number (returns 0 for green-magenta, 1 for red-cyan and -2 for blue-yellow)
+*/
+int extractAnaglyphType(char metadata);
