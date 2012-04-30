@@ -19,6 +19,12 @@
 
   (09/04/2012)
   Created function to create an above-below stereopair
+
+  (27/04/2012)
+  RevGlyph now handles red-cyan compressed files. Created a function that extracts the anaglyph
+  type from metadata: extractAnaglyphType(). Functions createSBSImage() and createABImage()
+  received new parameters to extract the anaglyph type to create the correct reverted stereo
+  pair. Blue-yellow is not implemented yet.
 */
 
 #include <stdio.h>

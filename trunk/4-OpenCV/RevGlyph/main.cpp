@@ -29,6 +29,12 @@
         -rc: red-cyan
         -by: blue-yellow
 
+    Modifications (dd/mm/aaaa):
+    (27/04/2012)
+    Added a new parameter to the program call, that holds which threshold is used
+    to compute the luminance differences (LumDiff). Created two constants in order
+    to apply changes to the parameters more effectively.
+
 */
 
 #include <stdio.h>
@@ -53,9 +59,9 @@ void verifyParameters(int argc, char* argv[]);
 
 void printHelp(){
     printf("Usage:\n\n");
-    printf("Encode:\n\tRevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440}\n\n");
+    printf("Encode:\n\tRevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440} threshold\n\n");
     printf("Decode:\n\tRevGlyph -d <anaglyph.dat>\n\n");
-    printf("Parameters:\n -e: encode\n -d: decode\n -sbs: side-by-side\n -ab: above-below\n -gm: green-magenta\n -rc: red-cyan\n -by: blue-yellow");
+    printf("Parameters:\n -e: encode\n -d: decode\n -sbs: side-by-side\n -ab: above-below\n -gm: green-magenta\n -rc: red-cyan\n -by: blue-yellow\n threshold: threshold value (zero to five recommended)");
 }
 
 void verifyParameters(int argc, char* argv[]){
