@@ -18,6 +18,11 @@
   (01/02/2012)
   Created structure to apply RLE in the luminanceDiff datastream, in order to obtain greater
   compression. Also implemented RLE algorithm
+
+  (27/04/2012)
+  Now luminance differences data (LumDiff) is stored together with the other compressed data.
+  First 4 bytes of LumDiff contains the number of elements from the LumDiff array, which is
+  variable, depending on the threshold used. Threshold is now a parameter entered by the user
 */
 
 #include <stdio.h>
