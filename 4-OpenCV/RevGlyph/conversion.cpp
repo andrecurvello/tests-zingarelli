@@ -73,7 +73,6 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
 
     //color index table data (imageSize bytes)
     fwrite(cit, sizeof(uchar), width*height, fp);
-    printf("OK!\n");
 
     //LumDiff data (variable size)
     buffer[0] = rle_size;
@@ -82,6 +81,8 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
     fwrite(buffer, sizeof(int), 1, fp);
     fwrite(rle_elements,sizeof(struct rle_struct),rle_size, fp);
     fclose(fp);
+
+    printf("OK!\n");
 
 //-------UNIT TEST
 //printf("\n\n\tControl %d\n\n", control);
@@ -387,18 +388,27 @@ void anaglyphConversion(char* parameters[]){
     //Color Index Table (CIT)
     uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
     cit = createCIT(c_anaglyph, imageSize);
+printf("Entrando... %s\n", parameters[6]);
+    if(parameters[7] != NULL){ //apply luminance differences
+        //Luminance Differences (LumDiff)
+        char* lumDiff = (char*)malloc(imageSize*sizeof(char));
+        lumDiff = diffY(anaglyph, c_anaglyph, imageSize);
 
-    //Luminance Differences (LumDiff)
-    char* lumDiff = (char*)malloc(imageSize*sizeof(char));
-    lumDiff = diffY(anaglyph, c_anaglyph, imageSize);
+        //RLE (run-length encoding)
+        struct rle_struct rle_elements[imageSize];
+        int nelements = 0; //holds the number of elements from the RLE vector
+        nelements = RLE(lumDiff, imageSize, rle_elements, atoi(parameters[7]));
 
-    //RLE (run-length encoding)
-    struct rle_struct rle_elements[imageSize];
-    int nelements = 0; //holds the number of elements from the RLE vector
-    nelements = RLE(lumDiff, imageSize, rle_elements, atoi(parameters[6]));
-
-    //store data in a single file
-    saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, rle_elements, nelements);
+        //store data in a single file
+        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, rle_elements, nelements);
+printf("Oi\n");
+        free(lumDiff);
+printf("Tchau\n");
+    }
+    else{
+        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, 0, 0);
+    }
+printf("Saindo...\n");
 
 
 //------UNIT TEST
@@ -421,7 +431,6 @@ fclose(fp);*/
     free(anaglyph);
     free(c_anaglyph);
     free(cit);
-    free(lumDiff);
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);

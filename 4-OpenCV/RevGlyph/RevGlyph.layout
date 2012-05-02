@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="conversion.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="0" topLine="0" />
+	<File name="conversion.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="16863" topLine="382" />
 	</File>
 	<File name="conversion.h" open="1" top="0" tabpos="2">
 		<Cursor position="0" topLine="0" />
 	</File>
-	<File name="main.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="0" topLine="21" />
+	<File name="main.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="5027" topLine="113" />
 	</File>
 	<File name="reversion.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="15624" topLine="366" />
+		<Cursor position="15624" topLine="354" />
 	</File>
 	<File name="reversion.h" open="1" top="0" tabpos="4">
 		<Cursor position="0" topLine="3" />
