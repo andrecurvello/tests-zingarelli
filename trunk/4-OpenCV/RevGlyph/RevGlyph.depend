@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1335554753 source:e:\versionados\4-opencv\revglyph\main.cpp
+1335978685 source:e:\versionados\4-opencv\revglyph\main.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
@@ -10,13 +10,13 @@
 	<cv.h>
 	<highgui.h>
 
-1335553935 source:e:\versionados\4-opencv\revglyph\reversion.cpp
+1335788785 source:e:\versionados\4-opencv\revglyph\reversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
 	"reversion.h"
 
-1335555181 source:e:\versionados\4-opencv\revglyph\conversion.cpp
+1335983015 source:e:\versionados\4-opencv\revglyph\conversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
