@@ -46,22 +46,27 @@ uchar createMetadata(char* parameters[]){
     if(!strcmp(parameters[5],"-422")){//00010000 = 16
         control |= 16;
     }
+    //verify if luminance differences is applied or not
+    if(parameters[7] != NULL){//00001000 = 8
+        control |= 8;
+    }
     return control;
 }
 
 
 void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int height, int depth, rle_struct* rle_elements, int rle_size){
     printf("Saving data... ");
-    char* imageName = strtok(parameters[2],".");
-    char filename[] = "";
-    strcpy(filename, imageName);
-    strcat(filename,"-compressed.dat");
+    char imageName[256] = "";
+    strcpy(imageName, parameters[2]);
+    strtok(imageName,".");
+    strcat(imageName,"-compressed.dat");
     FILE *fp;
-    fp = fopen(filename,"wb");
+    fp = fopen(imageName,"wb");
     if(fp == NULL){
-        printf("ERROR!\n\tError opening file %s", filename);
+        printf("ERROR!\n\tError opening file %s", imageName);
         exit(-1);
     }
+
     //metadata
     uchar control = createMetadata(parameters);
     fputc((int)control, fp);
@@ -74,14 +79,14 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
     //color index table data (imageSize bytes)
     fwrite(cit, sizeof(uchar), width*height, fp);
 
-    //LumDiff data (variable size)
-    buffer[0] = rle_size;
-
-    //store the number of elements of the rle array so the decode phase knows how many elements needs to be extracted
-    fwrite(buffer, sizeof(int), 1, fp);
-    fwrite(rle_elements,sizeof(struct rle_struct),rle_size, fp);
+    //store luminance differences if it was applied
+    if(rle_size > 0){
+        buffer[0] = rle_size;
+        //store the number of elements of the rle array so the decode phase knows how many elements needs to be extracted
+        fwrite(buffer, sizeof(int), 1, fp);
+        fwrite(rle_elements,sizeof(struct rle_struct),rle_size, fp);
+    }
     fclose(fp);
-
     printf("OK!\n");
 
 //-------UNIT TEST
@@ -354,6 +359,42 @@ void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** ri
     printf("OK!\n");
 }
 
+void spatialCompression(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* parameters[]){
+    //subsampling
+    int imageSize = mainAnaglyph->width*mainAnaglyph->height;
+    printf("Compressing main anaglyph...\n");
+    uchar* anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
+    anaglyph = subsample440(mainAnaglyph);
+    printf("OK!\n");
+    printf("Compressing complementary anaglyph...\n");
+    uchar* c_anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
+    c_anaglyph = subsample440(complAnaglyph);
+    printf("OK!\n");
+
+    //Color Index Table (CIT)
+    uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
+    cit = createCIT(c_anaglyph, imageSize);
+    if(parameters[7] != NULL){ //Luminance differences (lumDiff)
+        char* lumDiff = (char*)malloc(imageSize*sizeof(char));
+        lumDiff = diffY(anaglyph, c_anaglyph, imageSize);
+
+        //RLE (run-length encoding)
+        struct rle_struct rle_elements[imageSize];
+        int nelements = 0; //holds the number of elements from the RLE vector
+        nelements = RLE(lumDiff, imageSize, rle_elements, atoi(parameters[7]));
+
+        //store data in a single file
+        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, rle_elements, nelements);
+        free(lumDiff);
+    }
+    else{
+        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, 0, 0);
+    }
+
+    free(anaglyph);
+    free(c_anaglyph);
+    free(cit);
+}
 
 void anaglyphConversion(char* parameters[]){
     IplImage *stereopair = NULL;
@@ -374,42 +415,8 @@ void anaglyphConversion(char* parameters[]){
     //create the anaglyphs
     createAnaglyph(left, right, mainAnaglyph, complAnaglyph, parameters[4]);
 
-    //subsampling compression
-    int imageSize = mainAnaglyph->width*mainAnaglyph->height;
-    printf("Compressing main anaglyph...\n");
-    uchar* anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
-    anaglyph = subsample440(mainAnaglyph);
-    printf("OK!\n");
-    printf("Compressing complementary anaglyph...\n");
-    uchar* c_anaglyph = (uchar*) malloc(2*imageSize*sizeof(uchar));
-    c_anaglyph = subsample440(complAnaglyph);
-    printf("OK!\n");
-
-    //Color Index Table (CIT)
-    uchar* cit = (uchar*)malloc(imageSize*sizeof(uchar));
-    cit = createCIT(c_anaglyph, imageSize);
-printf("Entrando... %s\n", parameters[6]);
-    if(parameters[7] != NULL){ //apply luminance differences
-        //Luminance Differences (LumDiff)
-        char* lumDiff = (char*)malloc(imageSize*sizeof(char));
-        lumDiff = diffY(anaglyph, c_anaglyph, imageSize);
-
-        //RLE (run-length encoding)
-        struct rle_struct rle_elements[imageSize];
-        int nelements = 0; //holds the number of elements from the RLE vector
-        nelements = RLE(lumDiff, imageSize, rle_elements, atoi(parameters[7]));
-
-        //store data in a single file
-        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, rle_elements, nelements);
-printf("Oi\n");
-        free(lumDiff);
-printf("Tchau\n");
-    }
-    else{
-        saveData(anaglyph, cit, parameters, complAnaglyph->width, complAnaglyph->height, complAnaglyph->depth, 0, 0);
-    }
-printf("Saindo...\n");
-
+    //perform spatial compression
+    spatialCompression(mainAnaglyph, complAnaglyph, parameters);
 
 //------UNIT TEST
 //cvSaveImage("left.bmp", left);
@@ -427,10 +434,6 @@ if(fp == NULL){
 fwrite(rle_elements,sizeof(struct rle_struct),nelements, fp);
 fclose(fp);*/
 
-
-    free(anaglyph);
-    free(c_anaglyph);
-    free(cit);
     cvReleaseImage(&stereopair);
     cvReleaseImage(&left);
     cvReleaseImage(&right);

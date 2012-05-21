@@ -294,14 +294,27 @@ uchar* recoverComplY(char* filename, uchar* anaglyph, int imageSize){
     return Yc;
 }
 
+int extractLumDiff(uchar metadata){
+    int result = metadata << 4;
+    return (result & 128);
+}
+
 void rebuildAnaglyph(char* filename, IplImage* mainAnaglyph, IplImage* complAnaglyph, uchar* anaglyph, uchar* cit, uchar metadata, int* imageSize){
     int size = imageSize[0]*imageSize[1]; //width*height
 
-    //extract Y from main anaglyph (modified to use the luminance difference approach
-    //uchar* Y = extractY(anaglyph, size);
-
-    //luminance difference approach
-    uchar* Y = recoverComplY(filename, anaglyph, size);
+    //verify if luminance differences was applied
+    int lumDiff = extractLumDiff(metadata);
+    uchar* Y = NULL;
+    if(lumDiff == 0){
+        //extract Y from main anaglyph
+printf("extracao sem lumdiff\n");
+        Y = extractY(anaglyph, size);
+    }
+    else{
+        //luminance difference approach
+printf("extracao COM lumdiff\n");
+        Y = recoverComplY(filename, anaglyph, size);
+    }
 
     //build complementary anaglyph
     uchar* complementary = buildComplementaryAnaglyph(cit, Y, size);

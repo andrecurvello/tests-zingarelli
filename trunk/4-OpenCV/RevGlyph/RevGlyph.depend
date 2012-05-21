@@ -6,17 +6,17 @@
 	"conversion.h"
 	"reversion.h"
 
-1335471989 e:\versionados\4-opencv\revglyph\conversion.h
+1337620752 e:\versionados\4-opencv\revglyph\conversion.h
 	<cv.h>
 	<highgui.h>
 
-1335788785 source:e:\versionados\4-opencv\revglyph\reversion.cpp
+1337621709 source:e:\versionados\4-opencv\revglyph\reversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
 	"reversion.h"
 
-1335983015 source:e:\versionados\4-opencv\revglyph\conversion.cpp
+1337625088 source:e:\versionados\4-opencv\revglyph\conversion.cpp
 	<stdio.h>
 	<cv.h>
 	<highgui.h>
