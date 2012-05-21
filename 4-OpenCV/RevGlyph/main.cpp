@@ -75,7 +75,8 @@ void verifyParameters(int argc, char* argv[]){
         exit(-1);
     }
 
-    if(argc == NUMPARAM_ENC){//encoding using the color index table only
+    //encoding using the color index table only
+    if(argc == NUMPARAM_ENC_LUMDIFF || argc == NUMPARAM_ENC){
         if(strcmp(argv[1],"-e")){
             printf("ERROR!\nInvalid parameter for codification '%s'.\n", argv[1]);
             printHelp();
@@ -96,20 +97,20 @@ void verifyParameters(int argc, char* argv[]){
             printHelp();
             exit(-1);
         }
-    }
-    else if(argc == NUMPARAM_ENC_LUMDIFF){//enconding using the luminance differences
-        if(strcmp(argv[6],"-Y")){
-            printf("ERROR!\nInvalid parameter '%s'.\n", argv[6]);
-            printHelp();
-            exit(-1);
+        if(argc == NUMPARAM_ENC_LUMDIFF){//enconding using the luminance differences
+            if(strcmp(argv[6],"-Y")){
+                printf("ERROR!\nInvalid parameter '%s'.\n", argv[6]);
+                printHelp();
+                exit(-1);
+            }
+            if(atoi(argv[7]) < 0){
+                printf("ERROR!\nPlease, enter a number greater or equal than zero (zero to five recommended). You entered %s.\n", argv[7]);
+                printHelp();
+                exit(-1);
+            }
         }
-        if(atoi(argv[7]) < 0){
-            printf("ERROR!\nPlease, enter a number greater or equal than zero (zero to five recommended). You entered %s.\n", argv[7]);
-            printHelp();
-            exit(-1);
-        }
     }
-    else{//verify parameter for decoding
+    if(argc == NUMPARAM_DEC){//verify parameter for decoding
         if(strcmp(argv[1],"-d")){
             printf("ERROR!\nInvalid parameter for decodification '%s'.\n", argv[1]);
             printHelp();
