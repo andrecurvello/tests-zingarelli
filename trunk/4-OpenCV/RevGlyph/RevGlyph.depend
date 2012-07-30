@@ -26,3 +26,30 @@
 	<cv.h>
 	<highgui.h>
 
+1335801950 source:c:\users\matheus\desktop\mestrado\4-opencv\revglyph\main.cpp
+	<stdio.h>
+	<cv.h>
+	<highgui.h>
+	"conversion.h"
+	"reversion.h"
+
+1335801950 c:\users\matheus\desktop\mestrado\4-opencv\revglyph\conversion.h
+	<cv.h>
+	<highgui.h>
+
+1335801950 c:\users\matheus\desktop\mestrado\4-opencv\revglyph\reversion.h
+	<cv.h>
+	<highgui.h>
+
+1343676818 source:c:\users\matheus\desktop\mestrado\4-opencv\revglyph\conversion.cpp
+	<stdio.h>
+	<cv.h>
+	<highgui.h>
+	"conversion.h"
+
+1343677561 source:c:\users\matheus\desktop\mestrado\4-opencv\revglyph\reversion.cpp
+	<stdio.h>
+	<cv.h>
+	<highgui.h>
+	"reversion.h"
+

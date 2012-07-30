@@ -102,6 +102,7 @@ void saveData(uchar* anaglyph, uchar* cit, char* parameters[], int width, int he
   The array's size is the same as the imageSize (for the worst case scenario of RLE).
   Input: data - data to be encoded
          imageSize - size of the anaglyph image
+         elements - structure that holds the number of each luminance difference
          threshold - the amount of difference between two pixels to be considered similar
   Output: number of elements of the RLE array
 */
@@ -139,7 +140,6 @@ int RLE(char* data, int imageSize, rle_struct* elements, int threshold){
     printf("Element %d\t Value: %d\t Quantity: %d\n", i, elements[i].value, elements[i].qty);
 }
 printf("\n\n---- End Debug RLE ----\n\n");*/
-
     return currPosition; //the current position in the array is the array length
 }
 
@@ -156,7 +156,7 @@ char* diffY(uchar* mainData, uchar* complData, int imageSize){
 //UNIT TEST - luminance differences without RLE
 /*
 FILE *fp;
-fp = fopen("diffData.dat","wb");
+fp = fopen("diffData.dat","w");
 if(fp == NULL){
     printf("ERROR!\n\tError opening file diffData.dat");
     exit(-1);
@@ -284,6 +284,10 @@ void createAnaglyph(IplImage* left, IplImage* right, IplImage* mainAnaglyph, Ipl
         }
         printf("OK!\n");
     }
+
+//UNIT TEST
+/*cvSaveImage("main.bmp",mainAnaglyph);
+cvSaveImage("complementar.bmp",complAnaglyph);*/
 }
 
 
