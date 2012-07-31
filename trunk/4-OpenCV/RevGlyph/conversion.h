@@ -149,11 +149,3 @@ void splitImage(IplImage* stereoPair, char* type, IplImage** left, IplImage** ri
   Input: parameters - the parameters entered by user via command line
 */
 void anaglyphConversion(char* parameters[]);
-
-/*
-  Performs all the necessary steps to achieve spatial compression
-  Input: mainAnaglyph - green-magenta, red-cyan or blue-yellow anaglyph
-         complAnaglyph - complementary anaglyph
-         parameters: the parameters entered by user via command line
-*/
-void spatialCompression(IplImage* mainAnaglyph, IplImage* complAnaglyph, char* parameters[]);

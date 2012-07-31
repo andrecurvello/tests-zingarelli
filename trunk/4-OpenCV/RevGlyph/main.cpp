@@ -16,7 +16,7 @@
 
   Usage:
         Encode:
-        RevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440} [-Y threshold]
+        RevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440}
 
         Decode:
         RevGlyph -d <compressed-file.dat>
@@ -28,8 +28,6 @@
         -gm: green-magenta
         -rc: red-cyan
         -by: blue-yellow
-        -Y: (optional) indicate that luminance differences will be used
-        threshold: threshold value
 
     Modifications (dd/mm/aaaa):
     (27/04/2012)
@@ -45,8 +43,7 @@
 #include "conversion.h"
 #include "reversion.h"
 
-#define NUMPARAM_ENC 6
-#define NUMPARAM_ENC_LUMDIFF 8
+#define NUMPARAM_ENC 7
 #define NUMPARAM_DEC 3
 
 /* --- GENERAL PURPOSE FUNCTIONS --- */
@@ -62,21 +59,20 @@ void verifyParameters(int argc, char* argv[]);
 
 void printHelp(){
     printf("Usage:\n\n");
-    printf("Encode:\n\tRevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440} [-Y threshold]\n\n");
+    printf("Encode:\n\tRevGlyph -e <image.bmp> {-sbs | -ab} {-gm | -rc | -by} {-422 | -440} threshold\n\n");
     printf("Decode:\n\tRevGlyph -d <anaglyph.dat>\n\n");
-    printf("Parameters:\n -e: encode\n -d: decode\n -sbs: side-by-side\n -ab: above-below\n -gm: green-magenta\n -rc: red-cyan\n -by: blue-yellow\n -Y:(optional) indicate that luminance differences will be used\n threshold: threshold value (zero to five recommended)");
+    printf("Parameters:\n -e: encode\n -d: decode\n -sbs: side-by-side\n -ab: above-below\n -gm: green-magenta\n -rc: red-cyan\n -by: blue-yellow\n threshold: threshold value (zero to five recommended)");
 }
 
 void verifyParameters(int argc, char* argv[]){
     //verify number of parameters
-    if(argc != NUMPARAM_ENC && argc != NUMPARAM_DEC && argc != NUMPARAM_ENC_LUMDIFF){
+    if(argc != NUMPARAM_ENC && argc != NUMPARAM_DEC){
         printf("ERROR!\n\tInvalid number of parameters.\n");
         printHelp();
         exit(-1);
     }
-
-    //encoding using the color index table only
-    if(argc == NUMPARAM_ENC_LUMDIFF || argc == NUMPARAM_ENC){
+    //verify parameters for encoding
+    if(argc == NUMPARAM_ENC){
         if(strcmp(argv[1],"-e")){
             printf("ERROR!\nInvalid parameter for codification '%s'.\n", argv[1]);
             printHelp();
@@ -97,20 +93,8 @@ void verifyParameters(int argc, char* argv[]){
             printHelp();
             exit(-1);
         }
-        if(argc == NUMPARAM_ENC_LUMDIFF){//enconding using the luminance differences
-            if(strcmp(argv[6],"-Y")){
-                printf("ERROR!\nInvalid parameter '%s'.\n", argv[6]);
-                printHelp();
-                exit(-1);
-            }
-            if(atoi(argv[7]) < 0){
-                printf("ERROR!\nPlease, enter a number greater or equal than zero (zero to five recommended). You entered %s.\n", argv[7]);
-                printHelp();
-                exit(-1);
-            }
-        }
     }
-    if(argc == NUMPARAM_DEC){//verify parameter for decoding
+    else{//verify parameter for decoding
         if(strcmp(argv[1],"-d")){
             printf("ERROR!\nInvalid parameter for decodification '%s'.\n", argv[1]);
             printHelp();
@@ -123,7 +107,7 @@ int main(int argc, char* argv[]){
     //verify parameters
     verifyParameters(argc, argv);
 
-    if(argc == NUMPARAM_ENC || argc ==NUMPARAM_ENC_LUMDIFF){//anaglyph conversion
+    if(argc == NUMPARAM_ENC){//anaglyph conversion
         printf("--- ANAGLYPH CONVERSION  ---\n");
         anaglyphConversion(argv);
         printf("--- ANAGLYPH CONVERSION SUCCESSFULLY COMPLETED! ---\n");
