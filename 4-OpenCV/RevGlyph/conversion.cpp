@@ -107,39 +107,63 @@ int RLE(char* data, int imageSize, rle_struct* elements, int threshold){
     elements[0].qty = 1;
     //loop through data, couting the number of times each element repeats in a sequence
     for(int i = 1; i < imageSize; i++){
-        if(elements[currPosition].value <= (data[i] + threshold) &&
-           elements[currPosition].value >= (data[i] - threshold)){
+        if(elements[currPosition].value <= (data[i] + threshold) && elements[currPosition].value >= (data[i] - threshold)){
 
 
-                //start the look-ahead
-                if(abs(data[i]-data[i+1]) < abs(elements[currPosition].value-data[i+1]) && abs(data[i]-data[i+1]) > 0){
-                    //TODO: verify step (3) of the lookahead algorithm
+            //start the look-ahead
+            if(abs(data[i]-data[i+1]) < abs(elements[currPosition].value-data[i+1]) && abs(data[i]-data[i+1] > 0)){
+                //TODO: verify step (3) of the lookahead algorithm
+                /*if(data[i]==data[i+1]){
+                    //keep looking until find a different value
+                    int j = i;
+                    while(data[j] == data[i] && j < imageSize){
+                        j++;
+                    }
+                    //compare again
+                    if(j<imageSize){
+                        if(abs(data[i]-data[j]) < abs(elements[currPosition].value-data[j])){
+                            //start a new entry in the array
+                            currPosition++;
+                            elements[currPosition].value = data[i];
+                            elements[currPosition].qty = 1;
+                        }
+                        else{//add the data to the current element
+                            //maximum repeated elements supported in the array is 255 (uchar variable)
+                            if(elements[currPosition].qty < 255){
+                                elements[currPosition].qty++;
+                            }
+                            else{
+                                //more than 255 ocurrences, create a new element in the array
+                                currPosition++;
+                                elements[currPosition].value = data[i];
+                                elements[currPosition].qty = 1;
+                            }
+                        }
+                    }
+                }*/
+                //start a new entry in the array
+                currPosition++;
+                elements[currPosition].value = data[i];
+                elements[currPosition].qty = 1;
+            }
+            else{ //add the data to the current element
 
-                    //start a new entry in the array
+
+                //maximum repeated elements supported in the array is 255 (uchar variable)
+                if(elements[currPosition].qty < 255){
+                    elements[currPosition].qty++;
+                }
+                else{
+                    //more than 255 ocurrences, create a new element in the array
                     currPosition++;
                     elements[currPosition].value = data[i];
                     elements[currPosition].qty = 1;
                 }
-                else{ //add the data to the current element
 
 
-                    //maximum repeated elements supported in the array is 255 (uchar variable)
-                    if(elements[currPosition].qty < 255){
-                        elements[currPosition].qty++;
-                    }
-                    else{
-                        //more than 255 ocurrences, create a new element in the array
-                        currPosition++;
-                        elements[currPosition].value = data[i];
-                        elements[currPosition].qty = 1;
-                    }
-
-
-                }
-
-
-
+            }
         }
+
         else{
             //new value, new entry in the array
             currPosition++;
