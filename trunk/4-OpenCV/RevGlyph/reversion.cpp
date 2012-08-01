@@ -281,8 +281,9 @@ uchar* recoverComplY(char* filename, uchar* anaglyph, int imageSize){
     int i =0;
     for(int j = 0; j < nelements[0]; j++){
         while(rle_elements[j].qty > 0){
-            Yd[i++] = rle_elements[j].value;
+            Yd[i] = rle_elements[j].value;
             rle_elements[j].qty--;
+            i++;
         }
     }
 
