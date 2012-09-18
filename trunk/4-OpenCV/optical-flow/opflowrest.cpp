@@ -1,3 +1,5 @@
+//opflowrest.exe <image_left.bmp> <image_right.bmp>
+
 #include "cv.h"
 #include "highgui.h"
 #include <stdio.h>
@@ -129,8 +131,8 @@ int main(int argc, char *argv[])
 //      imshow("G recovery", im1est);
 
       // write image in the disk
-      imwrite("out_recover_left.png", im1est);
-      imwrite("out_recover_right.png", im2est);
+      imwrite("out_recover_left.bmp", im1est);
+      imwrite("out_recover_right.bmp", im2est);
 
 
       //create green-magenta anaglyph with the recovered images
@@ -165,6 +167,26 @@ int main(int argc, char *argv[])
       merge(rctrue, im5rc);
 
       imwrite("out_red_cyan_true.png",im5rc);
+
+      //create the stereo pair with the recovered images
+      IplImage* stereoPair = cvCreateImage(cvSize(1920, 540), IPL_DEPTH_8U, 3);
+      cvZero(stereoPair);
+
+      for(int row = 0; row < stereoPair->height; row++){
+        //set pointer to the correct position in each row
+        uchar* ptrStp = (uchar*)(stereoPair->imageData + row * stereoPair->widthStep);
+        for(int col = 0; col < stereoPair->width/2; col++){
+            ptrStp[3*col] = RGBest1.at(0).at<uchar>(row,col);       //B left
+            ptrStp[3*col+1] = RGBest1.at(1).at<uchar>(row,col);     //G left
+            ptrStp[3*col+2] = RGBest1.at(2).at<uchar>(row,col);     //R left
+            ptrStp[3*(col+(stereoPair->width)/2)] = RGBest2.at(0).at<uchar>(row,col);   //B right
+            ptrStp[3*(col+(stereoPair->width)/2)+1] = RGBest2.at(1).at<uchar>(row,col); //G right
+            ptrStp[3*(col+(stereoPair->width)/2)+2] = RGBest2.at(2).at<uchar>(row,col); //R right
+        }
+      }
+
+      cvSaveImage("out_rec_stereo_pair.bmp", stereoPair);
+      cvReleaseImage(&stereoPair);
 
       waitKey(0);
       return 0;
