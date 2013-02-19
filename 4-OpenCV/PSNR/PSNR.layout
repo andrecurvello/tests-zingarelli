@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="main.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="362" topLine="28" />
+	<File name="main.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="1149" topLine="30" />
 	</File>
-	<File name="psnr.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="807" topLine="0" />
+	<File name="psnr.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="5511" topLine="105" />
 	</File>
 	<File name="psnr.h" open="0" top="0" tabpos="5">
 		<Cursor position="652" topLine="24" />

@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
 
     }
     else if(!strcmp(argv[3],"-ycbcr")){
-        printf("\tPSNR - YCbCr");
+        printf("\tPSNR - YCbCr\n");
         printf("\tY: %lf\n", res1);
         printf("\tCb: %lf\n", res2);
         printf("\tCr: %lf\n", res3);
