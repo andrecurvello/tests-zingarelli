@@ -25,10 +25,10 @@
             <div id="main-title">
             <h1>Entre em contato conosco!</h1>
             </div>
-            <p>Para saber mais sobre a chácara, condições de pagamento e promoções, ou nos fazer uma visita, entre em contato conosco através do formulário ou telefones abaixo.</p>
+            <p>Para saber mais sobre a chácara, nossas condições de pagamento, ou nos fazer uma visita, entre em contato conosco através do formulário ou telefones abaixo.</p>
             <br />
             <p>Telefone: (16) 3336-9590 ou (16) 3335-8433</p>
-            <p>Celular: (16) 9992-6852</p>
+            <p>Celular: (16) 9992-6852 (Vivo)</p>
             <p>Email: alugue@chacarazingarelli.com.br</p>
             <br />
 			<?php 
@@ -61,7 +61,7 @@
                         if(eregi($bad_string, strtolower($str_to_test))) {
 							//possible attack caught              
 							$to = "thesolitaryreader@gmail.com";
-							$subject = "Possível ataque recebido no site";
+							$subject = "Possível ataque recebido no site - chácara";
 							$message = "Pega na filtragem do contains_bad_str";
 							mail($to, $subject, $message);
 							echo '<p class=\'red\'>Desculpe, mas sua mensagem foi filtrada como tentativa de ataque ou spam. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
@@ -76,7 +76,7 @@
                 function contains_newlines($str_to_test) {
                     if(preg_match("/(%0A|%0D|\\n+|\\r+)/i", $str_to_test) != 0) {
                         $to = "thesolitaryreader@gmail.com";
-						$subject = "Possível ataque recebido no site";
+						$subject = "Possível ataque recebido no site - chácara";
 						$message = "Pega na filtragem do contains_newlines";
 						mail($to, $subject, $message);
 						echo '<p class=\'red\'>Desculpe, mas sua mensagem foi filtrada como tentativa de ataque ou spam. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
@@ -89,7 +89,7 @@
         
                 if($_SERVER['REQUEST_METHOD'] != "POST"){
                     $to = "thesolitaryreader@gmail.com";
-					$subject = "Possível ataque recebido no site";
+					$subject = "Possível ataque recebido no site - chácara";
 					$message = "Houve uma tentativa de enviar request sem post";
 					mail($to, $subject, $message);
                     exit;
@@ -104,6 +104,13 @@
                         exit;
                     }
                 }
+				else{
+					echo '<p class=\'red\'>Desculpe, mas o email digitado é inválido. Por favor, entre em contato conosco pelo telefone ou <a href=\'alugue.php\' title=\'Vá para a página de contato\'>tente novamente</a>.</p></div>';
+					include 'footer.php';
+					echo'</div>';
+					include 'webdeveloper.php';
+					exit;
+				}
                 
                 //verify input
                 contains_bad_str($email);
@@ -133,7 +140,7 @@
             	<p><label for="telefone">Telefone:</label>
                 <input type="text" id="telefone" name="telefone"/></p>
             	<p><label for="mensagem">Mensagem:</label>
-                <textarea id="mensagem" rows="5" cols="40" name="mensagem"></textarea></p>
+                <textarea id="mensagem" rows="5" cols="53" name="mensagem"></textarea></p>
                 <p><input type="submit" value="Enviar" name="enviar"/></p>
             </form>
             <?php }?>
