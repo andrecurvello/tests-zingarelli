@@ -29,8 +29,8 @@
                 <ul>
                     <li>Churrasqueira de alvenaria</li>
                     <li>Pia</li>
-                    <li>2 banheiros</li>
-                    <li>10 mesas e 30 cadeiras</li>
+                    <li>Banheiros</li>
+                    <li>Mesas e cadeiras</li>
                 </ul>           
                 <h3>Cozinha externa</h3>
                 <ul>
@@ -44,15 +44,14 @@
                 <ul>
                     <li>3 quartos, sendo 1 suíte</li>
                     <li>10 camas com colchão</li>
-                    <li>Espaço para até 30 pessoas levando colchão</li>
-                    <li>Amplo salão com mesa de sinuca e sofás</li>
-                    <li>1 banheiro social</li>
+                    <li>Espaço para mais pessoas, levando colchão</li>
+                    <li>Amplo salão</li>
+                    <li>Banheiro social</li>
                 </ul>
                 <h3>Além disso contamos com</h3>
                 <ul>
                     <li>Piscina</li>
-                    <li>2 campos de futebol (um grande e um pequeno)</li>
-                    <li>Espaço para até 20 carros</li>
+                    <li>Campos de futebol (um grande e um pequeno)</li>
                 </ul>     
             </div>
             <div id="est-right">

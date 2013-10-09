@@ -34,7 +34,7 @@ h2{
 h3{
 	font-size:22px;
 	font-weight:bold;
-	margin:40px auto 15px;
+	margin:40px auto 8px;
 }
 
 h4{font-size:13px;}
@@ -54,7 +54,7 @@ li
 	margin-top:5px;
 }
 
-.red{color:red;}
+.red{color:#B23838;}
 
 /*######## STOP GENERAL CSS ########*/
 /*######## START SPECIFIC CSS ########*/
@@ -115,7 +115,7 @@ div#contato-content{
 	margin-left:0.5em;
 }
 
-div#est-content{margin: 25px;height:830px}
+div#est-content{margin: 25px;height:775px}
 
 div#est-left{
 	float:left;
