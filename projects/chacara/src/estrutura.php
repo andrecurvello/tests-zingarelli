@@ -36,8 +36,6 @@
                 <ul>
                     <li>Fogão</li>
                     <li>Pia</li>
-                    <li>Bebedouro</li>
-                    <li>Armário</li>
                     <li>Geladeira</li>
                 </ul>
                 <h3>Casa</h3>
@@ -45,7 +43,7 @@
                     <li>3 quartos, sendo 1 suíte</li>
                     <li>10 camas com colchão</li>
                     <li>Espaço para mais pessoas, levando colchão</li>
-                    <li>Amplo salão</li>
+                    <li>Amplo salão com sofás</li>
                     <li>Banheiro social</li>
                 </ul>
                 <h3>Além disso contamos com</h3>
