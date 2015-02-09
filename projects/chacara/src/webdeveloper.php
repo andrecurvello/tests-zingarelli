@@ -1,1 +1,1 @@
-<div id="webdeveloper">Site criado por: <a href="http://www.icmc.usp.br/~zinga" title="Página do desenvolvedor do site">Matheus Zingarelli</a></div>
+<div id="webdeveloper">Site criado por: <a href="mailto:zingarelli.m@gmail.com" title="Email do desenvolvedor do site">Matheus Zingarelli</a></div>

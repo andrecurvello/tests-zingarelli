@@ -28,7 +28,7 @@
             <p>Para saber mais sobre a chácara, nossas condições de pagamento, ou nos fazer uma visita, entre em contato conosco através do formulário ou telefones abaixo.</p>
             <br />
             <p>Telefone: (16) 3336-9590 ou (16) 3335-8433</p>
-            <p>Celular: (16) 9992-6852 (Vivo)</p>
+            <p>Celular: (16) 99992-6852 (Vivo)</p>
             <p>Email: alugue@chacarazingarelli.com.br</p>
             <br />
 			<?php 
