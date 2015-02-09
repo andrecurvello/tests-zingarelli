@@ -24,38 +24,20 @@
     <div id="container">
     	<div id="est-content">
             <h2>Possuímos uma infraestrutura completa para seu evento. Confira!</h2>
-            <div id="est-left">
-                <h3>Salão de festas</h3>
-                <ul>
-                    <li>Churrasqueira de alvenaria</li>
-                    <li>Pia</li>
-                    <li>Banheiros</li>
-                    <li>Mesas e cadeiras</li>
-                </ul>           
-                <h3>Cozinha externa</h3>
-                <ul>
-                    <li>Fogão</li>
-                    <li>Pia</li>
-                    <li>Geladeira</li>
-                </ul>
-                <h3>Casa</h3>
-                <ul>
-                    <li>3 quartos, sendo 1 suíte</li>
-                    <li>10 camas com colchão</li>
-                    <li>Espaço para mais pessoas, levando colchão</li>
-                    <li>Amplo salão com sofás</li>
-                    <li>Banheiro social</li>
-                </ul>
-                <h3>Além disso contamos com</h3>
-                <ul>
-                    <li>Piscina</li>
-                    <li>Campos de futebol (um grande e um pequeno)</li>
-                </ul>     
-            </div>
-            <div id="est-right">
-                <img src="img/est-casa.jpg" class="est-right"/>          
-                <img src="img/est-campo.jpg" class="est-right"/>
-            </div>
+            <br />
+			<img alt="Casarão Chácara Zingarelli" title="Casarão Chácara Zingarelli" src="img/casa.jpg" width="720px"/>
+			<p>Casa com 3 quartos (1 suíte), 10 camas com colchão,<br /> amplo salão com sofás e banheiro social.</p>
+			<br />
+			<br />
+			<img alt="Salão de festas Chácara Zingarelli" title="Salão de festas Chácara Zingarelli" src="img/salao.jpg" width="720px"/>
+			<p>Salão de festas com churrasqueira de alvenaria, pia,<br /> banheiros, mesas e cadeiras.</p>
+			<br />
+			<br />
+			<img alt="Cozinha externa Chácara Zingarelli" title="Cozinha externa Chácara Zingarelli" src="img/cozinha.jpg" width="720px"/>
+			<p>Cozinha externa com fogão, pia e geladeira.</p>
+			<br />
+			<br />
+			<p>Além disso, contamos com Piscina e campos de futebol (grande e mini).</p>			
         </div>
         <?php include 'footer.php'; ?>
     </div>
