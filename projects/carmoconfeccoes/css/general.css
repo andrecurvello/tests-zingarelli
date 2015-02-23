@@ -17,7 +17,7 @@ p, h1, h2, h3, h4, h5, h6, ul, li, ol{margin:0; font-weight:normal;}
 
 /*######## START GENERAL CSS ########*/
 body{
-	background:url(../images/background.png) top left repeat-x fixed;
+	background:url(../img/background.png) top left repeat-x fixed;
 	text-align:center;
 }
 
@@ -74,7 +74,7 @@ a:hover{text-decoration:underline;}
 }
 
 #navigation li{
-	background:transparent url(../images/hearts.png) no-repeat left center;
+	background:transparent url(../img/hearts.png) no-repeat left center;
 	width:26px;
 	font-size:123.1%;
 	letter-spacing:5px;
