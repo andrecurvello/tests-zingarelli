@@ -83,12 +83,14 @@ a:hover{text-decoration:underline;}
 	margin-right:15px;
 	display:inline;
 }
+
+#navigation li.less{letter-spacing:2px;}
 /*######## STOP NAVIGATION ########*/
 
 /*######## START CONTENT ########*/
 #content{
 	overflow:hidden;
-	min-height:250px;
+	min-height:210px;
 }
 
 *html #content{height:100%;}
@@ -97,7 +99,7 @@ a:hover{text-decoration:underline;}
 	margin-bottom:10px;
 	font-size:93%;
 }
-#content h5#first{margin-top:70px;}
+#content h5#first{margin-top:45px;}
 *html #content h5#last{margin-bottom:70px;}
 #content h2{text-align:center; margin:20px auto;}
 
@@ -119,6 +121,11 @@ a#show-form span{text-decoration:underline;}
 div#fale-conosco{margin:20px;}
 
 div#fale-conosco textarea{margin-bottom:10px;}
+
+div#produtos{margin: 25px auto 40px auto;overflow: hidden;width: 75%;}
+div#produtos-left{float:left;width:40%;}
+div#produtos-right{float:right;width:48%;}
+ul#produtos-list li{margin-left:20px;text-align:left;list-style-type:square;}
 
 _div.photoslider{height:615px;}
 
